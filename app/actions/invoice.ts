@@ -1,9 +1,11 @@
 "use server"
 
-import { headers } from "next/headers"
+import { getClientIp } from "@/lib/utils/ip"
 import { createClient } from "@/lib/supabase/server"
 import { checkUsageLimits, incrementUsage } from "@/lib/utils/usage"
 import { type InvoiceFormData, calculateInvoiceTotals } from "@/lib/utils/invoice"
+
+export { getClientIp }
 
 export interface GenerateInvoiceResult {
   success: boolean
@@ -17,13 +19,6 @@ export interface GenerateInvoiceResult {
     monthlyLimit: number | null
     message?: string
   }
-}
-
-export async function getClientIp(): Promise<string> {
-  const headersList = await headers()
-  const forwarded = headersList.get("x-forwarded-for")
-  const ip = forwarded ? forwarded.split(",")[0].trim() : headersList.get("x-real-ip") || "unknown"
-  return ip
 }
 
 export async function checkInvoiceUsage(userId: string | null): Promise<GenerateInvoiceResult["usage"]> {

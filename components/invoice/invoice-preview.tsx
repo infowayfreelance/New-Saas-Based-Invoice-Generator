@@ -24,15 +24,15 @@ export function InvoicePreview({ data, className }: InvoicePreviewProps) {
       {/* Header */}
       <div className="flex flex-col justify-between gap-6 sm:flex-row">
         <div>
-          <h1 className="text-2xl font-bold" style={{ color: "#171717" }}>
+          <h1 className="text-3xl font-bold" style={{ color: "#171717" }}>
             INVOICE
           </h1>
-          <p className="mt-1 text-sm" style={{ color: "#737373" }}>
+          <p className="mt-1 text-base" style={{ color: "#737373" }}>
             #{data.invoiceNumber}
           </p>
         </div>
         <div className="text-right">
-          <div className="text-sm">
+          <div className="text-base">
             <p className="font-semibold" style={{ color: "#171717" }}>
               {data.fromName || "Your Business Name"}
             </p>
@@ -49,33 +49,33 @@ export function InvoicePreview({ data, className }: InvoicePreviewProps) {
       {/* Bill To & Invoice Info */}
       <div className="grid gap-6 sm:grid-cols-2">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: "#737373" }}>
+          <p className="text-sm font-semibold uppercase tracking-wider" style={{ color: "#737373" }}>
             Bill To
           </p>
-          <p className="mt-2 font-semibold" style={{ color: "#171717" }}>
+          <p className="mt-2 text-lg font-semibold" style={{ color: "#171717" }}>
             {data.clientName || "Client Name"}
           </p>
-          <p className="text-sm" style={{ color: "#737373" }}>
+          <p className="text-base" style={{ color: "#737373" }}>
             {data.clientEmail}
           </p>
-          <p className="whitespace-pre-line text-sm" style={{ color: "#737373" }}>
+          <p className="whitespace-pre-line text-base" style={{ color: "#737373" }}>
             {data.clientAddress}
           </p>
         </div>
         <div className="space-y-2 sm:text-right">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: "#737373" }}>
+            <p className="text-sm font-semibold uppercase tracking-wider" style={{ color: "#737373" }}>
               Issue Date
             </p>
-            <p className="text-sm" style={{ color: "#171717" }}>
+            <p className="text-base" style={{ color: "#171717" }}>
               {formatDate(data.issueDate)}
             </p>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: "#737373" }}>
+            <p className="text-sm font-semibold uppercase tracking-wider" style={{ color: "#737373" }}>
               Due Date
             </p>
-            <p className="text-sm" style={{ color: "#171717" }}>
+            <p className="text-base" style={{ color: "#171717" }}>
               {formatDate(data.dueDate)}
             </p>
           </div>
@@ -86,7 +86,7 @@ export function InvoicePreview({ data, className }: InvoicePreviewProps) {
 
       {/* Items Table */}
       <div className="overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="w-full text-base">
           <thead>
             <tr style={{ borderBottomWidth: "1px", borderBottomColor: "#e5e5e5" }}>
               <th className="pb-3 text-left font-semibold" style={{ color: "#171717" }}>
@@ -113,7 +113,7 @@ export function InvoicePreview({ data, className }: InvoicePreviewProps) {
               const total = subtotal + tax
               return (
                 <tr key={item.id} style={{ borderBottomWidth: "1px", borderBottomColor: "#f5f5f5" }}>
-                  <td className="py-3" style={{ color: "#171717" }}>
+                  <td className="py-3 text-lg font-medium" style={{ color: "#171717" }}>
                     {item.description || "—"}
                   </td>
                   <td className="py-3 text-right" style={{ color: "#171717" }}>
@@ -125,7 +125,7 @@ export function InvoicePreview({ data, className }: InvoicePreviewProps) {
                   <td className="py-3 text-right" style={{ color: "#171717" }}>
                     {item.taxRate}%
                   </td>
-                  <td className="py-3 text-right" style={{ color: "#171717" }}>
+                  <td className="py-3 text-right font-bold text-lg" style={{ color: "#171717" }}>
                     {formatCurrency(total, data.currency)}
                   </td>
                 </tr>
@@ -138,24 +138,26 @@ export function InvoicePreview({ data, className }: InvoicePreviewProps) {
       {/* Totals */}
       <div className="mt-6 flex justify-end">
         <div className="w-full max-w-xs space-y-2">
-          <div className="flex justify-between text-sm">
+          <div className="flex justify-between text-base">
             <span style={{ color: "#737373" }}>Subtotal</span>
             <span style={{ color: "#171717" }}>{formatCurrency(totals.subtotal, data.currency)}</span>
           </div>
-          <div className="flex justify-between text-sm">
+          <div className="flex justify-between text-base">
             <span style={{ color: "#737373" }}>Tax</span>
             <span style={{ color: "#171717" }}>{formatCurrency(totals.taxAmount, data.currency)}</span>
           </div>
           {totals.discountAmount > 0 && (
-            <div className="flex justify-between text-sm">
+            <div className="flex justify-between text-base">
               <span style={{ color: "#737373" }}>Discount</span>
               <span style={{ color: "#171717" }}>-{formatCurrency(totals.discountAmount, data.currency)}</span>
             </div>
           )}
           <Separator style={{ backgroundColor: "#e5e5e5" }} />
-          <div className="flex justify-between text-lg font-semibold">
+          <div className="mt-4 flex justify-between py-3 text-2xl font-extrabold">
             <span style={{ color: "#171717" }}>Total</span>
-            <span style={{ color: "#171717" }}>{formatCurrency(totals.totalAmount, data.currency)}</span>
+            <span className="text-3xl font-extrabold tracking-wide" style={{ color: "#171717" }}>
+              {formatCurrency(totals.totalAmount, data.currency)}
+            </span>
           </div>
         </div>
       </div>
@@ -167,20 +169,20 @@ export function InvoicePreview({ data, className }: InvoicePreviewProps) {
           <div className="grid gap-6 sm:grid-cols-2">
             {data.notes && (
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: "#737373" }}>
+                <p className="text-sm font-semibold uppercase tracking-wider" style={{ color: "#737373" }}>
                   Notes
                 </p>
-                <p className="mt-2 whitespace-pre-line text-sm" style={{ color: "#171717" }}>
+                <p className="mt-2 whitespace-pre-line text-base" style={{ color: "#171717" }}>
                   {data.notes}
                 </p>
               </div>
             )}
             {data.terms && (
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: "#737373" }}>
+                <p className="text-sm font-semibold uppercase tracking-wider" style={{ color: "#737373" }}>
                   Terms & Conditions
                 </p>
-                <p className="mt-2 whitespace-pre-line text-sm" style={{ color: "#171717" }}>
+                <p className="mt-2 whitespace-pre-line text-base" style={{ color: "#171717" }}>
                   {data.terms}
                 </p>
               </div>

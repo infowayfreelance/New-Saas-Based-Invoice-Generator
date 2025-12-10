@@ -92,26 +92,43 @@ export default function FreeInvoicePage() {
       const html2canvas = (await import("html2canvas")).default
       const { jsPDF } = await import("jspdf")
 
-      const canvas = await html2canvas(element, {
-        scale: 3,
-        useCORS: true,
-        logging: false,
-        backgroundColor: "#ffffff",
-      })
+      const pdf = new jsPDF("p", "mm", "a4")
 
-      const imgData = canvas.toDataURL("image/png")
-      const pdf = new jsPDF({
-        orientation: "portrait",
-        unit: "mm",
-        format: "a4",
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: "#ffffff",
+        windowWidth: element.scrollWidth,
       })
 
       const pageWidth = pdf.internal.pageSize.getWidth()
-      const margin = 10 // 10mm margin on each side
-      const imgWidth = pageWidth - margin * 2
-      const imgHeight = (canvas.height * imgWidth) / canvas.width
+      const pageHeight = pdf.internal.pageSize.getHeight()
+      const margin = 10 // small margins
 
-      pdf.addImage(imgData, "PNG", margin, margin, imgWidth, imgHeight)
+      const imgData = canvas.toDataURL("image/png")
+      let imgWidth = pageWidth - margin * 2
+      let imgHeight = (canvas.height * imgWidth) / canvas.width
+
+      // If the image is still too short, scale it to ~90% of page height
+      const targetHeight = pageHeight - margin * 2
+      if (imgHeight < targetHeight * 0.9) {
+        const scale = (targetHeight * 0.9) / imgHeight
+        imgWidth = imgWidth * scale
+        imgHeight = imgHeight * scale
+      }
+
+      // If scaled width exceeds page, scale back to fit
+      if (imgWidth > pageWidth - margin * 2) {
+        const fitScale = (pageWidth - margin * 2) / imgWidth
+        imgWidth = imgWidth * fitScale
+        imgHeight = imgHeight * fitScale
+      }
+
+      // Center horizontally, top margin vertically
+      const x = (pageWidth - imgWidth) / 2
+      const y = margin
+
+      pdf.addImage(imgData, "PNG", x, y, imgWidth, imgHeight)
       pdf.save(`invoice-${formData.invoiceNumber}.pdf`)
 
       toast.success("PDF downloaded successfully!")

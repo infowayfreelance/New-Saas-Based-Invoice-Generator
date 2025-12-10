@@ -4,7 +4,7 @@ import type React from "react"
 
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -17,15 +17,26 @@ export default function LoginPage() {
   const [password, setPassword] = useState("")
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [configError, setConfigError] = useState<string | null>(null)
   const router = useRouter()
+
+  useEffect(() => {
+    try {
+      createClient()
+    } catch (e) {
+      const message = e instanceof Error ? e.message : "Supabase configuration error"
+      setConfigError(message)
+      console.error("[Login] Supabase config error:", message)
+    }
+  }, [])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-    const supabase = createClient()
     setIsLoading(true)
     setError(null)
 
     try {
+      const supabase = createClient()
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -37,6 +48,25 @@ export default function LoginPage() {
     } finally {
       setIsLoading(false)
     }
+  }
+
+  if (configError) {
+    return (
+      <div className="flex min-h-[calc(100vh-8rem)] items-center justify-center px-4 py-12">
+        <Card className="w-full max-w-sm border-destructive">
+          <CardHeader className="text-center">
+            <CardTitle className="text-destructive">Configuration Error</CardTitle>
+            <CardDescription>{configError}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground text-center">
+              Please ensure NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY are set in your environment
+              variables.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    )
   }
 
   return (
