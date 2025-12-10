@@ -79,7 +79,10 @@ export default function FreeInvoicePage() {
 
   const handleDownloadPDF = useCallback(async () => {
     const element = document.getElementById("invoice-preview")
-    if (!element) return
+    if (!element) {
+      toast.error("Invoice preview not found. Please try again.")
+      return
+    }
 
     toast.info("Generating PDF...")
 
@@ -92,6 +95,7 @@ export default function FreeInvoicePage() {
         scale: 2,
         useCORS: true,
         logging: false,
+        backgroundColor: "#ffffff",
       })
 
       const imgData = canvas.toDataURL("image/png")
@@ -110,7 +114,10 @@ export default function FreeInvoicePage() {
       toast.success("PDF downloaded successfully!")
     } catch (error) {
       console.error("Error generating PDF:", error)
-      toast.error("Failed to generate PDF. Please try again.")
+      toast.error("Failed to generate PDF. Please try again or contact support.", {
+        duration: 5000,
+        description: error instanceof Error ? error.message : "An unexpected error occurred",
+      })
     }
   }, [formData.invoiceNumber])
 
@@ -167,7 +174,7 @@ export default function FreeInvoicePage() {
                 <TabsTrigger value="details">Details</TabsTrigger>
               </TabsList>
               <TabsContent value="preview" className="mt-6">
-                <div ref={previewRef} className="rounded-lg border border-border shadow-sm">
+                <div ref={previewRef} className="rounded-lg border border-border shadow-sm" id="invoice-preview">
                   <InvoicePreview data={formData} />
                 </div>
               </TabsContent>
