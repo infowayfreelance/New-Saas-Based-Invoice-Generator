@@ -152,3 +152,20 @@
 .pdf-safe-wrapper .text-muted-foreground {
   color: #737373 !important;
 }
+
+/* Fixed cursor/caret color with simpler, more specific selectors */
+/* Base caret color - black for light mode */
+input,
+textarea,
+select,
+[contenteditable="true"] {
+  caret-color: #171717 !important;
+}
+
+/* Dark mode caret color - white */
+.dark input,
+.dark textarea,
+.dark select,
+.dark [contenteditable="true"] {
+  caret-color: #fafafa !important;
+}

@@ -18,9 +18,10 @@ import { InvoicePreview } from "@/components/invoice/invoice-preview"
 import { UsageMeter } from "@/components/invoice/usage-meter"
 import { type InvoiceFormData, getDefaultInvoiceData, calculateInvoiceTotals } from "@/lib/utils/invoice"
 import { generateGuestInvoice, checkInvoiceUsage } from "@/app/actions/invoice"
-import { Download, Send, AlertCircle, ArrowRight } from "lucide-react"
+import { Download, Send, AlertCircle, ArrowRight, FilePlus } from "lucide-react"
 import { toast } from "sonner"
 import { useEffect } from "react"
+import { FloatingDownloadButton } from "@/components/floating-download-button"
 
 export default function FreeInvoicePage() {
   const [formData, setFormData] = useState<InvoiceFormData>(getDefaultInvoiceData())
@@ -121,6 +122,11 @@ export default function FreeInvoicePage() {
     }
   }, [formData.invoiceNumber])
 
+  const handleCreateNewInvoice = useCallback(() => {
+    setFormData(getDefaultInvoiceData())
+    setShowPreview(false)
+  }, [])
+
   return (
     <div className="px-4 py-12 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
@@ -157,6 +163,10 @@ export default function FreeInvoicePage() {
               <Button onClick={handleDownloadPDF}>
                 <Download className="mr-2 h-4 w-4" />
                 Download PDF
+              </Button>
+              <Button variant="outline" onClick={handleCreateNewInvoice} className="bg-transparent">
+                <FilePlus className="mr-2 h-4 w-4" />
+                Create New Invoice
               </Button>
               <Button variant="outline" onClick={() => setShowEmailDialog(true)} className="bg-transparent">
                 <Send className="mr-2 h-4 w-4" />
@@ -222,6 +232,9 @@ export default function FreeInvoicePage() {
             </Tabs>
           </div>
         )}
+
+        {/* Floating Download Button */}
+        <FloatingDownloadButton onClick={handleDownloadPDF} isVisible={showPreview} />
 
         {/* Email Dialog (Upgrade CTA) */}
         <Dialog open={showEmailDialog} onOpenChange={setShowEmailDialog}>
