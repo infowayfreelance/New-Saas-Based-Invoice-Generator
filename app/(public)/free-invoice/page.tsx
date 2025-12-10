@@ -93,7 +93,7 @@ export default function FreeInvoicePage() {
       const { jsPDF } = await import("jspdf")
 
       const canvas = await html2canvas(element, {
-        scale: 2,
+        scale: 3,
         useCORS: true,
         logging: false,
         backgroundColor: "#ffffff",
@@ -106,10 +106,12 @@ export default function FreeInvoicePage() {
         format: "a4",
       })
 
-      const imgWidth = 210 // A4 width in mm
+      const pageWidth = pdf.internal.pageSize.getWidth()
+      const margin = 10 // 10mm margin on each side
+      const imgWidth = pageWidth - margin * 2
       const imgHeight = (canvas.height * imgWidth) / canvas.width
 
-      pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight)
+      pdf.addImage(imgData, "PNG", margin, margin, imgWidth, imgHeight)
       pdf.save(`invoice-${formData.invoiceNumber}.pdf`)
 
       toast.success("PDF downloaded successfully!")
