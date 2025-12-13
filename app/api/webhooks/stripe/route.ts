@@ -1,11 +1,7 @@
-import { stripe } from "@/lib/stripe"
-import { createClient } from "@supabase/supabase-js"
-import { headers } from "next/headers"
-import { NextResponse } from "next/server"
-import type Stripe from "stripe"
+export const dynamic = "force-dynamic"
+export const runtime = "nodejs"
 
-// Use service role for webhook handler
-const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
+import { NextResponse } from "next/server"
 
 const PLAN_MAPPING: Record<string, string> = {
   prod_TZgwJzsBISQoVW: "basic",
@@ -13,7 +9,33 @@ const PLAN_MAPPING: Record<string, string> = {
   prod_TZgwfycFvWN4a5: "pro",
 }
 
+async function getSupabaseAdmin() {
+  const { createClient } = await import("@supabase/supabase-js")
+
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+  if (!supabaseUrl || !supabaseServiceKey) {
+    throw new Error("Missing Supabase environment variables for webhook handler")
+  }
+
+  return createClient(supabaseUrl, supabaseServiceKey)
+}
+
+async function getStripe() {
+  const Stripe = (await import("stripe")).default
+
+  const stripeSecretKey = process.env.STRIPE_SECRET_KEY
+  if (!stripeSecretKey) {
+    throw new Error("Missing Stripe secret key for webhook handler")
+  }
+  return new Stripe(stripeSecretKey, { apiVersion: "2023-08-16" })
+}
+
 export async function POST(req: Request) {
+  const { headers } = await import("next/headers")
+  const Stripe = (await import("stripe")).default
+
   const body = await req.text()
   const headersList = await headers()
   const signature = headersList.get("stripe-signature")
@@ -22,10 +44,12 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "No signature" }, { status: 400 })
   }
 
+  const stripeInstance = await getStripe()
+
   let event: Stripe.Event
 
   try {
-    event = stripe.webhooks.constructEvent(body, signature, process.env.STRIPE_WEBHOOK_SECRET!)
+    event = stripeInstance.webhooks.constructEvent(body, signature, process.env.STRIPE_WEBHOOK_SECRET!)
   } catch (err) {
     console.error("Webhook signature verification failed:", err)
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 })
@@ -67,25 +91,25 @@ export async function POST(req: Request) {
   }
 }
 
-async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
+async function handleCheckoutCompleted(session: any) {
+  const Stripe = (await import("stripe")).default
+  const stripeInstance = await getStripe()
+  const supabaseAdmin = await getSupabaseAdmin()
+
   const userId = session.metadata?.user_id
   const planSlug = session.metadata?.plan_slug
 
   if (!userId || !planSlug) return
 
-  // Get plan ID from database
   const { data: plan } = await supabaseAdmin.from("plans").select("id").eq("slug", planSlug).single()
 
   if (!plan) return
 
-  // Get subscription details
   const subscriptionId = session.subscription as string
-  const subscription = await stripe.subscriptions.retrieve(subscriptionId)
+  const subscription = await stripeInstance.subscriptions.retrieve(subscriptionId)
 
-  // Update user's plan
   await supabaseAdmin.from("users").update({ plan_id: plan.id }).eq("id", userId)
 
-  // Create subscription record
   await supabaseAdmin.from("subscriptions").upsert({
     user_id: userId,
     plan_id: plan.id,
@@ -97,15 +121,15 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   })
 }
 
-async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
+async function handleSubscriptionUpdated(subscription: any) {
+  const supabaseAdmin = await getSupabaseAdmin()
+
   const customerId = subscription.customer as string
 
-  // Find user by Stripe customer ID
   const { data: user } = await supabaseAdmin.from("users").select("id").eq("stripe_customer_id", customerId).single()
 
   if (!user) return
 
-  // Get product ID from subscription
   const productId = subscription.items.data[0]?.price.product as string
   const planSlug = PLAN_MAPPING[productId]
 
@@ -117,7 +141,6 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
     }
   }
 
-  // Update subscription record
   await supabaseAdmin
     .from("subscriptions")
     .update({
@@ -129,31 +152,28 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
     .eq("stripe_subscription_id", subscription.id)
 }
 
-async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
+async function handleSubscriptionDeleted(subscription: any) {
+  const supabaseAdmin = await getSupabaseAdmin()
+
   const customerId = subscription.customer as string
 
-  // Find user and reset to guest plan
   const { data: user } = await supabaseAdmin.from("users").select("id").eq("stripe_customer_id", customerId).single()
 
   if (!user) return
 
-  // Get guest plan
   const { data: guestPlan } = await supabaseAdmin.from("plans").select("id").eq("slug", "guest").single()
 
   if (guestPlan) {
     await supabaseAdmin.from("users").update({ plan_id: guestPlan.id }).eq("id", user.id)
   }
 
-  // Update subscription status
   await supabaseAdmin.from("subscriptions").update({ status: "canceled" }).eq("stripe_subscription_id", subscription.id)
 }
 
-async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
-  // Log successful payment if needed
+async function handleInvoicePaymentSucceeded(invoice: any) {
   console.log("Payment succeeded for invoice:", invoice.id)
 }
 
-async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
-  // Log failed payment for follow-up
+async function handleInvoicePaymentFailed(invoice: any) {
   console.log("Payment failed for invoice:", invoice.id)
 }
