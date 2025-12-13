@@ -3,70 +3,50 @@
 import type React from "react"
 
 import Link from "next/link"
-import { useRouter } from "next/navigation"
 import { useState, useEffect } from "react"
-import { createClient } from "@/lib/supabase/client"
+import { useSearchParams } from "next/navigation"
+import { signIn } from "@/app/actions/auth"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { FileText } from "lucide-react"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
-  const [configError, setConfigError] = useState<string | null>(null)
-  const router = useRouter()
+  const searchParams = useSearchParams()
 
   useEffect(() => {
-    try {
-      createClient()
-    } catch (e) {
-      const message = e instanceof Error ? e.message : "Supabase configuration error"
-      setConfigError(message)
-      console.error("[Login] Supabase config error:", message)
+    const urlError = searchParams.get("error")
+    if (urlError === "auth_callback_failed") {
+      setError("Authentication failed. Please try signing in again.")
+    } else if (urlError === "no_code") {
+      setError("Invalid authentication link. Please try signing in again.")
     }
-  }, [])
+  }, [searchParams])
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setIsLoading(true)
     setError(null)
 
+    const formData = new FormData(e.currentTarget)
+
     try {
-      const supabase = createClient()
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      })
-      if (error) throw error
-      router.push("/app")
-    } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : "An error occurred")
+      const result = await signIn(formData)
+
+      if (result?.error) {
+        setError(result.error)
+      }
+      // If successful, signIn redirects to /app
+    } catch (err) {
+      // signIn redirects on success, so we only get here on error
+      setError("An unexpected error occurred. Please try again.")
     } finally {
       setIsLoading(false)
     }
-  }
-
-  if (configError) {
-    return (
-      <div className="flex min-h-[calc(100vh-8rem)] items-center justify-center px-4 py-12">
-        <Card className="w-full max-w-sm border-destructive">
-          <CardHeader className="text-center">
-            <CardTitle className="text-destructive">Configuration Error</CardTitle>
-            <CardDescription>{configError}</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground text-center">
-              Please ensure NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY are set in your environment
-              variables.
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-    )
   }
 
   return (
@@ -87,30 +67,21 @@ export default function LoginPage() {
             <CardDescription>Enter your email and password to access your account</CardDescription>
           </CardHeader>
           <CardContent>
+            {error && (
+              <Alert className="mb-4">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
             <form onSubmit={handleLogin}>
               <div className="flex flex-col gap-4">
                 <div className="grid gap-2">
                   <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="you@example.com"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
+                  <Input id="email" name="email" type="email" placeholder="you@example.com" required />
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="password">Password</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
+                  <Input id="password" name="password" type="password" required />
                 </div>
-                {error && <p className="text-sm text-destructive">{error}</p>}
                 <Button type="submit" className="w-full" disabled={isLoading}>
                   {isLoading ? "Signing in..." : "Sign in"}
                 </Button>

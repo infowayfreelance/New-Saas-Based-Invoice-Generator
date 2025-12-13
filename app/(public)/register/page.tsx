@@ -3,9 +3,9 @@
 import type React from "react"
 
 import Link from "next/link"
-import { useRouter, useSearchParams } from "next/navigation"
-import { useState, Suspense, useEffect } from "react"
-import { createClient } from "@/lib/supabase/client"
+import { useSearchParams } from "next/navigation"
+import { useState, Suspense } from "react"
+import { signUp } from "@/app/actions/auth"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -13,98 +13,49 @@ import { Label } from "@/components/ui/label"
 import { FileText } from "lucide-react"
 
 function RegisterForm() {
-  const [name, setName] = useState("")
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [confirmPassword, setConfirmPassword] = useState("")
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [success, setSuccess] = useState(false)
-  const [configError, setConfigError] = useState<string | null>(null)
-  const router = useRouter()
+  const [successEmail, setSuccessEmail] = useState("")
   const searchParams = useSearchParams()
   const plan = searchParams.get("plan") || "basic"
 
-  useEffect(() => {
-    try {
-      createClient()
-    } catch (e) {
-      const message = e instanceof Error ? e.message : "Supabase configuration error"
-      setConfigError(message)
-      console.error("[Register] Supabase config error:", message)
-    }
-  }, [])
-
-  const handleSignUp = async (e: React.FormEvent) => {
+  const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setIsLoading(true)
     setError(null)
 
-    if (password !== confirmPassword) {
-      setError("Passwords do not match")
-      setIsLoading(false)
-      return
-    }
-
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters")
-      setIsLoading(false)
-      return
-    }
+    const formData = new FormData(e.currentTarget)
+    formData.set("plan", plan)
+    formData.set("redirectUrl", `${window.location.origin}/auth/callback`)
 
     try {
-      const supabase = createClient()
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL || `${window.location.origin}/app`,
-          data: {
-            name,
-            plan,
-          },
-        },
-      })
-      if (error) throw error
-      setSuccess(true)
-    } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : "An error occurred")
+      const result = await signUp(formData)
+
+      if (result.error) {
+        setError(result.error)
+      } else if (result.success) {
+        setSuccess(true)
+        setSuccessEmail(result.email || "")
+      }
+    } catch (err) {
+      const errorMessage =
+        typeof err === "string" ? err : (err as any)?.message || "An unexpected error occurred. Please try again."
+      setError(errorMessage)
     } finally {
       setIsLoading(false)
     }
-  }
-
-  if (configError) {
-    return (
-      <div className="flex min-h-[calc(100vh-8rem)] items-center justify-center px-4 py-12">
-        <Card className="w-full max-w-sm border-destructive">
-          <CardHeader className="text-center">
-            <CardTitle className="text-destructive">Configuration Error</CardTitle>
-            <CardDescription>{configError}</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground text-center">
-              Please ensure NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY are set in your environment
-              variables.
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-    )
   }
 
   if (success) {
     return (
       <div className="flex min-h-[calc(100vh-8rem)] items-center justify-center px-4 py-12">
         <Card className="w-full max-w-sm">
-          <CardHeader className="text-center">
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-              <FileText className="h-6 w-6 text-primary" />
-            </div>
-            <CardTitle>Check your email</CardTitle>
+          <CardHeader className="space-y-1">
+            <CardTitle className="text-xl">Check your email</CardTitle>
             <CardDescription>
-              We have sent a confirmation link to <strong>{email}</strong>. Please check your inbox and click the link
-              to activate your account.
+              We have sent a confirmation link to <strong>{successEmail}</strong>. Please check your inbox and click the
+              link to activate your account.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -141,44 +92,19 @@ function RegisterForm() {
               <div className="flex flex-col gap-4">
                 <div className="grid gap-2">
                   <Label htmlFor="name">Name</Label>
-                  <Input
-                    id="name"
-                    type="text"
-                    placeholder="John Doe"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                  />
+                  <Input id="name" name="name" type="text" placeholder="John Doe" />
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="you@example.com"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
+                  <Input id="email" name="email" type="email" placeholder="you@example.com" required />
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="password">Password</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
+                  <Input id="password" name="password" type="password" required />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="confirm-password">Confirm Password</Label>
-                  <Input
-                    id="confirm-password"
-                    type="password"
-                    required
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                  />
+                  <Label htmlFor="confirmPassword">Confirm Password</Label>
+                  <Input id="confirmPassword" name="confirmPassword" type="password" required />
                 </div>
                 {error && <p className="text-sm text-destructive">{error}</p>}
                 <Button type="submit" className="w-full" disabled={isLoading}>
