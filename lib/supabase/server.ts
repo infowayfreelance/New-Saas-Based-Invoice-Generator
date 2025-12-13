@@ -1,18 +1,20 @@
 import { createServerClient } from "@supabase/ssr"
 import { cookies } from "next/headers"
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-
 export async function createClient() {
-  if (!supabaseUrl) {
-    console.error("[Supabase Server] NEXT_PUBLIC_SUPABASE_URL is not set.")
-    throw new Error("Supabase URL is missing. Please configure NEXT_PUBLIC_SUPABASE_URL.")
-  }
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-  if (!supabaseAnonKey) {
-    console.error("[Supabase Server] NEXT_PUBLIC_SUPABASE_ANON_KEY is not set.")
-    throw new Error("Supabase Anon Key is missing. Please configure NEXT_PUBLIC_SUPABASE_ANON_KEY.")
+  if (!supabaseUrl || !supabaseAnonKey) {
+    const errorMessage = `
+      ❌ Supabase Server configuration error:
+      ${!supabaseUrl ? "- NEXT_PUBLIC_SUPABASE_URL is missing\n" : ""}
+      ${!supabaseAnonKey ? "- NEXT_PUBLIC_SUPABASE_ANON_KEY is missing\n" : ""}
+      
+      Please add these environment variables to your Vercel project or v0 Vars section.
+    `
+    console.error(errorMessage)
+    throw new Error("Missing Supabase environment variables. Check server logs for details.")
   }
 
   const cookieStore = await cookies()
