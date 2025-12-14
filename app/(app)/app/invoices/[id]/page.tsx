@@ -37,6 +37,8 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
 
   let invoice: any
   let items: any[] | null = null
+  let client: any = null
+  let userSettings: any = null
 
   try {
     const { data: invoiceData, error: invoiceError } = await supabase
@@ -88,6 +90,16 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
       .order("created_at", { ascending: true })
 
     items = itemsData
+
+    if (invoice.client_id) {
+      const { data: clientData } = await supabase.from("clients").select("*").eq("id", invoice.client_id).single()
+
+      client = clientData
+    }
+
+    const { data: settingsData } = await supabase.from("user_settings").select("*").eq("user_id", user.id).maybeSingle()
+
+    userSettings = settingsData
   } catch (error) {
     console.error("[v0] Error loading invoice:", error)
     return (
@@ -121,13 +133,27 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
     )
   }
 
+  const clientAddress = client
+    ? [
+        client.address_line1,
+        client.address_line2,
+        [client.city, client.state].filter(Boolean).join(", "),
+        client.postcode,
+        client.country,
+      ]
+        .filter(Boolean)
+        .join("\n")
+    : ""
+
+  const businessAddress = userSettings?.company_address || ""
+
   const formData: InvoiceFormData = {
-    fromName: "",
-    fromEmail: "",
-    fromAddress: "",
-    clientName: "",
-    clientEmail: "",
-    clientAddress: "",
+    fromName: userSettings?.company_name || user.email || "Your Business Name",
+    fromEmail: userSettings?.default_reply_to_email || user.email || "",
+    fromAddress: businessAddress,
+    clientName: client?.name || client?.company_name || "Client Name",
+    clientEmail: client?.email || "",
+    clientAddress: clientAddress,
     invoiceNumber: invoice.invoice_number,
     issueDate: invoice.issue_date,
     dueDate: invoice.due_date,
@@ -141,7 +167,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
         taxRate: toNumber(item.tax_rate),
       })) || [],
     notes: invoice.notes || "",
-    terms: "",
+    terms: invoice.terms || "",
     taxRate: 0,
     discountAmount: toNumber(invoice.discount_total),
   }

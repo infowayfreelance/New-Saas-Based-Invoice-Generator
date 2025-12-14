@@ -5,53 +5,45 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import type { User } from "@supabase/supabase-js"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { Button } from "@/components/ui/button"
+import { AlertCircle } from "lucide-react"
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
-  const [demoMode, setDemoMode] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const router = useRouter()
 
   useEffect(() => {
-    let supabase: ReturnType<typeof createClient> | null = null
     let mounted = true
 
     async function checkAuth() {
       try {
-        console.log("[v0] Checking auth...")
-        supabase = createClient()
+        const supabase = createClient()
 
-        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Auth timeout")), 5000))
-
-        const authPromise = supabase.auth.getUser()
-
-        const result = (await Promise.race([authPromise, timeoutPromise])) as any
+        const { data, error: authError } = await supabase.auth.getUser()
 
         if (!mounted) return
 
-        const { data, error: authError } = result
-
         if (authError) {
-          console.error("[v0] Auth error:", authError.message)
-          console.log("[v0] Enabling demo mode due to auth error")
-          setDemoMode(true)
+          console.error("[v0] Auth error:", authError)
+          setError(`Authentication failed: ${authError.message}. Check browser extensions or network settings.`)
           setLoading(false)
           return
         }
 
         if (!data?.user) {
-          console.log("[v0] No user, redirecting to login")
           router.push("/login")
           return
         }
 
-        console.log("[v0] User authenticated:", data.user.email)
         setUser(data.user)
       } catch (err) {
         console.error("[v0] Error checking auth:", err)
         if (mounted) {
-          console.log("[v0] Enabling demo mode due to connection error")
-          setDemoMode(true)
+          const errorMessage = err instanceof Error ? err.message : "Unknown error"
+          setError(`Connection failed: ${errorMessage}. Check your network connection and browser extensions.`)
         }
       } finally {
         if (mounted) {
@@ -78,14 +70,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     )
   }
 
-  if (demoMode) {
+  if (error) {
     return (
-      <>
-        <div className="fixed left-0 right-0 top-0 z-50 bg-yellow-500 px-4 py-2 text-center text-sm font-medium text-white">
-          Demo Mode: Database connection unavailable. Using demo data.
+      <div className="flex min-h-screen items-center justify-center p-4">
+        <div className="w-full max-w-md">
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Authentication Error</AlertTitle>
+            <AlertDescription className="mt-2 space-y-2">
+              <p>{error}</p>
+              <p className="text-sm">This may be caused by browser extensions blocking requests or network issues.</p>
+            </AlertDescription>
+          </Alert>
+          <div className="mt-4 flex gap-2">
+            <Button onClick={() => window.location.reload()} className="flex-1">
+              Retry
+            </Button>
+            <Button onClick={() => router.push("/login")} variant="outline" className="flex-1">
+              Back to Login
+            </Button>
+          </div>
         </div>
-        <div className="pt-10">{children}</div>
-      </>
+      </div>
     )
   }
 

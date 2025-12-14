@@ -9,8 +9,19 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Edit, FileText, Plus, Mail, Phone, MapPin, Building } from "lucide-react"
 import { formatCurrency, formatDate } from "@/lib/utils/invoice"
 
+const isValidUUID = (uuid: string) => {
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+  return uuidRegex.test(uuid)
+}
+
 export default async function ClientDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
+
+  if (!isValidUUID(id)) {
+    // Not a valid UUID - likely hit /clients/new which should use the specific route
+    notFound()
+  }
+
   const supabase = await createClient()
   const {
     data: { user },
