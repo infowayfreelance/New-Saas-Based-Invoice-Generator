@@ -106,6 +106,7 @@ export default async function RecurringPage() {
                     <TableHead>Auto-Send</TableHead>
                     <TableHead>Next Run</TableHead>
                     <TableHead>Status</TableHead>
+                    <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -132,6 +133,13 @@ export default async function RecurringPage() {
                             </>
                           )}
                         </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Link href={`/app/recurring/${rule.id}`}>
+                          <Button variant="ghost" size="sm">
+                            Edit
+                          </Button>
+                        </Link>
                       </TableCell>
                     </TableRow>
                   ))}
