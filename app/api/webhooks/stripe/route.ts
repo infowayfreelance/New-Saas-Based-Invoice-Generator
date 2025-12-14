@@ -4,9 +4,9 @@ export const runtime = "nodejs"
 import { NextResponse } from "next/server"
 
 const PLAN_MAPPING: Record<string, string> = {
-  prod_TZgwJzsBISQoVW: "basic",
-  prod_TZgwNbfS4MfzSv: "standard",
-  prod_TZgwfycFvWN4a5: "pro",
+  prod_TZgwJzsBISQoVW: "BASIC",
+  prod_TZgwNbfS4MfzSv: "STANDARD",
+  prod_TZgwfycFvWN4a5: "PRO",
 }
 
 async function getSupabaseAdmin() {
@@ -101,7 +101,7 @@ async function handleCheckoutCompleted(session: any) {
 
   if (!userId || !planSlug) return
 
-  const { data: plan } = await supabaseAdmin.from("plans").select("id").eq("slug", planSlug).single()
+  const { data: plan } = await supabaseAdmin.from("plans").select("id").eq("code", planSlug.toUpperCase()).single()
 
   if (!plan) return
 
@@ -112,10 +112,11 @@ async function handleCheckoutCompleted(session: any) {
 
   await supabaseAdmin.from("subscriptions").upsert({
     user_id: userId,
-    plan_id: plan.id,
-    stripe_subscription_id: subscriptionId,
-    stripe_customer_id: session.customer as string,
-    status: subscription.status,
+    provider: "STRIPE",
+    provider_customer_id: session.customer as string,
+    provider_subscription_id: subscriptionId,
+    status: "ACTIVE",
+    current_plan_id: plan.id,
     current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
     current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
   })
@@ -131,25 +132,32 @@ async function handleSubscriptionUpdated(subscription: any) {
   if (!user) return
 
   const productId = subscription.items.data[0]?.price.product as string
-  const planSlug = PLAN_MAPPING[productId]
+  const planCode = PLAN_MAPPING[productId]
 
-  if (planSlug) {
-    const { data: plan } = await supabaseAdmin.from("plans").select("id").eq("slug", planSlug).single()
+  if (planCode) {
+    const { data: plan } = await supabaseAdmin.from("plans").select("id").eq("code", planCode).single()
 
     if (plan) {
       await supabaseAdmin.from("users").update({ plan_id: plan.id }).eq("id", user.id)
     }
   }
 
+  const statusMap: Record<string, string> = {
+    active: "ACTIVE",
+    trialing: "TRIALING",
+    past_due: "PAST_DUE",
+    canceled: "CANCELED",
+    unpaid: "INACTIVE",
+  }
+
   await supabaseAdmin
     .from("subscriptions")
     .update({
-      status: subscription.status,
+      status: statusMap[subscription.status] || "INACTIVE",
       current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
       current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
-      cancel_at_period_end: subscription.cancel_at_period_end,
     })
-    .eq("stripe_subscription_id", subscription.id)
+    .eq("provider_subscription_id", subscription.id)
 }
 
 async function handleSubscriptionDeleted(subscription: any) {
@@ -161,13 +169,16 @@ async function handleSubscriptionDeleted(subscription: any) {
 
   if (!user) return
 
-  const { data: guestPlan } = await supabaseAdmin.from("plans").select("id").eq("slug", "guest").single()
+  const { data: guestPlan } = await supabaseAdmin.from("plans").select("id").eq("code", "GUEST").single()
 
   if (guestPlan) {
     await supabaseAdmin.from("users").update({ plan_id: guestPlan.id }).eq("id", user.id)
   }
 
-  await supabaseAdmin.from("subscriptions").update({ status: "canceled" }).eq("stripe_subscription_id", subscription.id)
+  await supabaseAdmin
+    .from("subscriptions")
+    .update({ status: "CANCELED" })
+    .eq("provider_subscription_id", subscription.id)
 }
 
 async function handleInvoicePaymentSucceeded(invoice: any) {

@@ -4,7 +4,6 @@ import { createClient } from "@/lib/supabase/server"
 import { stripe } from "@/lib/stripe"
 import { redirect } from "next/navigation"
 
-// Price IDs from Stripe (created above)
 const PRICE_IDS = {
   basic: "price_1ScXaDBmjLH9PKqeqiDHdvJT",
   standard: "price_1ScXaNBmjLH9PKqeVb0OtQWn",
@@ -18,7 +17,7 @@ export async function createCheckoutSession(planSlug: "basic" | "standard" | "pr
   } = await supabase.auth.getUser()
 
   if (!user) {
-    redirect("/login")
+    redirect(`/login?redirect=/pricing`)
   }
 
   // Get or create Stripe customer
@@ -55,8 +54,8 @@ export async function createCheckoutSession(planSlug: "basic" | "standard" | "pr
       },
     ],
     mode: "subscription",
-    success_url: `${baseUrl}/app/subscription?success=true`,
-    cancel_url: `${baseUrl}/app/subscription?canceled=true`,
+    success_url: `${baseUrl}/billing/success?session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${baseUrl}/billing/cancel`,
     metadata: {
       user_id: user.id,
       plan_slug: planSlug,

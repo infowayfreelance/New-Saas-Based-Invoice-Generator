@@ -6,9 +6,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { ArrowLeft } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
 import { AdminHeader } from "@/components/admin/admin-header"
+import { UserManagementForm } from "@/components/admin/user-management-form"
 
 async function updateUserRole(formData: FormData) {
   "use server"
@@ -119,58 +119,12 @@ export default async function AdminUserDetailPage({ params }: { params: Promise<
             </CardContent>
           </Card>
 
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Change Role</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <form action={updateUserRole} className="space-y-4">
-                  <input type="hidden" name="userId" value={user.id} />
-                  <div className="space-y-2">
-                    <Label>Role</Label>
-                    <Select name="role" defaultValue={user.role || "USER"}>
-                      <SelectTrigger className="w-full">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="USER">User</SelectItem>
-                        <SelectItem value="ADMIN">Admin</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <Button type="submit">Update Role</Button>
-                </form>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Change Plan</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <form action={updateUserPlan} className="space-y-4">
-                  <input type="hidden" name="userId" value={user.id} />
-                  <div className="space-y-2">
-                    <Label>Plan</Label>
-                    <Select name="planId" defaultValue={user.plan_id || ""}>
-                      <SelectTrigger className="w-full">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {plans?.map((plan) => (
-                          <SelectItem key={plan.id} value={plan.id}>
-                            {plan.name} - ${plan.price_monthly}/mo
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <Button type="submit">Update Plan</Button>
-                </form>
-              </CardContent>
-            </Card>
-          </div>
+          <UserManagementForm
+            userId={user.id}
+            currentRole={user.role || "USER"}
+            currentPlanId={user.plan_id || ""}
+            plans={plans || []}
+          />
         </div>
 
         <Card>

@@ -1,8 +1,8 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Check, X } from "lucide-react"
+import { PricingButton } from "@/components/pricing/pricing-button"
 
 export const metadata: Metadata = {
   title: "Pricing",
@@ -19,6 +19,7 @@ const planDetails = [
     cta: "Create Free Invoice",
     href: "/free-invoice",
     popular: false,
+    requiresAuth: false, // Guest plan doesn't require auth
     features: [
       { text: "3 invoices per day", included: true },
       { text: "15 invoices per month", included: true },
@@ -35,9 +36,10 @@ const planDetails = [
     description: "Perfect for getting started",
     price: "$5",
     period: "/month",
-    cta: "Start Free Trial",
-    href: "/register?plan=basic",
+    cta: "Upgrade to Basic",
+    planSlug: "basic", // Add plan slug for checkout
     popular: false,
+    requiresAuth: true, // Paid plans require auth
     features: [
       { text: "5 invoices per day", included: true },
       { text: "30 invoices per month", included: true },
@@ -54,9 +56,10 @@ const planDetails = [
     description: "For growing businesses",
     price: "$12",
     period: "/month",
-    cta: "Start Free Trial",
-    href: "/register?plan=standard",
+    cta: "Upgrade to Standard",
+    planSlug: "standard", // Add plan slug for checkout
     popular: true,
+    requiresAuth: true, // Paid plans require auth
     features: [
       { text: "Unlimited invoices", included: true },
       { text: "Download PDF", included: true },
@@ -73,9 +76,10 @@ const planDetails = [
     description: "For power users",
     price: "$29.99",
     period: "/month",
-    cta: "Start Free Trial",
-    href: "/register?plan=pro",
+    cta: "Upgrade to Pro",
+    planSlug: "pro", // Add plan slug for checkout
     popular: false,
+    requiresAuth: true, // Paid plans require auth
     features: [
       { text: "Everything in Standard", included: true },
       { text: "5 premium templates", included: true },
@@ -134,11 +138,22 @@ export default function PricingPage() {
                 </ul>
               </CardContent>
               <CardFooter>
-                <Link href={plan.href} className="w-full">
-                  <Button className="w-full" variant={plan.popular ? "default" : "outline"}>
+                {plan.requiresAuth && plan.planSlug ? (
+                  <PricingButton
+                    planSlug={plan.planSlug as "basic" | "standard" | "pro"}
+                    variant={plan.popular ? "default" : "outline"}
+                  >
                     {plan.cta}
-                  </Button>
-                </Link>
+                  </PricingButton>
+                ) : (
+                  <Link href={plan.href!} className="w-full">
+                    <button
+                      className={`w-full rounded-md px-4 py-2 text-sm font-medium transition-colors ${plan.popular ? "bg-primary text-primary-foreground hover:bg-primary/90" : "border border-input bg-background hover:bg-accent hover:text-accent-foreground"}`}
+                    >
+                      {plan.cta}
+                    </button>
+                  </Link>
+                )}
               </CardFooter>
             </Card>
           ))}
