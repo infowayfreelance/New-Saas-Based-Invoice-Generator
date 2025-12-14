@@ -24,7 +24,7 @@ type Props = {
 
 export function UserManagementForm({ userId, currentRole, currentPlanId, plans }: Props) {
   const [role, setRole] = useState(currentRole)
-  const [planId, setPlanId] = useState(currentPlanId)
+  const [planId, setPlanId] = useState(currentPlanId || "")
   const [isUpdatingRole, setIsUpdatingRole] = useState(false)
   const [isUpdatingPlan, setIsUpdatingPlan] = useState(false)
   const { toast } = useToast()
@@ -57,6 +57,15 @@ export function UserManagementForm({ userId, currentRole, currentPlanId, plans }
   }
 
   async function handleUpdatePlan() {
+    if (!planId || planId.trim() === "") {
+      toast({
+        title: "No plan selected",
+        description: "Please select a plan",
+        variant: "destructive",
+      })
+      return
+    }
+
     setIsUpdatingPlan(true)
     try {
       const result = await updateUserPlan(userId, planId)
@@ -115,14 +124,14 @@ export function UserManagementForm({ userId, currentRole, currentPlanId, plans }
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label>Plan</Label>
-            <Select value={planId} onValueChange={setPlanId}>
+            <Select value={planId || ""} onValueChange={setPlanId}>
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select a plan" />
               </SelectTrigger>
               <SelectContent>
                 {plans.map((plan) => (
                   <SelectItem key={plan.id} value={plan.id}>
-                    {plan.name} - ${plan.price_monthly}/mo
+                    {plan.name} - ${plan.price_monthly.toFixed(2)}/mo
                   </SelectItem>
                 ))}
               </SelectContent>

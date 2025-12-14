@@ -1,13 +1,12 @@
 "use server"
 
 import { createClient } from "@/lib/supabase/server"
-import { stripe } from "@/lib/stripe"
 import { redirect } from "next/navigation"
 
 const PRICE_IDS = {
-  basic: "price_1ScXaDBmjLH9PKqeqiDHdvJT",
-  standard: "price_1ScXaNBmjLH9PKqeVb0OtQWn",
-  pro: "price_1ScXaNBmjLH9PKqeq6kQEm5R",
+  basic: process.env.STRIPE_PRICE_ID_BASIC || "",
+  standard: process.env.STRIPE_PRICE_ID_STANDARD || "",
+  pro: process.env.STRIPE_PRICE_ID_PRO || "",
 }
 
 export async function createCheckoutSession(planSlug: "basic" | "standard" | "pro") {
@@ -20,12 +19,22 @@ export async function createCheckoutSession(planSlug: "basic" | "standard" | "pr
     redirect(`/login?redirect=/pricing`)
   }
 
+  const priceId = PRICE_IDS[planSlug]
+  if (!priceId) {
+    throw new Error(
+      `Stripe price ID not configured for plan: ${planSlug}. Please add STRIPE_PRICE_ID_${planSlug.toUpperCase()} to your environment variables.`,
+    )
+  }
+
   // Get or create Stripe customer
   const { data: profile } = await supabase.from("users").select("stripe_customer_id, email").eq("id", user.id).single()
 
   let customerId = profile?.stripe_customer_id
 
   if (!customerId) {
+    const { getStripe } = await import("@/lib/stripe")
+    const stripe = getStripe()
+
     const customer = await stripe.customers.create({
       email: user.email || profile?.email,
       metadata: {
@@ -38,12 +47,10 @@ export async function createCheckoutSession(planSlug: "basic" | "standard" | "pr
     await supabase.from("users").update({ stripe_customer_id: customerId }).eq("id", user.id)
   }
 
-  const priceId = PRICE_IDS[planSlug]
-  if (!priceId) {
-    throw new Error("Invalid plan")
-  }
-
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+
+  const { getStripe } = await import("@/lib/stripe")
+  const stripe = getStripe()
 
   const session = await stripe.checkout.sessions.create({
     customer: customerId,
@@ -86,6 +93,9 @@ export async function createCustomerPortalSession() {
   }
 
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+
+  const { getStripe } = await import("@/lib/stripe")
+  const stripe = getStripe()
 
   const session = await stripe.billingPortal.sessions.create({
     customer: profile.stripe_customer_id,

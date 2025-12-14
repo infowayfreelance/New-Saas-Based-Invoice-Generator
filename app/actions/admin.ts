@@ -58,6 +58,10 @@ export async function updateUserPlan(userId: string, planId: string) {
   try {
     const { supabase } = await verifyAdmin()
 
+    if (!planId || planId.trim() === "") {
+      return { success: false, error: "Please select a plan" }
+    }
+
     // Verify plan exists
     const { data: plan, error: planError } = await supabase.from("plans").select("id, code").eq("id", planId).single()
 
@@ -76,22 +80,34 @@ export async function updateUserPlan(userId: string, planId: string) {
       return { success: false, error: userError.message }
     }
 
-    const { error: subError } = await supabase.from("subscriptions").upsert(
-      {
+    // Check if subscription exists first
+    const { data: existingSub } = await supabase.from("subscriptions").select("id").eq("user_id", userId).single()
+
+    if (existingSub) {
+      // Update existing subscription
+      const { error: subError } = await supabase
+        .from("subscriptions")
+        .update({
+          current_plan_id: planId,
+          status: "ACTIVE",
+          updated_at: new Date().toISOString(),
+        })
+        .eq("user_id", userId)
+
+      if (subError) {
+        console.error("[v0] Admin updateUserPlan subscription update error:", subError)
+      }
+    } else {
+      // Create new subscription with minimal fields
+      const { error: subError } = await supabase.from("subscriptions").insert({
         user_id: userId,
         current_plan_id: planId,
         status: "ACTIVE",
-        current_period_start: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      },
-      {
-        onConflict: "user_id",
-      },
-    )
+      })
 
-    if (subError) {
-      console.error("[v0] Admin updateUserPlan subscription error:", subError)
-      // Don't fail if subscription update fails, user plan is already updated
+      if (subError) {
+        console.error("[v0] Admin updateUserPlan subscription insert error:", subError)
+      }
     }
 
     revalidatePath(`/admin/users/${userId}`)

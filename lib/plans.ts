@@ -47,6 +47,7 @@ export const PLANS: Plan[] = [
     name: "Basic",
     code: "BASIC",
     priceMonthly: 5,
+    stripePriceId: process.env.STRIPE_PRICE_ID_BASIC,
     invoiceLimitPerDay: 5,
     invoiceLimitPerMonth: 30,
     features: {
@@ -64,6 +65,7 @@ export const PLANS: Plan[] = [
     name: "Standard",
     code: "STANDARD",
     priceMonthly: 12,
+    stripePriceId: process.env.STRIPE_PRICE_ID_STANDARD,
     invoiceLimitPerDay: null,
     invoiceLimitPerMonth: null,
     features: {
@@ -83,6 +85,7 @@ export const PLANS: Plan[] = [
     name: "Pro",
     code: "PRO",
     priceMonthly: 29.99,
+    stripePriceId: process.env.STRIPE_PRICE_ID_PRO,
     invoiceLimitPerDay: null,
     invoiceLimitPerMonth: null,
     features: {

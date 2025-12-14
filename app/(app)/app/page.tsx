@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
-import { FileText, Plus, Users, TrendingUp, Clock, ArrowRight } from "lucide-react"
+import { FileText, Plus, Users, TrendingUp, Clock, ArrowRight, AlertCircle } from "lucide-react"
 import { formatCurrency } from "@/lib/utils/invoice"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -19,45 +20,129 @@ export default async function DashboardPage() {
     redirect("/login")
   }
 
-  // Fetch user with plan
-  const { data: userData } = await supabase
-    .from("users")
-    .select(
-      `
+  let userData
+  let hasDbError = false
+  let dbErrorMessage = ""
+
+  try {
+    // Fetch user with plan
+    const { data, error } = await supabase
+      .from("users")
+      .select(
+        `
       *,
       plan:plans(*)
     `,
+      )
+      .eq("id", user.id)
+      .single()
+
+    if (error) throw error
+    userData = data
+  } catch (error: any) {
+    if (error?.code === "42P01" || error?.code === "PGRST204" || error?.message?.includes("does not exist")) {
+      hasDbError = true
+      dbErrorMessage = "Database tables not found. Please run the SQL migration scripts."
+    } else {
+      throw error
+    }
+  }
+
+  // If database is not set up, show setup instructions
+  if (hasDbError) {
+    return (
+      <div className="flex min-h-screen items-center justify-center p-6">
+        <Card className="w-full max-w-2xl">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <AlertCircle className="h-5 w-5 text-destructive" />
+              Database Setup Required
+            </CardTitle>
+            <CardDescription>The database tables haven't been created yet.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Alert>
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Setup Instructions</AlertTitle>
+              <AlertDescription>
+                Run these SQL scripts in your Supabase SQL Editor in order:
+                <ol className="mt-2 list-decimal space-y-1 pl-5 text-sm">
+                  <li>
+                    <code className="rounded bg-muted px-1">scripts/001_create_tables.sql</code>
+                  </li>
+                  <li>
+                    <code className="rounded bg-muted px-1">scripts/002_enable_rls.sql</code>
+                  </li>
+                  <li>
+                    <code className="rounded bg-muted px-1">scripts/003_seed_data.sql</code>
+                  </li>
+                  <li>
+                    <code className="rounded bg-muted px-1">scripts/004_create_user_trigger.sql</code>
+                  </li>
+                  <li>
+                    <code className="rounded bg-muted px-1">scripts/005_fix_default_plan.sql</code>
+                  </li>
+                </ol>
+              </AlertDescription>
+            </Alert>
+            <p className="text-sm text-muted-foreground">After running all scripts, refresh this page to continue.</p>
+          </CardContent>
+        </Card>
+      </div>
     )
-    .eq("id", user.id)
-    .single()
+  }
 
-  // Fetch invoice stats
-  const { count: totalInvoices } = await supabase
-    .from("invoices")
-    .select("id", { count: "exact" })
-    .eq("user_id", user.id)
+  let totalInvoices = 0
+  let paidInvoices: any[] = []
+  let pendingInvoices: any[] = []
+  let clientCount = 0
+  let recentInvoices: any[] = []
+  let usageLog: any = null
 
-  const { data: paidInvoices } = await supabase
-    .from("invoices")
-    .select("total_amount")
-    .eq("user_id", user.id)
-    .eq("status", "PAID")
+  try {
+    // Fetch invoice stats
+    const { count } = await supabase.from("invoices").select("id", { count: "exact" }).eq("user_id", user.id)
+    totalInvoices = count || 0
 
-  const { data: pendingInvoices } = await supabase
-    .from("invoices")
-    .select("total_amount")
-    .eq("user_id", user.id)
-    .in("status", ["SENT", "DRAFT"])
+    const { data: paid } = await supabase
+      .from("invoices")
+      .select("total_amount")
+      .eq("user_id", user.id)
+      .eq("status", "PAID")
+    paidInvoices = paid || []
 
-  const { count: clientCount } = await supabase.from("clients").select("id", { count: "exact" }).eq("user_id", user.id)
+    const { data: pending } = await supabase
+      .from("invoices")
+      .select("total_amount")
+      .eq("user_id", user.id)
+      .in("status", ["SENT", "DRAFT"])
+    pendingInvoices = pending || []
 
-  // Recent invoices
-  const { data: recentInvoices } = await supabase
-    .from("invoices")
-    .select("*")
-    .eq("user_id", user.id)
-    .order("created_at", { ascending: false })
-    .limit(5)
+    const { count: clients } = await supabase.from("clients").select("id", { count: "exact" }).eq("user_id", user.id)
+    clientCount = clients || 0
+
+    // Recent invoices
+    const { data: recent } = await supabase
+      .from("invoices")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(5)
+    recentInvoices = recent || []
+
+    // Get today's usage
+    const today = new Date().toISOString().split("T")[0]
+    const { data: usage } = await supabase
+      .from("usage_logs")
+      .select("*")
+      .eq("user_id", user.id)
+      .eq("date", today)
+      .single()
+    usageLog = usage
+  } catch (error) {
+    // If queries fail, continue with empty data
+    console.error("Error fetching dashboard data:", error)
+  }
 
   const totalPaid = paidInvoices?.reduce((sum, inv) => sum + Number(inv.total_amount), 0) || 0
   const totalPending = pendingInvoices?.reduce((sum, inv) => sum + Number(inv.total_amount), 0) || 0
@@ -65,15 +150,6 @@ export default async function DashboardPage() {
   const planCode = userData?.plan?.code || "BASIC"
   const dailyLimit = userData?.plan?.invoice_limit_per_day
   const monthlyLimit = userData?.plan?.invoice_limit_per_month
-
-  // Get today's usage
-  const today = new Date().toISOString().split("T")[0]
-  const { data: usageLog } = await supabase
-    .from("usage_logs")
-    .select("*")
-    .eq("user_id", user.id)
-    .eq("date", today)
-    .single()
 
   const dailyUsed = usageLog?.invoices_today || 0
 
