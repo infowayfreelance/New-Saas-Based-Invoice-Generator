@@ -71,12 +71,18 @@ export async function signIn(formData: FormData) {
     })
 
     if (error) {
+      if (error.message.includes("Invalid login credentials")) {
+        return {
+          error: "Invalid email or password. If you haven't created an account yet, please sign up first.",
+          suggestion: "register",
+        }
+      }
       return { error: error.message }
     }
 
     redirect("/app")
   } catch (err: any) {
-    if (err?.message === "NEXT_REDIRECT") {
+    if (err?.digest?.startsWith("NEXT_REDIRECT")) {
       throw err
     }
     console.error("Sign in error:", err)
@@ -90,7 +96,7 @@ export async function signOut() {
     await supabase.auth.signOut()
     redirect("/login")
   } catch (err: any) {
-    if (err?.message === "NEXT_REDIRECT") {
+    if (err?.digest?.startsWith("NEXT_REDIRECT")) {
       throw err
     }
     redirect("/login")

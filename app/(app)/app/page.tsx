@@ -104,16 +104,12 @@ export default async function DashboardPage() {
     const { count } = await supabase.from("invoices").select("id", { count: "exact" }).eq("user_id", user.id)
     totalInvoices = count || 0
 
-    const { data: paid } = await supabase
-      .from("invoices")
-      .select("total_amount")
-      .eq("user_id", user.id)
-      .eq("status", "PAID")
+    const { data: paid } = await supabase.from("invoices").select("total").eq("user_id", user.id).eq("status", "PAID")
     paidInvoices = paid || []
 
     const { data: pending } = await supabase
       .from("invoices")
-      .select("total_amount")
+      .select("total")
       .eq("user_id", user.id)
       .in("status", ["SENT", "DRAFT"])
     pendingInvoices = pending || []
@@ -144,8 +140,8 @@ export default async function DashboardPage() {
     console.error("Error fetching dashboard data:", error)
   }
 
-  const totalPaid = paidInvoices?.reduce((sum, inv) => sum + Number(inv.total_amount), 0) || 0
-  const totalPending = pendingInvoices?.reduce((sum, inv) => sum + Number(inv.total_amount), 0) || 0
+  const totalPaid = paidInvoices?.reduce((sum, inv) => sum + Number(inv.total), 0) || 0
+  const totalPending = pendingInvoices?.reduce((sum, inv) => sum + Number(inv.total), 0) || 0
 
   const planCode = userData?.plan?.code || "BASIC"
   const dailyLimit = userData?.plan?.invoice_limit_per_day
@@ -296,7 +292,7 @@ export default async function DashboardPage() {
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="font-medium">{formatCurrency(Number(invoice.total_amount), invoice.currency)}</p>
+                      <p className="font-medium">{formatCurrency(Number(invoice.total), invoice.currency)}</p>
                       <Badge
                         variant={
                           invoice.status === "PAID"

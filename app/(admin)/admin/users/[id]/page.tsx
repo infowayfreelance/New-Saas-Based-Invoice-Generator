@@ -188,7 +188,7 @@ export default async function AdminUserDetailPage({ params }: { params: Promise<
                       <Badge variant={invoice.status === "PAID" ? "default" : "outline"}>{invoice.status}</Badge>
                     </TableCell>
                     <TableCell>
-                      {invoice.currency} {invoice.total_amount}
+                      {invoice.currency} {invoice.total}
                     </TableCell>
                     <TableCell className="text-muted-foreground">
                       {new Date(invoice.issue_date).toLocaleDateString()}

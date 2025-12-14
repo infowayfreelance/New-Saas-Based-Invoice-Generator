@@ -6,13 +6,62 @@ import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
 
-  if (!user) {
+  let user = null
+  let authError = false
+
+  try {
+    const {
+      data: { user: authUser },
+    } = await supabase.auth.getUser()
+    user = authUser
+  } catch (err) {
+    console.error("Error fetching auth user:", err)
+    authError = true
+  }
+
+  if (!user && !authError) {
     redirect("/login")
   }
+  // </CHANGE>
+
+  if (authError) {
+    return (
+      <div className="flex min-h-screen items-center justify-center p-4">
+        <div className="max-w-md space-y-4 rounded-lg border border-red-500 bg-red-50 p-6 dark:bg-red-950">
+          <div className="flex items-start gap-3">
+            <div className="rounded-full bg-red-500 p-2 text-white">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path
+                  fillRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </div>
+            <div className="flex-1">
+              <h2 className="mb-2 text-lg font-semibold text-red-900 dark:text-red-100">Authentication Error</h2>
+              <p className="mb-3 text-sm text-red-800 dark:text-red-200">
+                Unable to connect to Supabase. Please check:
+              </p>
+              <ul className="mb-3 list-inside list-disc space-y-1 text-sm text-red-800 dark:text-red-200">
+                <li>Supabase environment variables are set correctly</li>
+                <li>Your internet connection is working</li>
+                <li>Supabase project is active</li>
+              </ul>
+              <a
+                href="/login"
+                className="inline-block rounded bg-red-600 px-4 py-2 text-sm text-white hover:bg-red-700"
+              >
+                Try Again
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+  // </CHANGE>
 
   let userData = null
   let dbError = null
@@ -30,17 +79,20 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       .single()
 
     if (error) {
-      // Check if error is due to missing table
-      if (error.code === "PGRST205") {
+      if (error.code === "PGRST116" || error.code === "42P01") {
         dbError = "database_not_setup"
       } else {
         console.error("Error fetching user data:", error)
+        dbError = "query_failed"
       }
+      // </CHANGE>
     } else {
       userData = data
     }
   } catch (err) {
-    console.error("Error querying database:", err)
+    console.error("Error fetching user data:", err)
+    dbError = "query_failed"
+    // </CHANGE>
   }
 
   // If database isn't set up, show a setup message
@@ -73,17 +125,12 @@ export default async function AppLayout({ children }: { children: React.ReactNod
                 </li>
                 <li>
                   <code className="rounded bg-yellow-100 px-1 py-0.5 dark:bg-yellow-900">
-                    scripts/002_enable_rls.sql
+                    scripts/002_rls_policies.sql
                   </code>
                 </li>
                 <li>
                   <code className="rounded bg-yellow-100 px-1 py-0.5 dark:bg-yellow-900">
                     scripts/003_seed_data.sql
-                  </code>
-                </li>
-                <li>
-                  <code className="rounded bg-yellow-100 px-1 py-0.5 dark:bg-yellow-900">
-                    scripts/004_create_user_trigger.sql
                   </code>
                 </li>
               </ol>
@@ -95,6 +142,11 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         </div>
       </div>
     )
+  }
+
+  // This allows the app to at least load and show an error state
+  if (dbError === "query_failed") {
+    console.warn("Rendering app with null user data due to database query failure")
   }
   // </CHANGE>
 

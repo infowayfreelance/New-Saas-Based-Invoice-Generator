@@ -15,6 +15,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 
 export default function LoginPage() {
   const [error, setError] = useState<string | null>(null)
+  const [showSignUpPrompt, setShowSignUpPrompt] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const searchParams = useSearchParams()
 
@@ -31,6 +32,7 @@ export default function LoginPage() {
     e.preventDefault()
     setIsLoading(true)
     setError(null)
+    setShowSignUpPrompt(false)
 
     const formData = new FormData(e.currentTarget)
 
@@ -39,6 +41,9 @@ export default function LoginPage() {
 
       if (result?.error) {
         setError(result.error)
+        if (result.suggestion === "register") {
+          setShowSignUpPrompt(true)
+        }
       }
       // If successful, signIn redirects to /app
     } catch (err) {
@@ -68,8 +73,17 @@ export default function LoginPage() {
           </CardHeader>
           <CardContent>
             {error && (
-              <Alert className="mb-4">
-                <AlertDescription>{error}</AlertDescription>
+              <Alert className="mb-4" variant={showSignUpPrompt ? "default" : "destructive"}>
+                <AlertDescription>
+                  {error}
+                  {showSignUpPrompt && (
+                    <div className="mt-2">
+                      <Link href="/register" className="font-medium text-primary hover:underline">
+                        Create an account →
+                      </Link>
+                    </div>
+                  )}
+                </AlertDescription>
               </Alert>
             )}
             <form onSubmit={handleLogin}>

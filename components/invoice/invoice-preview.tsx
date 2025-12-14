@@ -2,7 +2,7 @@
 
 import { Card } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
-import { type InvoiceFormData, calculateInvoiceTotals, formatCurrency, formatDate } from "@/lib/utils/invoice"
+import { type InvoiceFormData, calculateInvoiceTotals, formatCurrency, formatDate, toNumber } from "@/lib/utils/invoice"
 
 interface InvoicePreviewProps {
   data: InvoiceFormData
@@ -108,22 +108,27 @@ export function InvoicePreview({ data, className }: InvoicePreviewProps) {
           </thead>
           <tbody>
             {data.items.map((item) => {
-              const subtotal = item.quantity * item.unitPrice
-              const tax = subtotal * (item.taxRate / 100)
+              const quantity = toNumber(item.quantity)
+              const unitPrice = toNumber(item.unitPrice)
+              const taxRate = toNumber(item.taxRate)
+
+              const subtotal = quantity * unitPrice
+              const tax = subtotal * (taxRate / 100)
               const total = subtotal + tax
+
               return (
                 <tr key={item.id} style={{ borderBottomWidth: "1px", borderBottomColor: "#f5f5f5" }}>
                   <td className="py-3 text-lg font-medium" style={{ color: "#171717" }}>
                     {item.description || "—"}
                   </td>
                   <td className="py-3 text-right" style={{ color: "#171717" }}>
-                    {item.quantity}
+                    {quantity}
                   </td>
                   <td className="py-3 text-right" style={{ color: "#171717" }}>
-                    {formatCurrency(item.unitPrice, data.currency)}
+                    {formatCurrency(unitPrice, data.currency)}
                   </td>
                   <td className="py-3 text-right" style={{ color: "#171717" }}>
-                    {item.taxRate}%
+                    {taxRate}%
                   </td>
                   <td className="py-3 text-right font-bold text-lg" style={{ color: "#171717" }}>
                     {formatCurrency(total, data.currency)}
@@ -134,6 +139,8 @@ export function InvoicePreview({ data, className }: InvoicePreviewProps) {
           </tbody>
         </table>
       </div>
+
+      <Separator className="my-6" style={{ backgroundColor: "#e5e5e5" }} />
 
       {/* Totals */}
       <div className="mt-6 flex justify-end">

@@ -1,4 +1,4 @@
-import type React from "react"
+import React from "react"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Separator } from "@/components/ui/separator"
 import {
@@ -25,16 +25,16 @@ export function PageHeader({ title, breadcrumbs, children }: PageHeaderProps) {
         <Breadcrumb>
           <BreadcrumbList>
             {breadcrumbs.map((crumb, index) => (
-              <BreadcrumbItem key={index}>
-                {index < breadcrumbs.length - 1 ? (
-                  <>
+              <React.Fragment key={index}>
+                <BreadcrumbItem>
+                  {index < breadcrumbs.length - 1 ? (
                     <BreadcrumbLink href={crumb.href}>{crumb.label}</BreadcrumbLink>
-                    <BreadcrumbSeparator />
-                  </>
-                ) : (
-                  <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
-                )}
-              </BreadcrumbItem>
+                  ) : (
+                    <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
+                  )}
+                </BreadcrumbItem>
+                {index < breadcrumbs.length - 1 && <BreadcrumbSeparator />}
+              </React.Fragment>
             ))}
           </BreadcrumbList>
         </Breadcrumb>

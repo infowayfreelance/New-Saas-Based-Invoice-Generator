@@ -123,7 +123,7 @@ export default async function AdminInvoicesPage({
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      {invoice.currency} {invoice.total_amount?.toFixed(2)}
+                      {invoice.currency} {invoice.total?.toFixed(2)}
                     </TableCell>
                     <TableCell className="text-muted-foreground">
                       {new Date(invoice.issue_date).toLocaleDateString()}

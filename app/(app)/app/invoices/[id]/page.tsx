@@ -1,18 +1,31 @@
 import type React from "react"
-import { notFound, redirect } from "next/navigation"
+import { redirect } from "next/navigation"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/server"
 import { PageHeader } from "@/components/app/page-header"
 import { InvoicePreview } from "@/components/invoice/invoice-preview"
+import { InvoiceActionButtons } from "@/components/invoice/invoice-action-buttons"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Download, Send, Edit, Clock, CheckCircle2 } from "lucide-react"
-import { formatCurrency, formatDate, type InvoiceFormData } from "@/lib/utils/invoice"
+import { Edit, Clock, CheckCircle2, Send } from "lucide-react"
+import { formatCurrency, formatDate, toNumber, type InvoiceFormData } from "@/lib/utils/invoice"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { AlertCircle } from "lucide-react"
+
+function isValidUUID(id: string): boolean {
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+  return uuidRegex.test(id)
+}
 
 export default async function InvoiceDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
+
+  if (!isValidUUID(id)) {
+    redirect("/app/invoices")
+  }
+
   const supabase = await createClient()
   const {
     data: { user },
@@ -22,27 +35,99 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
     redirect("/login")
   }
 
-  // Fetch invoice with items
-  const { data: invoice } = await supabase.from("invoices").select("*").eq("id", id).eq("user_id", user.id).single()
+  let invoice: any
+  let items: any[] | null = null
 
-  if (!invoice) {
-    notFound()
+  try {
+    const { data: invoiceData, error: invoiceError } = await supabase
+      .from("invoices")
+      .select("*")
+      .eq("id", id)
+      .eq("user_id", user.id)
+      .single()
+
+    if (!invoiceData || invoiceError) {
+      // Return error page instead of redirecting from inside try-catch
+      return (
+        <>
+          <PageHeader
+            title="Invoice Not Found"
+            breadcrumbs={[
+              { label: "Dashboard", href: "/app" },
+              { label: "Invoices", href: "/app/invoices" },
+              { label: "Error" },
+            ]}
+          />
+          <div className="flex-1 space-y-6 p-6">
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Invoice Not Found</AlertTitle>
+              <AlertDescription>
+                The invoice you're looking for doesn't exist or you don't have permission to view it.
+              </AlertDescription>
+            </Alert>
+            <div className="flex gap-4">
+              <Link href="/app/invoices">
+                <Button>Back to Invoices</Button>
+              </Link>
+              <Link href="/app/invoices/new">
+                <Button variant="outline">Create New Invoice</Button>
+              </Link>
+            </div>
+          </div>
+        </>
+      )
+    }
+
+    invoice = invoiceData
+
+    const { data: itemsData } = await supabase
+      .from("invoice_items")
+      .select("*")
+      .eq("invoice_id", id)
+      .order("created_at", { ascending: true })
+
+    items = itemsData
+  } catch (error) {
+    console.error("[v0] Error loading invoice:", error)
+    return (
+      <>
+        <PageHeader
+          title="Error Loading Invoice"
+          breadcrumbs={[
+            { label: "Dashboard", href: "/app" },
+            { label: "Invoices", href: "/app/invoices" },
+            { label: "Error" },
+          ]}
+        />
+        <div className="flex-1 space-y-6 p-6">
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Error Loading Invoice</AlertTitle>
+            <AlertDescription>
+              There was an error loading this invoice. Please try again or contact support if the problem persists.
+            </AlertDescription>
+          </Alert>
+          <div className="flex gap-4">
+            <Link href="/app/invoices">
+              <Button>Back to Invoices</Button>
+            </Link>
+            <Link href="/app/invoices/new">
+              <Button variant="outline">Create New Invoice</Button>
+            </Link>
+          </div>
+        </div>
+      </>
+    )
   }
 
-  const { data: items } = await supabase
-    .from("invoice_items")
-    .select("*")
-    .eq("invoice_id", id)
-    .order("sort_order", { ascending: true })
-
-  // Convert to form data for preview
   const formData: InvoiceFormData = {
-    fromName: invoice.from_name || "",
-    fromEmail: invoice.from_email || "",
-    fromAddress: invoice.from_address || "",
-    clientName: invoice.client_name || "",
-    clientEmail: invoice.client_email || "",
-    clientAddress: invoice.client_address || "",
+    fromName: "",
+    fromEmail: "",
+    fromAddress: "",
+    clientName: "",
+    clientEmail: "",
+    clientAddress: "",
     invoiceNumber: invoice.invoice_number,
     issueDate: invoice.issue_date,
     dueDate: invoice.due_date,
@@ -51,14 +136,14 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
       items?.map((item) => ({
         id: item.id,
         description: item.description,
-        quantity: Number(item.quantity),
-        unitPrice: Number(item.unit_price),
-        taxRate: Number(item.tax_rate),
+        quantity: toNumber(item.quantity),
+        unitPrice: toNumber(item.unit_price),
+        taxRate: toNumber(item.tax_rate),
       })) || [],
     notes: invoice.notes || "",
-    terms: invoice.terms || "",
+    terms: "",
     taxRate: 0,
-    discountAmount: Number(invoice.discount_amount),
+    discountAmount: toNumber(invoice.discount_total),
   }
 
   const getStatusBadge = (status: string) => {
@@ -91,14 +176,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
           { label: invoice.invoice_number },
         ]}
       >
-        <Button variant="outline" className="bg-transparent">
-          <Download className="mr-2 h-4 w-4" />
-          Download PDF
-        </Button>
-        <Button>
-          <Send className="mr-2 h-4 w-4" />
-          Send Email
-        </Button>
+        <InvoiceActionButtons invoiceData={formData} invoiceId={id} invoiceNumber={invoice.invoice_number} />
       </PageHeader>
       <div className="flex-1 space-y-6 p-6">
         {/* Status Banner */}
@@ -107,7 +185,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
             <div className="flex items-center gap-4">
               {getStatusBadge(invoice.status)}
               <div>
-                <p className="font-semibold">{formatCurrency(Number(invoice.total_amount), invoice.currency)}</p>
+                <p className="font-semibold">{formatCurrency(toNumber(invoice.total), invoice.currency)}</p>
                 <p className="text-sm text-muted-foreground">Due {formatDate(invoice.due_date)}</p>
               </div>
             </div>
@@ -141,7 +219,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
             <TabsTrigger value="activity">Activity</TabsTrigger>
           </TabsList>
           <TabsContent value="preview" className="mt-6">
-            <div className="rounded-lg border border-border shadow-sm">
+            <div className="rounded-lg border border-border shadow-sm" id="invoice-preview">
               <InvoicePreview data={formData} />
             </div>
           </TabsContent>
@@ -177,30 +255,30 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
                 <CardContent className="space-y-4">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Subtotal</span>
-                    <span>{formatCurrency(Number(invoice.subtotal), invoice.currency)}</span>
+                    <span>{formatCurrency(toNumber(invoice.subtotal), invoice.currency)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Tax</span>
-                    <span>{formatCurrency(Number(invoice.tax_amount), invoice.currency)}</span>
+                    <span>{formatCurrency(toNumber(invoice.tax_total), invoice.currency)}</span>
                   </div>
-                  {Number(invoice.discount_amount) > 0 && (
+                  {toNumber(invoice.discount_total) > 0 && (
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Discount</span>
-                      <span>-{formatCurrency(Number(invoice.discount_amount), invoice.currency)}</span>
+                      <span>-{formatCurrency(toNumber(invoice.discount_total), invoice.currency)}</span>
                     </div>
                   )}
                   <div className="flex justify-between border-t pt-4 font-semibold">
                     <span>Total</span>
-                    <span>{formatCurrency(Number(invoice.total_amount), invoice.currency)}</span>
+                    <span>{formatCurrency(toNumber(invoice.total), invoice.currency)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Amount Paid</span>
-                    <span>{formatCurrency(Number(invoice.amount_paid), invoice.currency)}</span>
+                    <span>{formatCurrency(toNumber(invoice.amount_paid), invoice.currency)}</span>
                   </div>
                   <div className="flex justify-between font-semibold text-primary">
                     <span>Balance Due</span>
                     <span>
-                      {formatCurrency(Number(invoice.total_amount) - Number(invoice.amount_paid), invoice.currency)}
+                      {formatCurrency(toNumber(invoice.total) - toNumber(invoice.amount_paid), invoice.currency)}
                     </span>
                   </div>
                 </CardContent>

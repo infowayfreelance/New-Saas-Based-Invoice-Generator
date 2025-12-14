@@ -9,6 +9,8 @@ import { type InvoiceFormData, getDefaultInvoiceData } from "@/lib/utils/invoice
 import { generateAuthenticatedInvoice, checkInvoiceUsage } from "@/app/actions/invoice"
 import { toast } from "sonner"
 import { createClient } from "@/lib/supabase/client"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { AlertCircle } from "lucide-react"
 
 export default function NewInvoicePage() {
   const router = useRouter()
@@ -21,33 +23,72 @@ export default function NewInvoicePage() {
     monthlyUsed: number
     monthlyLimit: number | null
   } | null>(null)
+  const [isLoadingData, setIsLoadingData] = useState(true)
+  const [loadError, setLoadError] = useState<string | null>(null)
 
   useEffect(() => {
     const loadData = async () => {
-      const supabase = createClient()
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
+      try {
+        const supabase = createClient()
+        const {
+          data: { user },
+          error: authError,
+        } = await supabase.auth.getUser()
 
-      if (user) {
-        // Load user settings
-        const { data: settings } = await supabase.from("user_settings").select("*").eq("user_id", user.id).single()
-
-        if (settings) {
-          setInitialData((prev) => ({
-            ...prev,
-            fromName: settings.company_name || "",
-            fromAddress: settings.company_address || "",
-            currency: settings.default_currency || "USD",
-            invoiceNumber: `${settings.invoice_prefix || "INV-"}${String(settings.invoice_start_number || 1).padStart(3, "0")}`,
-          }))
+        if (authError) {
+          console.error("[v0] Auth error:", authError)
+          setLoadError("Authentication error. Please log in again.")
+          setIsLoadingData(false)
+          return
         }
 
-        // Check usage
-        const usageResult = await checkInvoiceUsage(user.id)
-        if (usageResult) {
-          setUsage(usageResult)
+        if (!user) {
+          console.error("[v0] No authenticated user")
+          setLoadError("Please log in to create invoices.")
+          setIsLoadingData(false)
+          return
         }
+
+        try {
+          const { data: settings, error: settingsError } = await supabase
+            .from("user_settings")
+            .select("*")
+            .eq("user_id", user.id)
+            .maybeSingle() // Use maybeSingle instead of single to avoid throwing on no rows
+
+          // Only log error if it's not a "table doesn't exist" error
+          if (settingsError && !settingsError.message.includes("does not exist")) {
+            console.error("[v0] Settings error:", settingsError)
+          }
+
+          if (settings) {
+            setInitialData((prev) => ({
+              ...prev,
+              fromName: settings.company_name || "",
+              fromAddress: settings.company_address || "",
+              currency: settings.default_currency || "USD",
+              invoiceNumber: `${settings.invoice_prefix || "INV-"}${String(settings.invoice_start_number || 1).padStart(3, "0")}`,
+            }))
+          }
+        } catch (settingsErr) {
+          // Silently handle settings errors - not critical for invoice creation
+          console.error("[v0] Error loading settings:", settingsErr)
+        }
+
+        try {
+          const usageResult = await checkInvoiceUsage(user.id)
+          if (usageResult) {
+            setUsage(usageResult)
+          }
+        } catch (usageErr) {
+          console.error("[v0] Error checking usage:", usageErr)
+          // Continue without usage data - not critical
+        }
+      } catch (err) {
+        console.error("[v0] Error loading invoice data:", err)
+        setLoadError("Failed to load invoice data. You can still create an invoice with default settings.")
+      } finally {
+        setIsLoadingData(false)
       }
     }
     loadData()
@@ -69,7 +110,8 @@ export default function NewInvoicePage() {
 
       toast.success("Invoice created successfully!")
       router.push(`/app/invoices/${result.invoiceId}`)
-    } catch {
+    } catch (err) {
+      console.error("[v0] Invoice creation error:", err)
       toast.error("An error occurred. Please try again.")
     } finally {
       setIsLoading(false)
@@ -87,7 +129,14 @@ export default function NewInvoicePage() {
         ]}
       />
       <div className="flex-1 space-y-6 p-6">
-        {usage && (
+        {loadError && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{loadError}</AlertDescription>
+          </Alert>
+        )}
+
+        {usage && !isLoadingData && (
           <UsageMeter
             dailyUsed={usage.dailyUsed}
             dailyLimit={usage.dailyLimit}
@@ -96,12 +145,22 @@ export default function NewInvoicePage() {
             canCreate={usage.canCreate}
           />
         )}
-        <InvoiceForm
-          initialData={initialData}
-          onSubmit={handleSubmit}
-          isLoading={isLoading}
-          submitLabel="Create Invoice"
-        />
+
+        {isLoadingData ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center space-y-2">
+              <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]" />
+              <p className="text-sm text-muted-foreground">Loading invoice form...</p>
+            </div>
+          </div>
+        ) : (
+          <InvoiceForm
+            initialData={initialData}
+            onSubmit={handleSubmit}
+            isLoading={isLoading}
+            submitLabel="Create Invoice"
+          />
+        )}
       </div>
     </>
   )

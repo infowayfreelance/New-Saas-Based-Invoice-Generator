@@ -127,7 +127,7 @@ export default async function InvoicesPage({
                         <TableCell>{invoice.client_name || "—"}</TableCell>
                         <TableCell>{formatDate(invoice.issue_date)}</TableCell>
                         <TableCell>{formatDate(invoice.due_date)}</TableCell>
-                        <TableCell>{formatCurrency(Number(invoice.total_amount), invoice.currency)}</TableCell>
+                        <TableCell>{formatCurrency(Number(invoice.total), invoice.currency)}</TableCell>
                         <TableCell>{getStatusBadge(invoice.status)}</TableCell>
                         <TableCell>
                           <DropdownMenu>

@@ -39,30 +39,58 @@ export function generateInvoiceNumber(): string {
   return `INV-${year}${month}-${random}`
 }
 
+/**
+ * Safely converts a value to a number, returning 0 for invalid values
+ */
+export function toNumber(value: any): number {
+  if (value === null || value === undefined || value === "") {
+    return 0
+  }
+  const num = typeof value === "number" ? value : Number(value)
+  return Number.isFinite(num) ? num : 0
+}
+
 export function calculateItemTotal(item: InvoiceItemFormData): number {
-  const subtotal = item.quantity * item.unitPrice
-  const tax = subtotal * (item.taxRate / 100)
+  const quantity = toNumber(item.quantity)
+  const unitPrice = toNumber(item.unitPrice)
+  const taxRate = toNumber(item.taxRate)
+
+  const subtotal = quantity * unitPrice
+  const tax = subtotal * (taxRate / 100)
   return subtotal + tax
 }
 
 export function calculateInvoiceTotals(items: InvoiceItemFormData[], discountAmount = 0) {
-  const subtotal = items.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0)
-  const taxAmount = items.reduce((sum, item) => sum + item.quantity * item.unitPrice * (item.taxRate / 100), 0)
-  const totalAmount = subtotal + taxAmount - discountAmount
+  const subtotal = items.reduce((sum, item) => {
+    const qty = toNumber(item.quantity)
+    const price = toNumber(item.unitPrice)
+    return sum + qty * price
+  }, 0)
+
+  const taxAmount = items.reduce((sum, item) => {
+    const qty = toNumber(item.quantity)
+    const price = toNumber(item.unitPrice)
+    const taxRate = toNumber(item.taxRate)
+    return sum + qty * price * (taxRate / 100)
+  }, 0)
+
+  const discount = toNumber(discountAmount)
+  const totalAmount = subtotal + taxAmount - discount
 
   return {
     subtotal: Math.round(subtotal * 100) / 100,
     taxAmount: Math.round(taxAmount * 100) / 100,
-    discountAmount: Math.round(discountAmount * 100) / 100,
+    discountAmount: Math.round(discount * 100) / 100,
     totalAmount: Math.round(totalAmount * 100) / 100,
   }
 }
 
-export function formatCurrency(amount: number, currency = "USD"): string {
+export function formatCurrency(amount: number | string | null | undefined, currency = "USD"): string {
+  const safeAmount = toNumber(amount)
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency,
-  }).format(amount)
+  }).format(safeAmount)
 }
 
 export function formatDate(date: string | Date): string {

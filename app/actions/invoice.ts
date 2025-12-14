@@ -3,7 +3,7 @@
 import { getClientIp } from "@/lib/utils/ip"
 import { createClient } from "@/lib/supabase/server"
 import { checkUsageLimits, incrementUsage } from "@/lib/utils/usage"
-import { type InvoiceFormData, calculateInvoiceTotals } from "@/lib/utils/invoice"
+import { type InvoiceFormData, calculateInvoiceTotals, toNumber } from "@/lib/utils/invoice"
 
 export { getClientIp }
 
@@ -81,61 +81,58 @@ export async function generateAuthenticatedInvoice(data: InvoiceFormData): Promi
 
   const totals = calculateInvoiceTotals(data.items, data.discountAmount)
 
-  // Create invoice in database
   const { data: invoice, error: invoiceError } = await supabase
     .from("invoices")
     .insert({
       user_id: user.id,
+      client_id: null,
       invoice_number: data.invoiceNumber,
       status: "DRAFT",
       issue_date: data.issueDate,
       due_date: data.dueDate,
       currency: data.currency,
       subtotal: totals.subtotal,
-      tax_amount: totals.taxAmount,
-      discount_amount: totals.discountAmount,
-      total_amount: totals.totalAmount,
-      amount_paid: 0,
+      tax_total: totals.taxAmount,
+      discount_total: totals.discountAmount,
+      total: totals.totalAmount,
       notes: data.notes || null,
-      terms: data.terms || null,
-      client_name: data.clientName,
-      client_email: data.clientEmail,
-      client_address: data.clientAddress || null,
-      from_name: data.fromName,
-      from_email: data.fromEmail,
-      from_address: data.fromAddress || null,
     })
     .select()
     .single()
 
   if (invoiceError) {
-    console.error("Error creating invoice:", invoiceError)
+    console.error("[v0] Error creating invoice:", invoiceError.message)
     return {
       success: false,
-      error: "Failed to create invoice. Please try again.",
+      error: `Failed to create invoice: ${invoiceError.message || "Unknown error"}`,
     }
   }
 
-  // Create invoice items
-  const itemsToInsert = data.items.map((item, index) => ({
-    invoice_id: invoice.id,
-    description: item.description,
-    quantity: item.quantity,
-    unit_price: item.unitPrice,
-    tax_rate: item.taxRate,
-    total: item.quantity * item.unitPrice * (1 + item.taxRate / 100),
-    sort_order: index,
-  }))
+  const itemsToInsert = data.items.map((item) => {
+    const quantity = toNumber(item.quantity)
+    const unitPrice = toNumber(item.unitPrice)
+    const taxRate = toNumber(item.taxRate)
+
+    return {
+      invoice_id: invoice.id,
+      user_id: user.id,
+      description: item.description,
+      quantity: quantity,
+      unit_price: unitPrice,
+      tax_rate: taxRate,
+      line_total: quantity * unitPrice, // Just quantity * price, tax is tracked separately
+    }
+  })
 
   const { error: itemsError } = await supabase.from("invoice_items").insert(itemsToInsert)
 
   if (itemsError) {
-    console.error("Error creating invoice items:", itemsError)
+    console.error("[v0] Error creating invoice items:", itemsError.message)
     // Rollback invoice
     await supabase.from("invoices").delete().eq("id", invoice.id)
     return {
       success: false,
-      error: "Failed to create invoice items. Please try again.",
+      error: `Failed to create invoice items: ${itemsError.message || "Unknown error"}`,
     }
   }
 
@@ -150,5 +147,77 @@ export async function generateAuthenticatedInvoice(data: InvoiceFormData): Promi
       dailyUsed: usage.dailyUsed + 1,
       monthlyUsed: usage.monthlyUsed + 1,
     },
+  }
+}
+
+export async function sendInvoiceEmail(invoiceId: string): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient()
+
+  // Get authenticated user
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return {
+      success: false,
+      error: "You must be logged in to send invoices",
+    }
+  }
+
+  // Fetch invoice to verify ownership
+  const { data: invoice, error: invoiceError } = await supabase
+    .from("invoices")
+    .select("*")
+    .eq("id", invoiceId)
+    .eq("user_id", user.id)
+    .single()
+
+  if (invoiceError || !invoice) {
+    return {
+      success: false,
+      error: "Invoice not found or access denied",
+    }
+  }
+
+  // Check if user has email sending capability based on plan
+  const { data: userData } = await supabase.from("users").select("*, plan:plans(*)").eq("id", user.id).single()
+
+  if (!userData?.plan) {
+    return {
+      success: false,
+      error: "Unable to verify your plan. Please contact support.",
+    }
+  }
+
+  const planCode = userData.plan.code
+  const canSendEmail = planCode !== "GUEST"
+
+  if (!canSendEmail) {
+    return {
+      success: false,
+      error: "Email sending is not available on the Guest plan. Please upgrade to send invoices via email.",
+    }
+  }
+
+  // TODO: Implement actual email sending logic here
+  // For now, just update the invoice status to SENT
+  const { error: updateError } = await supabase
+    .from("invoices")
+    .update({
+      status: "SENT",
+      sent_at: new Date().toISOString(),
+    })
+    .eq("id", invoiceId)
+
+  if (updateError) {
+    return {
+      success: false,
+      error: "Failed to update invoice status",
+    }
+  }
+
+  return {
+    success: true,
   }
 }
