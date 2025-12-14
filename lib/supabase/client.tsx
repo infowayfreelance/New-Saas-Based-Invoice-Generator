@@ -1,6 +1,13 @@
 import { createBrowserClient } from "@supabase/ssr"
 
+let cachedClient: ReturnType<typeof createBrowserClient> | null = null
+
 export function createClient() {
+  // Return cached client if it exists
+  if (cachedClient) {
+    return cachedClient
+  }
+
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
@@ -16,5 +23,12 @@ export function createClient() {
     throw new Error("Missing Supabase environment variables. Check console for details.")
   }
 
-  return createBrowserClient(supabaseUrl, supabaseAnonKey)
+  try {
+    cachedClient = createBrowserClient(supabaseUrl, supabaseAnonKey)
+    return cachedClient
+  } catch (error) {
+    console.error("[v0] Error creating Supabase browser client:", error)
+    throw error
+  }
+  // </CHANGE>
 }

@@ -54,12 +54,12 @@ export default async function InvoicesPage({
   return (
     <>
       <PageHeader title="Invoices" breadcrumbs={[{ label: "Dashboard", href: "/app" }, { label: "Invoices" }]}>
-        <Link href="/app/invoices/new">
-          <Button>
+        <Button asChild>
+          <Link href="/app/invoices/new">
             <Plus className="mr-2 h-4 w-4" />
             New Invoice
-          </Button>
-        </Link>
+          </Link>
+        </Button>
       </PageHeader>
       <div className="flex-1 space-y-6 p-6">
         {/* Filters */}
@@ -169,12 +169,12 @@ export default async function InvoicesPage({
                     ? "Try adjusting your filters"
                     : "Create your first invoice to get started."}
                 </p>
-                <Link href="/app/invoices/new">
-                  <Button className="mt-4">
+                <Button asChild className="mt-4">
+                  <Link href="/app/invoices/new">
                     <Plus className="mr-2 h-4 w-4" />
                     Create Invoice
-                  </Button>
-                </Link>
+                  </Link>
+                </Button>
               </div>
             )}
           </CardContent>

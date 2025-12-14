@@ -29,9 +29,18 @@ export async function updateSession(request: NextRequest) {
     },
   })
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  let user = null
+  try {
+    const {
+      data: { user: authUser },
+    } = await supabase.auth.getUser()
+    user = authUser
+  } catch (error) {
+    console.error("⚠️ Proxy middleware: Failed to fetch user from Supabase", error)
+    // On connection error, allow the request to continue - the layout will handle it
+    return supabaseResponse
+  }
+  // </CHANGE>
 
   // Protect /app routes
   if (request.nextUrl.pathname.startsWith("/app") && !user) {

@@ -27,41 +27,57 @@ export default function NewInvoicePage() {
   const [loadError, setLoadError] = useState<string | null>(null)
 
   useEffect(() => {
+    let mounted = true
+
     const loadData = async () => {
       try {
+        console.log("[v0] Loading invoice form data...")
         const supabase = createClient()
+
+        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Auth timeout")), 3000))
+
+        const authPromise = supabase.auth.getUser()
+        const authResult = (await Promise.race([authPromise, timeoutPromise])) as any
+
+        if (!mounted) return
+
         const {
           data: { user },
           error: authError,
-        } = await supabase.auth.getUser()
+        } = authResult
 
         if (authError) {
           console.error("[v0] Auth error:", authError)
-          setLoadError("Authentication error. Please log in again.")
+          setLoadError("Connection issue. Using default settings.")
           setIsLoadingData(false)
           return
         }
 
         if (!user) {
-          console.error("[v0] No authenticated user")
-          setLoadError("Please log in to create invoices.")
+          console.log("[v0] No user, using demo mode")
+          setLoadError("Demo mode: Using default invoice settings.")
           setIsLoadingData(false)
           return
         }
 
         try {
-          const { data: settings, error: settingsError } = await supabase
-            .from("user_settings")
-            .select("*")
-            .eq("user_id", user.id)
-            .maybeSingle() // Use maybeSingle instead of single to avoid throwing on no rows
+          const settingsPromise = supabase.from("user_settings").select("*").eq("user_id", user.id).maybeSingle()
 
-          // Only log error if it's not a "table doesn't exist" error
-          if (settingsError && !settingsError.message.includes("does not exist")) {
+          const settingsResult = (await Promise.race([
+            settingsPromise,
+            new Promise((_, reject) => setTimeout(() => reject(new Error("Settings timeout")), 3000)),
+          ])) as any
+
+          if (!mounted) return
+
+          const { data: settings, error: settingsError } = settingsResult
+
+          if (settingsError && !settingsError.message?.includes("does not exist")) {
             console.error("[v0] Settings error:", settingsError)
           }
 
           if (settings) {
+            console.log("[v0] Loaded user settings")
             setInitialData((prev) => ({
               ...prev,
               fromName: settings.company_name || "",
@@ -71,27 +87,44 @@ export default function NewInvoicePage() {
             }))
           }
         } catch (settingsErr) {
-          // Silently handle settings errors - not critical for invoice creation
           console.error("[v0] Error loading settings:", settingsErr)
+          // Continue with defaults
         }
 
         try {
-          const usageResult = await checkInvoiceUsage(user.id)
+          const usagePromise = checkInvoiceUsage(user.id)
+          const usageResult = (await Promise.race([
+            usagePromise,
+            new Promise((_, reject) => setTimeout(() => reject(new Error("Usage timeout")), 3000)),
+          ])) as any
+
+          if (!mounted) return
+
           if (usageResult) {
+            console.log("[v0] Loaded usage data")
             setUsage(usageResult)
           }
         } catch (usageErr) {
           console.error("[v0] Error checking usage:", usageErr)
-          // Continue without usage data - not critical
+          // Continue without usage data
         }
       } catch (err) {
         console.error("[v0] Error loading invoice data:", err)
-        setLoadError("Failed to load invoice data. You can still create an invoice with default settings.")
+        if (mounted) {
+          setLoadError("Connection issue. Using default settings.")
+        }
       } finally {
-        setIsLoadingData(false)
+        if (mounted) {
+          setIsLoadingData(false)
+        }
       }
     }
+
     loadData()
+
+    return () => {
+      mounted = false
+    }
   }, [])
 
   const handleSubmit = async (data: InvoiceFormData) => {

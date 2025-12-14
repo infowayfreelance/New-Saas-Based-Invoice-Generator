@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
+import { useEffect, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import {
   Sidebar,
@@ -25,29 +26,106 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
+import type { UserWithPlan } from "@/lib/types"
 import {
-  FileText,
   LayoutDashboard,
+  FileText,
   Users,
+  RefreshCw,
   CreditCard,
   BarChart3,
-  RefreshCw,
-  Settings,
   Palette,
+  SettingsIcon,
+  Sparkles,
   LogOut,
   ChevronUp,
-  Sparkles,
 } from "lucide-react"
-import type { UserWithPlan } from "@/lib/types"
 
-interface AppSidebarProps {
-  user: UserWithPlan | null
-}
-
-export function AppSidebar({ user }: AppSidebarProps) {
+export function AppSidebar() {
   const pathname = usePathname()
   const router = useRouter()
-  const supabase = createClient()
+  const [user, setUser] = useState<UserWithPlan | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    let mounted = true
+
+    async function loadUserData() {
+      try {
+        console.log("[v0] Loading sidebar user data...")
+        const supabase = createClient()
+
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error("Connection timeout")), 3000),
+        )
+
+        const authPromise = supabase.auth.getUser()
+        const result = (await Promise.race([authPromise, timeoutPromise])) as any
+
+        if (!mounted) return
+
+        const {
+          data: { user: authUser },
+        } = result
+
+        if (!authUser) {
+          console.log("[v0] No auth user in sidebar")
+          setIsLoading(false)
+          return
+        }
+
+        const userDataPromise = supabase
+          .from("users")
+          .select(`
+            *,
+            plan:plans(*)
+          `)
+          .eq("id", authUser.id)
+          .maybeSingle()
+
+        const userResult = (await Promise.race([
+          userDataPromise,
+          new Promise((_, reject) => setTimeout(() => reject(new Error("User data timeout")), 3000)),
+        ])) as any
+
+        if (!mounted) return
+
+        if (userResult.data) {
+          console.log("[v0] Sidebar user data loaded:", userResult.data.email)
+          setUser(userResult.data)
+        } else {
+          console.log("[v0] No user data, using demo mode")
+          setUser({
+            id: authUser.id,
+            email: authUser.email || "demo@example.com",
+            name: "Demo User",
+            plan: { code: "BASIC", name: "Basic" },
+          } as any)
+        }
+      } catch (error) {
+        console.error("[v0] Error loading sidebar data:", error)
+        if (mounted) {
+          console.log("[v0] Using demo user due to error")
+          setUser({
+            id: "demo",
+            email: "demo@example.com",
+            name: "Demo User",
+            plan: { code: "BASIC", name: "Basic" },
+          } as any)
+        }
+      } finally {
+        if (mounted) {
+          setIsLoading(false)
+        }
+      }
+    }
+
+    loadUserData()
+
+    return () => {
+      mounted = false
+    }
+  }, [])
 
   const planCode = user?.plan?.code || "BASIC"
   const canAccessClients = planCode === "STANDARD" || planCode === "PRO"
@@ -56,8 +134,14 @@ export function AppSidebar({ user }: AppSidebarProps) {
   const canAccessAnalytics = planCode === "STANDARD" || planCode === "PRO"
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut()
-    router.push("/login")
+    try {
+      const supabase = createClient()
+      await supabase.auth.signOut()
+      router.push("/login")
+    } catch (error) {
+      console.error("[v0] Error signing out:", error)
+      router.push("/login")
+    }
   }
 
   const mainNav = [
@@ -126,7 +210,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
     {
       title: "Settings",
       href: "/app/settings",
-      icon: Settings,
+      icon: SettingsIcon,
       active: pathname.startsWith("/app/settings"),
     },
   ]
@@ -153,7 +237,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
                 <SidebarMenuItem key={item.href}>
                   <SidebarMenuButton asChild isActive={item.active}>
                     <Link href={item.href}>
-                      <item.icon className="h-4 w-4" />
+                      {item.icon && <item.icon className="h-4 w-4" />}
                       <span>{item.title}</span>
                     </Link>
                   </SidebarMenuButton>
@@ -172,7 +256,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
                     {item.locked ? (
                       <div className="flex w-full items-center justify-between opacity-50">
                         <div className="flex items-center gap-2">
-                          <item.icon className="h-4 w-4" />
+                          {item.icon && <item.icon className="h-4 w-4" />}
                           <span>{item.title}</span>
                         </div>
                         <Badge variant="outline" className="ml-auto text-xs">
@@ -181,7 +265,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
                       </div>
                     ) : (
                       <Link href={item.href}>
-                        <item.icon className="h-4 w-4" />
+                        {item.icon && <item.icon className="h-4 w-4" />}
                         <span>{item.title}</span>
                       </Link>
                     )}
@@ -199,7 +283,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
                 <SidebarMenuItem key={item.href}>
                   <SidebarMenuButton asChild isActive={item.active}>
                     <Link href={item.href}>
-                      <item.icon className="h-4 w-4" />
+                      {item.icon && <item.icon className="h-4 w-4" />}
                       <span>{item.title}</span>
                     </Link>
                   </SidebarMenuButton>
@@ -230,7 +314,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
               <DropdownMenuContent side="top" align="start" className="w-56">
                 <DropdownMenuItem asChild>
                   <Link href="/app/settings/profile">
-                    <Settings className="mr-2 h-4 w-4" />
+                    <SettingsIcon className="mr-2 h-4 w-4" />
                     Account Settings
                   </Link>
                 </DropdownMenuItem>

@@ -37,8 +37,7 @@ export async function checkUsageLimits(userId: string | null, ipAddress: string)
   const month = today.substring(0, 7)
 
   try {
-    // Try to get global settings - if it fails, use defaults
-    const globalSettings = await safeQuery(() => supabase.from("global_settings").select("*").single())
+    const globalSettings = await safeQuery(() => supabase.from("global_settings").select("*").maybeSingle())
 
     // If no settings (table doesn't exist), use defaults for guests
     if (!globalSettings && !userId) {
@@ -60,7 +59,7 @@ export async function checkUsageLimits(userId: string | null, ipAddress: string)
           .eq("ip_address", ipAddress)
           .eq("date", today)
           .is("user_id", null)
-          .single(),
+          .maybeSingle(),
       )
 
       const dailyLimit = globalSettings?.free_guest_daily_limit ?? DEFAULT_GUEST_DAILY_LIMIT
@@ -115,7 +114,7 @@ export async function checkUsageLimits(userId: string | null, ipAddress: string)
     }
 
     // Logged-in user - check plan limits
-    const user = await safeQuery(() => supabase.from("users").select("*, plan:plans(*)").eq("id", userId).single())
+    const user = await safeQuery(() => supabase.from("users").select("*, plan:plans(*)").eq("id", userId).maybeSingle())
 
     // If users table doesn't exist, allow with unlimited
     if (!user) {
@@ -155,7 +154,7 @@ export async function checkUsageLimits(userId: string | null, ipAddress: string)
 
     // Get usage for this user
     const usageLog = await safeQuery(() =>
-      supabase.from("usage_logs").select("*").eq("user_id", userId).eq("date", today).single(),
+      supabase.from("usage_logs").select("*").eq("user_id", userId).eq("date", today).maybeSingle(),
     )
 
     const dailyUsed = usageLog?.invoices_today ?? 0
@@ -229,7 +228,7 @@ export async function incrementUsage(userId: string | null, ipAddress: string): 
           .eq("ip_address", ipAddress)
           .eq("date", today)
           .is("user_id", null)
-          .single(),
+          .maybeSingle(),
       )
 
       if (existing) {
@@ -254,7 +253,7 @@ export async function incrementUsage(userId: string | null, ipAddress: string): 
     } else {
       // Logged-in user
       const existing = await safeQuery(() =>
-        supabase.from("usage_logs").select("*").eq("user_id", userId).eq("date", today).single(),
+        supabase.from("usage_logs").select("*").eq("user_id", userId).eq("date", today).maybeSingle(),
       )
 
       if (existing) {
