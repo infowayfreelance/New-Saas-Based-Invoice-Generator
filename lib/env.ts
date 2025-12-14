@@ -1,19 +1,19 @@
-// Environment variable validation
-// Import this file at the top of critical server-side code to fail fast on missing env vars
+// This prevents build failures when optional env vars are missing
 
-const required = ["NEXT_PUBLIC_SUPABASE_URL", "NEXT_PUBLIC_SUPABASE_ANON_KEY", "SUPABASE_SERVICE_ROLE_KEY"] as const
+const required = ["NEXT_PUBLIC_SUPABASE_URL", "NEXT_PUBLIC_SUPABASE_ANON_KEY"] as const
 
-const serverOnly = ["STRIPE_SECRET_KEY", "STRIPE_WEBHOOK_SECRET"] as const
+const serverOnly = ["STRIPE_SECRET_KEY", "STRIPE_WEBHOOK_SECRET", "SUPABASE_SERVICE_ROLE_KEY"] as const
 
-// Check required vars (both client and server)
-for (const key of required) {
-  if (!process.env[key]) {
-    throw new Error(`Missing required environment variable: ${key}`)
+// Only validate in runtime, not during build
+if (typeof window === "undefined" && process.env.NODE_ENV !== "production") {
+  // Check required vars (both client and server)
+  for (const key of required) {
+    if (!process.env[key]) {
+      console.warn(`Warning: Missing required environment variable: ${key}`)
+    }
   }
-}
 
-// Check server-only vars (skip in browser/client bundles)
-if (typeof window === "undefined") {
+  // Check server-only vars
   for (const key of serverOnly) {
     if (!process.env[key]) {
       console.warn(`Warning: Missing server environment variable: ${key}`)

@@ -1,4 +1,3 @@
-import "@/lib/env"
 import { NextResponse } from "next/server"
 import { createServiceClient } from "@/lib/supabase/service"
 
@@ -18,7 +17,17 @@ export async function POST(req: Request) {
     if (hdr !== CRON_SECRET) return new NextResponse("Unauthorized", { status: 401 })
   }
 
-  const svc = createServiceClient()
+  let svc
+  try {
+    svc = createServiceClient()
+  } catch (error) {
+    console.error("Failed to create service client:", error)
+    return NextResponse.json(
+      { error: "Service configuration error. Please check environment variables." },
+      { status: 500 },
+    )
+  }
+
   const today = new Date().toISOString().slice(0, 10)
 
   // Fetch due rules
