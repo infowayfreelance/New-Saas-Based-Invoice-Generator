@@ -25,8 +25,9 @@ export default function NewClientPage() {
     addressLine2: "",
     city: "",
     state: "",
-    postcode: "",
+    postalCode: "",
     country: "",
+    taxNumber: "", // Added tax_number field
     notes: "",
   })
 
@@ -45,31 +46,43 @@ export default function NewClientPage() {
       } = await supabase.auth.getUser()
 
       if (!user) {
-        toast.error("You must be logged in")
+        toast.error("You must be logged in to create a client")
+        setIsLoading(false)
         return
       }
 
-      const { error } = await supabase.from("clients").insert({
+      const insertPayload: Record<string, any> = {
         user_id: user.id,
-        name: formData.name,
-        email: formData.email || null,
-        company_name: formData.companyName || null,
-        phone: formData.phone || null,
-        address_line1: formData.addressLine1 || null,
-        address_line2: formData.addressLine2 || null,
-        city: formData.city || null,
-        state: formData.state || null,
-        postcode: formData.postcode || null,
-        country: formData.country || null,
-        notes: formData.notes || null,
-      })
+        name: formData.name.trim(),
+      }
 
-      if (error) throw error
+      // Only include optional fields if they have values
+      if (formData.email.trim()) insertPayload.email = formData.email.trim()
+      if (formData.phone.trim()) insertPayload.phone = formData.phone.trim()
+      if (formData.companyName.trim()) insertPayload.company_name = formData.companyName.trim()
+      if (formData.addressLine1.trim()) insertPayload.address_line1 = formData.addressLine1.trim()
+      if (formData.addressLine2.trim()) insertPayload.address_line2 = formData.addressLine2.trim()
+      if (formData.city.trim()) insertPayload.city = formData.city.trim()
+      if (formData.state.trim()) insertPayload.state = formData.state.trim()
+      if (formData.postalCode.trim()) insertPayload.postal_code = formData.postalCode.trim()
+      if (formData.country.trim()) insertPayload.country = formData.country.trim()
+      if (formData.taxNumber.trim()) insertPayload.tax_number = formData.taxNumber.trim()
+      if (formData.notes.trim()) insertPayload.notes = formData.notes.trim()
+
+      const { data, error } = await supabase.from("clients").insert(insertPayload).select().single()
+
+      if (error) {
+        console.error("Client insert error:", error)
+        toast.error(`Failed to add client: ${error.message || "Unknown database error"}`)
+        setIsLoading(false)
+        return
+      }
 
       toast.success("Client added successfully")
       router.push("/app/clients")
-    } catch {
-      toast.error("Failed to add client")
+    } catch (err) {
+      console.error("Unexpected error creating client:", err)
+      toast.error(`Failed to add client: ${err instanceof Error ? err.message : "Unknown error"}`)
     } finally {
       setIsLoading(false)
     }
@@ -182,11 +195,11 @@ export default function NewClientPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="postcode">Postal Code</Label>
+                  <Label htmlFor="postalCode">Postal Code</Label>
                   <Input
-                    id="postcode"
-                    value={formData.postcode}
-                    onChange={(e) => updateField("postcode", e.target.value)}
+                    id="postalCode"
+                    value={formData.postalCode}
+                    onChange={(e) => updateField("postalCode", e.target.value)}
                     placeholder="12345"
                   />
                 </div>
@@ -199,6 +212,15 @@ export default function NewClientPage() {
                     placeholder="Country"
                   />
                 </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="taxNumber">Tax Number / VAT ID</Label>
+                <Input
+                  id="taxNumber"
+                  value={formData.taxNumber}
+                  onChange={(e) => updateField("taxNumber", e.target.value)}
+                  placeholder="Optional tax identification number"
+                />
               </div>
             </CardContent>
           </Card>

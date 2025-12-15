@@ -1,4 +1,4 @@
-import { notFound, redirect } from "next/navigation"
+import { redirect } from "next/navigation"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/server"
 import { PageHeader } from "@/components/app/page-header"
@@ -25,7 +25,8 @@ export default async function EditRecurringRule({ params }: { params: Promise<{ 
   const { id } = await params
 
   if (!isValidUUID(id)) {
-    notFound()
+    // Return redirect instead of notFound() to avoid unhandled promise rejection
+    redirect("/app/recurring")
   }
 
   const supabase = await createClient()
@@ -40,7 +41,10 @@ export default async function EditRecurringRule({ params }: { params: Promise<{ 
     .eq("id", id)
     .eq("user_id", user.id)
     .single()
-  if (!rule) notFound()
+
+  if (!rule) {
+    redirect("/app/recurring")
+  }
 
   async function updateRule(formData: FormData) {
     "use server"
