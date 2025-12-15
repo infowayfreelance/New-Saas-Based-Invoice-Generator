@@ -28,6 +28,7 @@ export default function NewRulePage() {
   const [loading, setLoading] = useState(true)
   const [clients, setClients] = useState<{ id: string; name: string }[]>([])
   const [form, setForm] = useState({
+    title: "",
     client_id: "",
     base_invoice_id: "",
     day_of_month: 1,
@@ -35,6 +36,7 @@ export default function NewRulePage() {
     reminder_days: "3,5,7",
     is_active: true,
   })
+  const [titleError, setTitleError] = useState("")
 
   useEffect(() => {
     ;(async () => {
@@ -50,36 +52,58 @@ export default function NewRulePage() {
         .order("created_at", { ascending: false })
         .limit(50)
       setClients(cs ?? [])
-      // default base invoice if any
       setForm((f) => ({ ...f, base_invoice_id: invoices?.[0]?.id ?? "" }))
       setLoading(false)
     })()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  useEffect(() => {
+    if (form.client_id && !form.title) {
+      const client = clients.find((c) => c.id === form.client_id)
+      if (client) {
+        setForm((f) => ({ ...f, title: `Monthly invoice - ${client.name}` }))
+      }
+    }
+  }, [form.client_id, form.title, clients])
+
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault()
+    const trimmedTitle = form.title.trim()
+    if (trimmedTitle.length < 2) {
+      setTitleError("Rule title must be at least 2 characters")
+      toast.error("Please provide a valid rule title")
+      return
+    }
+    setTitleError("")
+
     try {
       const {
         data: { user },
       } = await supabase.auth.getUser()
       if (!user) return router.push("/login")
-      if (!form.client_id) return toast.error("Select a client")
+      if (!form.client_id) {
+        toast.error("Please select a client")
+        return
+      }
+
       const day = Math.min(28, Math.max(1, Number(form.day_of_month)))
 
       const payload = {
         user_id: user.id,
         client_id: form.client_id,
+        title: trimmedTitle,
         base_invoice_id: form.base_invoice_id || null,
+        template_id: null,
         frequency: "MONTHLY",
+        interval_count: 1,
         day_of_month: day,
         auto_send: !!form.auto_send,
         reminder_days: form.reminder_days,
-        next_run_at: computeNextRunAt(day), // Changed from next_run_date
+        next_run_at: computeNextRunAt(day),
         active: !!form.is_active,
+        currency: "USD",
       }
-
-      console.log("[v0] Creating recurring rule with payload:", payload)
 
       const { error } = await supabase.from("recurring_invoice_rules").insert(payload)
 
@@ -89,7 +113,7 @@ export default function NewRulePage() {
         return
       }
 
-      toast.success("Recurring rule created")
+      toast.success("Recurring rule created successfully")
       router.push("/app/recurring")
     } catch (err) {
       console.error("[v0] Exception creating rule:", err)
@@ -118,9 +142,28 @@ export default function NewRulePage() {
           <CardContent>
             <form onSubmit={onSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label>Client</Label>
+                <Label htmlFor="title">
+                  Rule title <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  id="title"
+                  value={form.title}
+                  onChange={(e) => {
+                    setForm((f) => ({ ...f, title: e.target.value }))
+                    setTitleError("")
+                  }}
+                  placeholder="e.g., Monthly invoice for Hamza Farooq"
+                  className={titleError ? "border-destructive" : ""}
+                />
+                {titleError && <p className="text-sm text-destructive">{titleError}</p>}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="client">
+                  Client <span className="text-destructive">*</span>
+                </Label>
                 <Select value={form.client_id} onValueChange={(v) => setForm((f) => ({ ...f, client_id: v }))}>
-                  <SelectTrigger>
+                  <SelectTrigger id="client">
                     <SelectValue placeholder="Select client" />
                   </SelectTrigger>
                   <SelectContent>
@@ -132,17 +175,20 @@ export default function NewRulePage() {
                   </SelectContent>
                 </Select>
               </div>
+
               <div className="space-y-2">
-                <Label>Base invoice ID (optional)</Label>
+                <Label htmlFor="base-invoice">Base invoice ID (optional)</Label>
                 <Input
+                  id="base-invoice"
                   value={form.base_invoice_id}
                   onChange={(e) => setForm((f) => ({ ...f, base_invoice_id: e.target.value }))}
                   placeholder="UUID or leave empty"
                 />
               </div>
               <div className="space-y-2">
-                <Label>Day of month (1–28)</Label>
+                <Label htmlFor="day">Day of month (1–28)</Label>
                 <Input
+                  id="day"
                   type="number"
                   min={1}
                   max={28}
@@ -152,14 +198,16 @@ export default function NewRulePage() {
               </div>
               <div className="flex items-center gap-2">
                 <Checkbox
+                  id="auto-send"
                   checked={form.auto_send}
                   onCheckedChange={(v) => setForm((f) => ({ ...f, auto_send: !!v }))}
                 />
-                <Label>Auto-send invoice emails</Label>
+                <Label htmlFor="auto-send">Auto-send invoice emails</Label>
               </div>
               <div className="space-y-2">
-                <Label>Reminder days (comma-separated)</Label>
+                <Label htmlFor="reminder-days">Reminder days (comma-separated)</Label>
                 <Input
+                  id="reminder-days"
                   value={form.reminder_days}
                   onChange={(e) => setForm((f) => ({ ...f, reminder_days: e.target.value }))}
                   placeholder="3,5,7"
@@ -167,10 +215,11 @@ export default function NewRulePage() {
               </div>
               <div className="flex items-center gap-2">
                 <Checkbox
+                  id="active"
                   checked={form.is_active}
                   onCheckedChange={(v) => setForm((f) => ({ ...f, is_active: !!v }))}
                 />
-                <Label>Active</Label>
+                <Label htmlFor="active">Active</Label>
               </div>
               <div className="flex gap-3">
                 <Button type="submit">Create rule</Button>
