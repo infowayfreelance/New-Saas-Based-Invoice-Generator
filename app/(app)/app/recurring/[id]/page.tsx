@@ -25,7 +25,6 @@ export default async function EditRecurringRule({ params }: { params: Promise<{ 
   const { id } = await params
 
   if (!isValidUUID(id)) {
-    // Return redirect instead of notFound() to avoid unhandled promise rejection
     redirect("/app/recurring")
   }
 
@@ -54,16 +53,14 @@ export default async function EditRecurringRule({ params }: { params: Promise<{ 
     } = await s.auth.getUser()
     if (!user) redirect("/login")
     const day = Math.min(28, Math.max(1, Number(formData.get("day_of_month"))))
+
     const patch = {
       client_id: String(formData.get("client_id") || rule.client_id),
       base_invoice_id: String(formData.get("base_invoice_id") || "") || null,
       day_of_month: day,
       auto_send: formData.get("auto_send") === "on",
-      auto_reminder_days: String(formData.get("auto_reminder_days") || "3,5,7")
-        .split(",")
-        .map((n) => Number(n.trim()))
-        .filter((n) => !Number.isNaN(n)),
-      is_active: formData.get("is_active") === "on",
+      reminder_days: String(formData.get("reminder_days") || "3,5,7"),
+      active: formData.get("is_active") === "on", // Column is 'active' not 'is_active'
       next_run_date: computeNextRunDate(day),
       updated_at: new Date().toISOString(),
     }
@@ -122,15 +119,16 @@ export default async function EditRecurringRule({ params }: { params: Promise<{ 
                 <Label htmlFor="auto_send">Auto-send invoice emails</Label>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="auto_reminder_days">Auto-reminder days</Label>
+                <Label htmlFor="reminder_days">Reminder days (comma-separated)</Label>
                 <Input
-                  id="auto_reminder_days"
-                  name="auto_reminder_days"
-                  defaultValue={(rule.auto_reminder_days ?? [3, 5, 7]).join(",")}
+                  id="reminder_days"
+                  name="reminder_days"
+                  defaultValue={rule.reminder_days ?? "3,5,7"}
+                  placeholder="3,5,7"
                 />
               </div>
               <div className="flex items-center gap-2">
-                <Checkbox id="is_active" name="is_active" defaultChecked={!!rule.is_active} />
+                <Checkbox id="is_active" name="is_active" defaultChecked={!!rule.active} />
                 <Label htmlFor="is_active">Active</Label>
               </div>
               <div className="flex gap-3">

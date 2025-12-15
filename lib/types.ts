@@ -155,9 +155,9 @@ export interface RecurringInvoiceRule {
   frequency: RecurringFrequency
   day_of_month: number
   auto_send: boolean
-  auto_reminder_days: number[]
+  reminder_days: string | null
   next_run_date: string | null
-  is_active: boolean
+  active: boolean
   created_at: string
   updated_at: string
 }

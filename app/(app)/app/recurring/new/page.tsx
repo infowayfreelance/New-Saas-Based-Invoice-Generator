@@ -32,7 +32,7 @@ export default function NewRulePage() {
     base_invoice_id: "",
     day_of_month: 1,
     auto_send: false,
-    auto_reminder_days: "3,5,7",
+    reminder_days: "3,5,7",
     is_active: true,
   })
 
@@ -66,24 +66,31 @@ export default function NewRulePage() {
       if (!user) return router.push("/login")
       if (!form.client_id) return toast.error("Select a client")
       const day = Math.min(28, Math.max(1, Number(form.day_of_month)))
-      const { error } = await supabase.from("recurring_invoice_rules").insert({
+
+      const payload = {
         user_id: user.id,
         client_id: form.client_id,
         base_invoice_id: form.base_invoice_id || null,
         frequency: "MONTHLY",
         day_of_month: day,
         auto_send: !!form.auto_send,
-        auto_reminder_days: form.auto_reminder_days
-          .split(",")
-          .map((n) => Number(n.trim()))
-          .filter((n) => !Number.isNaN(n)),
+        reminder_days: form.reminder_days, // Store as string "3,5,7"
         next_run_date: computeNextRunDate(day),
-        is_active: !!form.is_active,
-      })
-      if (error) throw error
+        active: !!form.is_active, // Note: column is 'active' not 'is_active'
+      }
+
+      const { error } = await supabase.from("recurring_invoice_rules").insert(payload)
+
+      if (error) {
+        console.error("[v0] Supabase insert error:", error)
+        toast.error(`Failed to create rule: ${error.message}`)
+        return
+      }
+
       toast.success("Recurring rule created")
       router.push("/app/recurring")
-    } catch {
+    } catch (err) {
+      console.error("[v0] Exception creating rule:", err)
       toast.error("Failed to create rule")
     }
   }
@@ -149,10 +156,11 @@ export default function NewRulePage() {
                 <Label>Auto-send invoice emails</Label>
               </div>
               <div className="space-y-2">
-                <Label>Auto-reminder days (comma-separated)</Label>
+                <Label>Reminder days (comma-separated)</Label>
                 <Input
-                  value={form.auto_reminder_days}
-                  onChange={(e) => setForm((f) => ({ ...f, auto_reminder_days: e.target.value }))}
+                  value={form.reminder_days}
+                  onChange={(e) => setForm((f) => ({ ...f, reminder_days: e.target.value }))}
+                  placeholder="3,5,7"
                 />
               </div>
               <div className="flex items-center gap-2">
