@@ -29,7 +29,7 @@ You need to create three subscription products in your Stripe dashboard:
 
 Add these environment variables to your Vercel project or `.env.local`:
 
-\`\`\`bash
+```bash
 # Stripe API Keys (already configured)
 STRIPE_SECRET_KEY=sk_test_...
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
@@ -41,7 +41,7 @@ STRIPE_PRICE_ID_PRO=price_xxxxxxxxxxxxx
 
 # Stripe Webhook Secret (for production)
 STRIPE_WEBHOOK_SECRET=whsec_xxxxxxxxxxxxx
-\`\`\`
+```
 
 ## 3. Set Up Webhook (for production)
 

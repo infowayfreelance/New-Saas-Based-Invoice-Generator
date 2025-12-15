@@ -6,10 +6,10 @@ This application is designed to work with **any** Supabase project through envir
 
 Add these two environment variables to connect your Supabase project:
 
-\`\`\`
+```
 NEXT_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key-here
-\`\`\`
+```
 
 ## Where to Add Environment Variables
 
