@@ -118,10 +118,10 @@ export default async function RecurringPage() {
                       <TableCell>
                         <Badge variant={rule.auto_send ? "default" : "outline"}>{rule.auto_send ? "Yes" : "No"}</Badge>
                       </TableCell>
-                      <TableCell>{rule.next_run_date ? formatDate(rule.next_run_date) : "—"}</TableCell>
+                      <TableCell>{rule.next_run_at ? formatDate(rule.next_run_at) : "—"}</TableCell>
                       <TableCell>
-                        <Badge variant={rule.is_active ? "default" : "secondary"}>
-                          {rule.is_active ? (
+                        <Badge variant={rule.active ? "default" : "secondary"}>
+                          {rule.active ? (
                             <>
                               <Play className="mr-1 h-3 w-3" />
                               Active

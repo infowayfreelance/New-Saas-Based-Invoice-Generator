@@ -14,12 +14,12 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { toast } from "sonner"
 
-function computeNextRunDate(day: number, base = new Date()) {
+function computeNextRunAt(day: number, base = new Date()) {
   const y = base.getUTCFullYear(),
     m = base.getUTCMonth()
-  const d = new Date(Date.UTC(y, m, day))
+  const d = new Date(Date.UTC(y, m, day, 0, 0, 0, 0))
   if (base.getUTCDate() > day) d.setUTCMonth(m + 1)
-  return d.toISOString().slice(0, 10)
+  return d.toISOString() // Return full timestamp, not just date
 }
 
 export default function NewRulePage() {
@@ -74,10 +74,12 @@ export default function NewRulePage() {
         frequency: "MONTHLY",
         day_of_month: day,
         auto_send: !!form.auto_send,
-        reminder_days: form.reminder_days, // Store as string "3,5,7"
-        next_run_date: computeNextRunDate(day),
-        active: !!form.is_active, // Note: column is 'active' not 'is_active'
+        reminder_days: form.reminder_days,
+        next_run_at: computeNextRunAt(day), // Changed from next_run_date
+        active: !!form.is_active,
       }
+
+      console.log("[v0] Creating recurring rule with payload:", payload)
 
       const { error } = await supabase.from("recurring_invoice_rules").insert(payload)
 

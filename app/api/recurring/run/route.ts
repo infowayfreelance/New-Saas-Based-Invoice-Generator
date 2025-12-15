@@ -4,8 +4,8 @@ import { createServiceClient } from "@/lib/supabase/service"
 function nextMonthISO(day: number, from = new Date()) {
   const y = from.getUTCFullYear(),
     m = from.getUTCMonth()
-  const d = new Date(Date.UTC(y, m + 1, Math.min(28, Math.max(1, day))))
-  return d.toISOString().slice(0, 10)
+  const d = new Date(Date.UTC(y, m + 1, Math.min(28, Math.max(1, day)), 0, 0, 0, 0))
+  return d.toISOString() // Return full timestamp
 }
 
 // OPTIONAL: simple auth using a secret header from Vercel Cron
@@ -28,14 +28,14 @@ export async function POST(req: Request) {
     )
   }
 
-  const today = new Date().toISOString().slice(0, 10)
+  const today = new Date().toISOString() // Compare full timestamps
 
   // Fetch due rules
   const { data: rules, error } = await svc
     .from("recurring_invoice_rules")
     .select("*")
-    .eq("is_active", true)
-    .lte("next_run_date", today)
+    .eq("active", true) // Changed from is_active
+    .lte("next_run_at", today) // Changed from next_run_date
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   if (!rules || rules.length === 0) return NextResponse.json({ processed: 0 })
@@ -109,10 +109,10 @@ export async function POST(req: Request) {
       await svc.from("invoice_items").insert(items)
     }
 
-    // Update rule next_run_date
+    // Update rule next_run_at
     await svc
       .from("recurring_invoice_rules")
-      .update({ next_run_date: nextMonthISO(r.day_of_month), updated_at: new Date().toISOString() })
+      .update({ next_run_at: nextMonthISO(r.day_of_month), updated_at: new Date().toISOString() })
       .eq("id", r.id)
 
     created++

@@ -8,12 +8,12 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 
-function computeNextRunDate(day: number, base = new Date()) {
+function computeNextRunAt(day: number, base = new Date()) {
   const y = base.getUTCFullYear(),
     m = base.getUTCMonth()
-  const d = new Date(Date.UTC(y, m, Math.min(28, Math.max(1, day))))
+  const d = new Date(Date.UTC(y, m, Math.min(28, Math.max(1, day)), 0, 0, 0, 0))
   if (base.getUTCDate() > day) d.setUTCMonth(m + 1)
-  return d.toISOString().slice(0, 10)
+  return d.toISOString() // Return full timestamp, not just date
 }
 
 function isValidUUID(id: string): boolean {
@@ -61,7 +61,7 @@ export default async function EditRecurringRule({ params }: { params: Promise<{ 
       auto_send: formData.get("auto_send") === "on",
       reminder_days: String(formData.get("reminder_days") || "3,5,7"),
       active: formData.get("is_active") === "on", // Column is 'active' not 'is_active'
-      next_run_date: computeNextRunDate(day),
+      next_run_at: computeNextRunAt(day), // Changed from next_run_date
       updated_at: new Date().toISOString(),
     }
     const { error } = await s.from("recurring_invoice_rules").update(patch).eq("id", id).eq("user_id", user.id)
