@@ -2,13 +2,13 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { Plus, Trash2 } from "lucide-react"
 import {
@@ -18,10 +18,12 @@ import {
   formatCurrency,
   CURRENCIES,
 } from "@/lib/utils/invoice"
+import { createClient } from "@/lib/supabase/client"
+import Link from "next/link"
 
 interface InvoiceFormProps {
   initialData: InvoiceFormData
-  onSubmit: (data: InvoiceFormData) => void
+  onSubmit: (data: InvoiceFormData & { clientId?: string | null }) => void
   isLoading?: boolean
   submitLabel?: string
 }
@@ -33,9 +35,73 @@ export function InvoiceForm({
   submitLabel = "Generate Invoice",
 }: InvoiceFormProps) {
   const [formData, setFormData] = useState<InvoiceFormData>(initialData)
+  const [clients, setClients] = useState<any[]>([])
+  const [selectedClientId, setSelectedClientId] = useState<string | null>(null)
+  const [isLoadingClients, setIsLoadingClients] = useState(true)
+
+  useEffect(() => {
+    const loadClients = async () => {
+      try {
+        const supabase = createClient()
+        const {
+          data: { user },
+        } = await supabase.auth.getUser()
+
+        if (!user) {
+          setIsLoadingClients(false)
+          return
+        }
+
+        const { data, error } = await supabase
+          .from("clients")
+          .select("*")
+          .eq("user_id", user.id)
+          .order("name", { ascending: true })
+
+        if (!error && data) {
+          setClients(data)
+        }
+      } catch (err) {
+        console.error("[v0] Error loading clients:", err)
+      } finally {
+        setIsLoadingClients(false)
+      }
+    }
+
+    loadClients()
+  }, [])
 
   const updateField = <K extends keyof InvoiceFormData>(field: K, value: InvoiceFormData[K]) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
+  }
+
+  const handleClientSelect = (clientId: string) => {
+    setSelectedClientId(clientId)
+
+    if (clientId === "none") {
+      // Clear client fields
+      updateField("clientName", "")
+      updateField("clientEmail", "")
+      updateField("clientAddress", "")
+      return
+    }
+
+    const client = clients.find((c) => c.id === clientId)
+    if (client) {
+      const clientAddress = [
+        client.address_line1,
+        client.address_line2,
+        [client.city, client.state].filter(Boolean).join(", "),
+        client.postcode,
+        client.country,
+      ]
+        .filter(Boolean)
+        .join("\n")
+
+      updateField("clientName", client.name || client.company_name || "")
+      updateField("clientEmail", client.email || "")
+      updateField("clientAddress", clientAddress)
+    }
   }
 
   const addItem = () => {
@@ -69,7 +135,7 @@ export function InvoiceForm({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    onSubmit(formData)
+    onSubmit({ ...formData, clientId: selectedClientId })
   }
 
   return (
@@ -79,38 +145,20 @@ export function InvoiceForm({
         <Card>
           <CardHeader className="pb-4">
             <CardTitle className="text-base">From (Your Business)</CardTitle>
+            <CardDescription className="text-xs">Update these details in Settings</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="fromName">Business Name</Label>
-              <Input
-                id="fromName"
-                placeholder="Your Company Name"
-                value={formData.fromName}
-                onChange={(e) => updateField("fromName", e.target.value)}
-                required
-              />
+              <Input id="fromName" value={formData.fromName} disabled className="bg-muted" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="fromEmail">Email</Label>
-              <Input
-                id="fromEmail"
-                type="email"
-                placeholder="you@company.com"
-                value={formData.fromEmail}
-                onChange={(e) => updateField("fromEmail", e.target.value)}
-                required
-              />
+              <Input id="fromEmail" type="email" value={formData.fromEmail} disabled className="bg-muted" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="fromAddress">Address</Label>
-              <Textarea
-                id="fromAddress"
-                placeholder="123 Business St, City, State 12345"
-                value={formData.fromAddress}
-                onChange={(e) => updateField("fromAddress", e.target.value)}
-                rows={3}
-              />
+              <Textarea id="fromAddress" value={formData.fromAddress} disabled className="bg-muted" rows={3} />
             </div>
           </CardContent>
         </Card>
@@ -119,39 +167,59 @@ export function InvoiceForm({
         <Card>
           <CardHeader className="pb-4">
             <CardTitle className="text-base">To (Client)</CardTitle>
+            <CardDescription className="text-xs">
+              Select an existing client or{" "}
+              <Link href="/app/clients/new" className="text-primary hover:underline">
+                create a new one
+              </Link>
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="clientName">Client Name</Label>
-              <Input
-                id="clientName"
-                placeholder="Client or Company Name"
-                value={formData.clientName}
-                onChange={(e) => updateField("clientName", e.target.value)}
-                required
-              />
+              <Label htmlFor="clientSelect">Select Client</Label>
+              <Select value={selectedClientId || "none"} onValueChange={handleClientSelect} disabled={isLoadingClients}>
+                <SelectTrigger id="clientSelect">
+                  <SelectValue placeholder={isLoadingClients ? "Loading clients..." : "Select a client"} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">No client selected</SelectItem>
+                  {clients.map((client) => (
+                    <SelectItem key={client.id} value={client.id}>
+                      {client.name || client.company_name} {client.email && `(${client.email})`}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="clientEmail">Email</Label>
-              <Input
-                id="clientEmail"
-                type="email"
-                placeholder="client@company.com"
-                value={formData.clientEmail}
-                onChange={(e) => updateField("clientEmail", e.target.value)}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="clientAddress">Address</Label>
-              <Textarea
-                id="clientAddress"
-                placeholder="456 Client Ave, City, State 67890"
-                value={formData.clientAddress}
-                onChange={(e) => updateField("clientAddress", e.target.value)}
-                rows={3}
-              />
-            </div>
+
+            {selectedClientId && selectedClientId !== "none" && (
+              <>
+                <div className="space-y-2">
+                  <Label>Client Name</Label>
+                  <div className="rounded-md border border-input bg-muted px-3 py-2 text-sm">
+                    {formData.clientName || "—"}
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>Email</Label>
+                  <div className="rounded-md border border-input bg-muted px-3 py-2 text-sm">
+                    {formData.clientEmail || "—"}
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>Address</Label>
+                  <div className="rounded-md border border-input bg-muted px-3 py-2 text-sm whitespace-pre-line">
+                    {formData.clientAddress || "—"}
+                  </div>
+                </div>
+              </>
+            )}
+
+            {(!selectedClientId || selectedClientId === "none") && (
+              <div className="rounded-md border border-dashed p-4 text-center text-sm text-muted-foreground">
+                Please select a client to continue
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -359,7 +427,7 @@ export function InvoiceForm({
 
       {/* Submit */}
       <div className="flex justify-end">
-        <Button type="submit" size="lg" disabled={isLoading}>
+        <Button type="submit" size="lg" disabled={isLoading || !selectedClientId || selectedClientId === "none"}>
           {isLoading ? "Generating..." : submitLabel}
         </Button>
       </div>

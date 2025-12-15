@@ -85,8 +85,7 @@
 }
 
 @theme inline {
-  --font-sans: "Geist", "Geist Fallback";
-  --font-mono: "Geist Mono", "Geist Mono Fallback";
+  /* optional: --font-sans, --font-serif, --font-mono if they are applied in the layout.tsx */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -123,10 +122,6 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
-  --color-success: var(--success);
-  --color-success-foreground: var(--success-foreground);
-  --color-warning: var(--warning);
-  --color-warning-foreground: var(--warning-foreground);
 }
 
 @layer base {
@@ -138,55 +133,29 @@
   }
 }
 
-/* Added PDF-safe wrapper class with explicit hex colors for html2canvas compatibility */
+/* Caret color for inputs */
+input,
+textarea,
+select {
+  caret-color: #171717;
+}
+
+.dark input,
+.dark textarea,
+.dark select {
+  caret-color: #fafafa;
+}
+
+/* PDF-safe wrapper class with explicit hex colors for html2canvas compatibility */
 .pdf-safe-wrapper {
   background-color: #ffffff !important;
   color: #171717 !important;
 }
 
 .pdf-safe-wrapper * {
-  /* Force computed colors to be simple hex values for PDF rendering */
   border-color: #e5e5e5 !important;
 }
 
 .pdf-safe-wrapper .text-muted-foreground {
   color: #737373 !important;
-}
-
-/* Fixed cursor/caret color with simpler, more specific selectors */
-/* Base caret color - black for light mode */
-input,
-textarea,
-select,
-[contenteditable="true"] {
-  caret-color: #171717 !important;
-}
-
-/* Dark mode caret color - white */
-.dark input,
-.dark textarea,
-.dark select,
-.dark [contenteditable="true"] {
-  caret-color: #fafafa !important;
-}
-
-/* Added floating download button wave animations */
-@keyframes soft-wave {
-  0% {
-    transform: scale(1);
-    opacity: 0.15;
-  }
-  100% {
-    transform: scale(1.8);
-    opacity: 0;
-  }
-}
-
-.animate-soft-wave {
-  animation: soft-wave 3s ease-out infinite;
-}
-
-.animate-soft-wave-delayed {
-  animation: soft-wave 3s ease-out infinite;
-  animation-delay: 1s;
 }

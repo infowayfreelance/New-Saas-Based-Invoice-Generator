@@ -53,7 +53,9 @@ export async function generateGuestInvoice(data: InvoiceFormData): Promise<Gener
   }
 }
 
-export async function generateAuthenticatedInvoice(data: InvoiceFormData): Promise<GenerateInvoiceResult> {
+export async function generateAuthenticatedInvoice(
+  data: InvoiceFormData & { clientId?: string | null },
+): Promise<GenerateInvoiceResult> {
   const supabase = await createClient()
   const ip = await getClientIp()
 
@@ -85,7 +87,7 @@ export async function generateAuthenticatedInvoice(data: InvoiceFormData): Promi
     .from("invoices")
     .insert({
       user_id: user.id,
-      client_id: null,
+      client_id: data.clientId || null,
       invoice_number: data.invoiceNumber,
       status: "DRAFT",
       issue_date: data.issueDate,
@@ -120,7 +122,7 @@ export async function generateAuthenticatedInvoice(data: InvoiceFormData): Promi
       quantity: quantity,
       unit_price: unitPrice,
       tax_rate: taxRate,
-      line_total: quantity * unitPrice, // Just quantity * price, tax is tracked separately
+      line_total: quantity * unitPrice,
     }
   })
 

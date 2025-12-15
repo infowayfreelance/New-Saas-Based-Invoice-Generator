@@ -133,7 +133,7 @@ export default async function DashboardPage() {
       .select("*")
       .eq("user_id", user.id)
       .eq("date", today)
-      .single()
+      .maybeSingle()
     usageLog = usage
   } catch (error) {
     // If queries fail, continue with empty data

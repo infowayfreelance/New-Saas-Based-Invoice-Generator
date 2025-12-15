@@ -80,7 +80,8 @@ export default function NewInvoicePage() {
             console.log("[v0] Loaded user settings")
             setInitialData((prev) => ({
               ...prev,
-              fromName: settings.company_name || "",
+              fromName: settings.company_name || user.email || "",
+              fromEmail: settings.default_reply_to_email || user.email || "",
               fromAddress: settings.company_address || "",
               currency: settings.default_currency || "USD",
               invoiceNumber: `${settings.invoice_prefix || "INV-"}${String(settings.invoice_start_number || 1).padStart(3, "0")}`,
@@ -127,7 +128,7 @@ export default function NewInvoicePage() {
     }
   }, [])
 
-  const handleSubmit = async (data: InvoiceFormData) => {
+  const handleSubmit = async (data: InvoiceFormData & { clientId?: string | null }) => {
     setIsLoading(true)
 
     try {
