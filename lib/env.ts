@@ -2,7 +2,15 @@
 
 const required = ["NEXT_PUBLIC_SUPABASE_URL", "NEXT_PUBLIC_SUPABASE_ANON_KEY"] as const
 
-const serverOnly = ["STRIPE_SECRET_KEY", "STRIPE_WEBHOOK_SECRET", "SUPABASE_SERVICE_ROLE_KEY"] as const
+const serverOnly = [
+  "STRIPE_SECRET_KEY",
+  "STRIPE_WEBHOOK_SECRET",
+  "SUPABASE_SERVICE_ROLE_KEY",
+  "PAYPAL_CLIENT_ID",
+  "PAYPAL_CLIENT_SECRET",
+  "PAYPAL_MODE",
+  "PAYPAL_WEBHOOK_ID",
+] as const
 
 // Only validate in runtime, not during build
 if (typeof window === "undefined" && process.env.NODE_ENV !== "production") {

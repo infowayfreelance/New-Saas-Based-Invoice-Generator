@@ -3,147 +3,132 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* Replaced all oklch() colors with hex equivalents for PDF library compatibility */
-/* Updated theme with professional SaaS colors - emerald accent */
-:root {
-  --background: #fafafa;
-  --foreground: #171717;
-  --card: #ffffff;
-  --card-foreground: #171717;
-  --popover: #ffffff;
-  --popover-foreground: #171717;
-  --primary: #10b981;
-  --primary-foreground: #ffffff;
-  --secondary: #f5f5f5;
-  --secondary-foreground: #262626;
-  --muted: #f5f5f5;
-  --muted-foreground: #737373;
-  --accent: #10b981;
-  --accent-foreground: #ffffff;
-  --destructive: #ef4444;
-  --destructive-foreground: #ffffff;
-  --border: #e5e5e5;
-  --input: #e5e5e5;
-  --ring: #10b981;
-  --chart-1: #10b981;
-  --chart-2: #14b8a6;
-  --chart-3: #0ea5e9;
-  --chart-4: #f59e0b;
-  --chart-5: #f97316;
+@theme {
+  --color-background: #fafafa;
+  --color-foreground: #171717;
+  --color-card: #ffffff;
+  --color-card-foreground: #171717;
+  --color-popover: #ffffff;
+  --color-popover-foreground: #171717;
+  --color-primary: #10b981;
+  --color-primary-foreground: #ffffff;
+  --color-secondary: #f5f5f5;
+  --color-secondary-foreground: #262626;
+  --color-muted: #f5f5f5;
+  --color-muted-foreground: #737373;
+  --color-accent: #10b981;
+  --color-accent-foreground: #ffffff;
+  --color-destructive: #ef4444;
+  --color-destructive-foreground: #ffffff;
+  --color-border: #e5e5e5;
+  --color-input: #e5e5e5;
+  --color-ring: #10b981;
+  --color-chart-1: #10b981;
+  --color-chart-2: #14b8a6;
+  --color-chart-3: #0ea5e9;
+  --color-chart-4: #f59e0b;
+  --color-chart-5: #f97316;
   --radius: 0.625rem;
-  --sidebar: #fafafa;
-  --sidebar-foreground: #171717;
-  --sidebar-primary: #10b981;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #f5f5f5;
-  --sidebar-accent-foreground: #262626;
-  --sidebar-border: #e5e5e5;
-  --sidebar-ring: #10b981;
-  --success: #10b981;
-  --success-foreground: #ffffff;
-  --warning: #f59e0b;
-  --warning-foreground: #262626;
-}
-
-.dark {
-  --background: #171717;
-  --foreground: #fafafa;
-  --card: #262626;
-  --card-foreground: #fafafa;
-  --popover: #262626;
-  --popover-foreground: #fafafa;
-  --primary: #10b981;
-  --primary-foreground: #ffffff;
-  --secondary: #404040;
-  --secondary-foreground: #fafafa;
-  --muted: #404040;
-  --muted-foreground: #a3a3a3;
-  --accent: #10b981;
-  --accent-foreground: #ffffff;
-  --destructive: #dc2626;
-  --destructive-foreground: #fafafa;
-  --border: #525252;
-  --input: #525252;
-  --ring: #10b981;
-  --chart-1: #10b981;
-  --chart-2: #14b8a6;
-  --chart-3: #f97316;
-  --chart-4: #a855f7;
-  --chart-5: #f43f5e;
-  --sidebar: #262626;
-  --sidebar-foreground: #fafafa;
-  --sidebar-primary: #10b981;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #404040;
-  --sidebar-accent-foreground: #fafafa;
-  --sidebar-border: #525252;
-  --sidebar-ring: #10b981;
-  --success: #10b981;
-  --success-foreground: #ffffff;
-  --warning: #f59e0b;
-  --warning-foreground: #262626;
-}
-
-@theme inline {
-  /* optional: --font-sans, --font-serif, --font-mono if they are applied in the layout.tsx */
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-destructive-foreground: var(--destructive-foreground);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --color-sidebar: var(--sidebar);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar: oklch(0.985 0 0); /* Default from shadcn */
+  --color-sidebar-foreground: oklch(0.145 0 0); /* Default from shadcn */
+  --color-sidebar-primary: oklch(0.205 0 0); /* Default from shadcn */
+  --color-sidebar-primary-foreground: oklch(0.985 0 0); /* Default from shadcn */
+  --color-sidebar-accent: oklch(0.97 0 0); /* Default from shadcn */
+  --color-sidebar-accent-foreground: oklch(0.205 0 0); /* Default from shadcn */
+  --color-sidebar-border: oklch(0.922 0 0); /* Default from shadcn */
+  --color-sidebar-ring: oklch(0.708 0 0); /* Default from shadcn */
 }
 
 @layer base {
+  :root {
+    --background: var(--color-background);
+    --foreground: var(--color-foreground);
+    --card: var(--color-card);
+    --card-foreground: var(--color-card-foreground);
+    --popover: var(--color-popover);
+    --popover-foreground: var(--color-popover-foreground);
+    --primary: var(--color-primary);
+    --primary-foreground: var(--color-primary-foreground);
+    --secondary: var(--color-secondary);
+    --secondary-foreground: var(--color-secondary-foreground);
+    --muted: var(--color-muted);
+    --muted-foreground: var(--color-muted-foreground);
+    --accent: var(--color-accent);
+    --accent-foreground: var(--color-accent-foreground);
+    --destructive: var(--color-destructive);
+    --destructive-foreground: var(--color-destructive-foreground);
+    --border: var(--color-border);
+    --input: var(--color-input);
+    --ring: var(--color-ring);
+    --chart-1: var(--color-chart-1);
+    --chart-2: var(--color-chart-2);
+    --chart-3: var(--color-chart-3);
+    --chart-4: var(--color-chart-4);
+    --chart-5: var(--color-chart-5);
+    --sidebar: var(--color-sidebar); /* Added sidebar variables */
+    --sidebar-foreground: var(--color-sidebar-foreground);
+    --sidebar-primary: var(--color-sidebar-primary);
+    --sidebar-primary-foreground: var(--color-sidebar-primary-foreground);
+    --sidebar-accent: var(--color-sidebar-accent);
+    --sidebar-accent-foreground: var(--color-sidebar-accent-foreground);
+    --sidebar-border: var(--color-sidebar-border);
+    --sidebar-ring: var(--color-sidebar-ring);
+  }
+
+  .dark {
+    --color-background: #171717;
+    --color-foreground: #fafafa;
+    --color-card: #262626;
+    --color-card-foreground: #fafafa;
+    --color-popover: #262626;
+    --color-popover-foreground: #fafafa;
+    --color-primary: #10b981;
+    --color-primary-foreground: #ffffff;
+    --color-secondary: #404040;
+    --color-secondary-foreground: #fafafa;
+    --color-muted: #404040;
+    --color-muted-foreground: #a3a3a3;
+    --color-accent: #10b981;
+    --color-accent-foreground: #ffffff;
+    --color-destructive: #dc2626;
+    --color-destructive-foreground: #fafafa;
+    --color-border: #525252;
+    --color-input: #525252;
+    --color-ring: #10b981;
+    --color-chart-1: #10b981;
+    --color-chart-2: #14b8a6;
+    --color-chart-3: #f97316;
+    --color-chart-4: #a855f7;
+    --color-chart-5: #f43f5e;
+    --color-sidebar: oklch(0.205 0 0); /* Default from shadcn */
+    --color-sidebar-foreground: oklch(0.985 0 0); /* Default from shadcn */
+    --color-sidebar-primary: oklch(0.488 0.243 264.376); /* Default from shadcn */
+    --color-sidebar-primary-foreground: oklch(0.985 0 0); /* Default from shadcn */
+    --color-sidebar-accent: oklch(0.269 0 0); /* Default from shadcn */
+    --color-sidebar-accent-foreground: oklch(0.985 0 0); /* Default from shadcn */
+    --color-sidebar-border: oklch(0.269 0 0); /* Default from shadcn */
+    --color-sidebar-ring: oklch(0.439 0 0); /* Default from shadcn */
+  }
+
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
-}
 
-/* Caret color for inputs */
-input,
-textarea,
-select {
-  caret-color: #171717;
-}
+  input,
+  textarea,
+  select {
+    caret-color: #171717;
+  }
 
-.dark input,
-.dark textarea,
-.dark select {
-  caret-color: #fafafa;
+  .dark input,
+  .dark textarea,
+  .dark select {
+    caret-color: #fafafa;
+  }
 }
 
 /* PDF-safe wrapper class with explicit hex colors for html2canvas compatibility */
