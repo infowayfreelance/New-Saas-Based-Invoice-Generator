@@ -41,14 +41,47 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
   let userSettings: any = null
 
   try {
-    const { data: invoiceData, error: invoiceError } = await supabase
-      .from("invoices")
-      .select("*")
-      .eq("id", id)
-      .eq("user_id", user.id)
-      .single()
+    // Fetch invoice with all related data in parallel for better performance
+    const [invoiceResult, itemsResult, settingsResult] = await Promise.all([
+      supabase
+        .from("invoices")
+        .select(
+          `
+          *,
+          clients (
+            id,
+            name,
+            company_name,
+            email,
+            phone,
+            address_line1,
+            address_line2,
+            city,
+            state,
+            postcode,
+            country
+          )
+        `
+        )
+        .eq("id", id)
+        .eq("user_id", user.id)
+        .single(),
+      supabase.from("invoice_items").select("*").eq("invoice_id", id).order("created_at", { ascending: true }),
+      supabase
+        .from("user_settings")
+        .select(
+          `
+          company_name,
+          company_address,
+          company_phone,
+          default_reply_to_email
+        `
+        )
+        .eq("user_id", user.id)
+        .maybeSingle(),
+    ])
 
-    if (!invoiceData || invoiceError) {
+    if (!invoiceResult.data || invoiceResult.error) {
       // Return error page instead of redirecting from inside try-catch
       return (
         <>
@@ -81,25 +114,10 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
       )
     }
 
-    invoice = invoiceData
-
-    const { data: itemsData } = await supabase
-      .from("invoice_items")
-      .select("*")
-      .eq("invoice_id", id)
-      .order("created_at", { ascending: true })
-
-    items = itemsData
-
-    if (invoice.client_id) {
-      const { data: clientData } = await supabase.from("clients").select("*").eq("id", invoice.client_id).single()
-
-      client = clientData
-    }
-
-    const { data: settingsData } = await supabase.from("user_settings").select("*").eq("user_id", user.id).maybeSingle()
-
-    userSettings = settingsData
+    invoice = invoiceResult.data
+    items = itemsResult.data
+    client = invoice.clients // Client data is now nested in invoice response
+    userSettings = settingsResult.data
   } catch (error) {
     console.error("[v0] Error loading invoice:", error)
     return (
