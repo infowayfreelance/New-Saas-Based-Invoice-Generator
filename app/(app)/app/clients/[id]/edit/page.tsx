@@ -79,9 +79,41 @@ export default function EditClientPage() {
     const {
       data: { user },
     } = await supabase.auth.getUser()
-    const { error } = await supabase.from("clients").update(form).eq("id", params.id).eq("user_id", user!.id)
+    
+    // Build update object with only valid columns and convert empty strings to null
+    const updateData = {
+      name: form.name || null,
+      email: form.email || null,
+      company_name: form.company_name || null,
+      phone: form.phone || null,
+      address_line1: form.address_line1 || null,
+      address_line2: form.address_line2 || null,
+      city: form.city || null,
+      state: form.state || null,
+      postcode: form.postcode || null,
+      country: form.country || null,
+      notes: form.notes || null,
+      updated_at: new Date().toISOString(),
+    }
+    
+    // Remove null values for required fields (name is required)
+    if (!updateData.name) {
+      toast.error("Name is required")
+      setSaving(false)
+      return
+    }
+    
+    console.log("[v0] Updating client with data:", updateData)
+    
+    const { error } = await supabase.from("clients").update(updateData).eq("id", params.id).eq("user_id", user!.id)
+    
     setSaving(false)
-    if (error) return toast.error("Failed to save client")
+    
+    if (error) {
+      console.error("[v0] Supabase error:", error)
+      return toast.error(`Failed to save client: ${error.message}`)
+    }
+    
     toast.success("Client updated")
     router.push(`/app/clients/${params.id}`)
   }
