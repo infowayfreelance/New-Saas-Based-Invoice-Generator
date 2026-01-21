@@ -41,45 +41,13 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
   let userSettings: any = null
 
   try {
-    // Fetch invoice with all related data in parallel for better performance
-    const [invoiceResult, itemsResult, settingsResult] = await Promise.all([
-      supabase
-        .from("invoices")
-        .select(
-          `
-          *,
-          clients (
-            id,
-            name,
-            company_name,
-            email,
-            phone,
-            address_line1,
-            address_line2,
-            city,
-            state,
-            postcode,
-            country
-          )
-        `
-        )
-        .eq("id", id)
-        .eq("user_id", user.id)
-        .single(),
-      supabase.from("invoice_items").select("*").eq("invoice_id", id).order("created_at", { ascending: true }),
-      supabase
-        .from("user_settings")
-        .select(
-          `
-          company_name,
-          company_address,
-          company_phone,
-          default_reply_to_email
-        `
-        )
-        .eq("user_id", user.id)
-        .maybeSingle(),
-    ])
+    // Fetch invoice first to check if it exists
+    const invoiceResult = await supabase
+      .from("invoices")
+      .select("*")
+      .eq("id", id)
+      .eq("user_id", user.id)
+      .single()
 
     if (!invoiceResult.data || invoiceResult.error) {
       // Return error page instead of redirecting from inside try-catch
@@ -115,9 +83,50 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
     }
 
     invoice = invoiceResult.data
+
+    // Now fetch related data in parallel - using separate queries to avoid LEFT JOIN issues
+    const [itemsResult, clientResult, settingsResult] = await Promise.all([
+      supabase.from("invoice_items").select("*").eq("invoice_id", id).order("created_at", { ascending: true }),
+      invoice.client_id
+        ? supabase
+            .from("clients")
+            .select(
+              `
+            id,
+            name,
+            company_name,
+            email,
+            phone,
+            address_line1,
+            address_line2,
+            city,
+            state,
+            postcode,
+            country
+          `
+            )
+            .eq("id", invoice.client_id)
+            .maybeSingle()
+        : Promise.resolve({ data: null, error: null }),
+      supabase
+        .from("user_settings")
+        .select(
+          `
+          company_name,
+          company_address,
+          company_phone,
+          default_reply_to_email
+        `
+        )
+        .eq("user_id", user.id)
+        .maybeSingle(),
+    ])
+
     items = itemsResult.data
-    client = invoice.clients // Client data is now nested in invoice response
+    client = clientResult.data
     userSettings = settingsResult.data
+
+    client = invoice.clients // Client data is now nested in invoice response
   } catch (error) {
     console.error("[v0] Error loading invoice:", error)
     return (
