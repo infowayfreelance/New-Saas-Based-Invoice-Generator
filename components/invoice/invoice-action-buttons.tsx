@@ -1,7 +1,9 @@
 "use client"
 
-import { useState, useCallback, useEffect } from "react"
+import { useEffect } from "react"
 import { useSearchParams } from "next/navigation"
+
+import { useState, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Download, Send } from "lucide-react"
 import { toast } from "sonner"
@@ -104,18 +106,6 @@ export function InvoiceActionButtons({ invoiceData, invoiceId, invoiceNumber }: 
       setIsSending(false)
     }
   }, [invoiceId, invoiceData.clientEmail])
-
-  // Auto-trigger PDF download if download parameter is present
-  useEffect(() => {
-    const shouldDownload = searchParams.get('download') === 'true'
-    if (shouldDownload && !isDownloading) {
-      console.log("[v0] Auto-triggering PDF download")
-      // Wait a bit for the page to fully render
-      setTimeout(() => {
-        handleDownloadPDF()
-      }, 1000)
-    }
-  }, [searchParams, handleDownloadPDF, isDownloading])
 
   return (
     <>
