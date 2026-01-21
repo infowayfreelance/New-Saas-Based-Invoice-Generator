@@ -60,7 +60,7 @@ export default function EditClientPage() {
         address_line2: data.address_line2 ?? "",
         city: data.city ?? "",
         state: data.state ?? "",
-        postcode: data.postcode ?? "",
+        postcode: data.postal_code ?? "",
         country: data.country ?? "",
         notes: data.notes ?? "",
       })
@@ -90,7 +90,7 @@ export default function EditClientPage() {
       address_line2: form.address_line2 || null,
       city: form.city || null,
       state: form.state || null,
-      postcode: form.postcode || null,
+      postal_code: form.postcode || null,
       country: form.country || null,
       notes: form.notes || null,
       updated_at: new Date().toISOString(),
