@@ -110,14 +110,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
         : Promise.resolve({ data: null, error: null }),
       supabase
         .from("user_settings")
-        .select(
-          `
-          company_name,
-          company_address,
-          company_phone,
-          default_reply_to_email
-        `
-        )
+        .select("*")
         .eq("user_id", user.id)
         .maybeSingle(),
     ])
@@ -125,6 +118,9 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
     items = itemsResult.data
     client = clientResult.data
     userSettings = settingsResult.data
+
+    console.log("[v0] User settings data:", userSettings)
+    console.log("[v0] Client data:", client)
 
 
   } catch (error) {
@@ -172,12 +168,17 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
         .join("\n")
     : ""
 
+  // Compose business/sender information from user_settings
   const businessAddress = userSettings?.company_address || ""
+  const businessPhone = userSettings?.company_phone || ""
+  
+  // Build sender address block with phone if available
+  const senderAddressBlock = [businessAddress, businessPhone].filter(Boolean).join("\n")
 
   const formData: InvoiceFormData = {
     fromName: userSettings?.company_name || user.email || "Your Business Name",
     fromEmail: userSettings?.default_reply_to_email || user.email || "",
-    fromAddress: businessAddress,
+    fromAddress: senderAddressBlock,
     clientName: client?.name || client?.company_name || "Client Name",
     clientEmail: client?.email || "",
     clientAddress: clientAddress,
