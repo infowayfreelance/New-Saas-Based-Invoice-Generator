@@ -92,7 +92,7 @@ export function InvoiceForm({
         client.address_line1,
         client.address_line2,
         [client.city, client.state].filter(Boolean).join(", "),
-        client.postcode,
+        client.postal_code,
         client.country,
       ]
         .filter(Boolean)

@@ -54,7 +54,7 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
     const parts = [
       client.address_line1,
       client.address_line2,
-      [client.city, client.state, client.postcode].filter(Boolean).join(", "),
+      [client.city, client.state, client.postal_code].filter(Boolean).join(", "),
       client.country,
     ].filter(Boolean)
     return parts.length > 0 ? parts.join("\n") : null

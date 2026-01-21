@@ -54,7 +54,7 @@ export interface Client {
   address_line2: string | null
   city: string | null
   state: string | null
-  postcode: string | null
+  postal_code: string | null
   country: string | null
   notes: string | null
   created_at: string

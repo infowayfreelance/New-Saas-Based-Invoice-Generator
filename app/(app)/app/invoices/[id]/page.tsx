@@ -101,7 +101,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
             address_line2,
             city,
             state,
-            postcode,
+            postal_code,
             country
           `
             )
@@ -126,7 +126,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
     client = clientResult.data
     userSettings = settingsResult.data
 
-    client = invoice.clients // Client data is now nested in invoice response
+
   } catch (error) {
     console.error("[v0] Error loading invoice:", error)
     return (
@@ -165,7 +165,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
         client.address_line1,
         client.address_line2,
         [client.city, client.state].filter(Boolean).join(", "),
-        client.postcode,
+        client.postal_code,
         client.country,
       ]
         .filter(Boolean)
