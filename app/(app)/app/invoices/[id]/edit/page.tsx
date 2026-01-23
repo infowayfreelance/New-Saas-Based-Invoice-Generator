@@ -10,7 +10,8 @@ import { type InvoiceFormData, toNumber } from "@/lib/utils/invoice"
 import { updateInvoiceAction } from "@/app/actions/invoice"
 import { EditInvoiceFormServer } from "@/components/invoice/edit-invoice-form-server"
 
-function isValidUUID(id: string): boolean {
+function isValidUUID(id?: string): boolean {
+  if (!id) return false
   const uuidRegex =
     /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
   return uuidRegex.test(id)
@@ -19,9 +20,10 @@ function isValidUUID(id: string): boolean {
 export default async function InvoiceEditPage({
   params,
 }: {
-  params: { id: string }
+  params: { id?: string; invoiceId?: string }
 }) {
-  const { id } = params
+  // ✅ support BOTH route param names
+  const id = params.id ?? params.invoiceId
 
   if (!isValidUUID(id)) {
     redirect("/app/invoices")
@@ -44,7 +46,7 @@ export default async function InvoiceEditPage({
       .eq("user_id", user.id)
       .single()
 
-    if (!invoiceResult.data || invoiceResult.error) {
+    if (!invoiceResult.data) {
       throw new Error("Invoice not found or access denied")
     }
 
@@ -176,14 +178,7 @@ export default async function InvoiceEditPage({
 
     return (
       <>
-        <PageHeader
-          title="Error Loading Invoice"
-          breadcrumbs={[
-            { label: "Dashboard", href: "/app" },
-            { label: "Invoices", href: "/app/invoices" },
-            { label: "Error" },
-          ]}
-        />
+        <PageHeader title="Error Loading Invoice" />
         <div className="flex-1 space-y-6 p-6">
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
