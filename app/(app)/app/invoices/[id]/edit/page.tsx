@@ -10,24 +10,15 @@ import { type InvoiceFormData, toNumber } from "@/lib/utils/invoice"
 import { updateInvoiceAction } from "@/app/actions/invoice"
 import { EditInvoiceFormServer } from "@/components/invoice/edit-invoice-form-server"
 
-function isValidUUID(id?: string): boolean {
-  if (!id) return false
-  const uuidRegex =
-    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
-  return uuidRegex.test(id)
-}
-
 export default async function InvoiceEditPage({
   params,
 }: {
-  params: { id?: string; invoiceId?: string }
+  params: { id: string }
 }) {
-  // ✅ support BOTH route param names
-  const id = params.id ?? params.invoiceId
+  const { id } = params
 
-  if (!isValidUUID(id)) {
-    redirect("/app/invoices")
-  }
+  // ❌ DO NOT validate ID format here
+  // Let Supabase decide if the record exists
 
   const supabase = await createClient()
   const {
