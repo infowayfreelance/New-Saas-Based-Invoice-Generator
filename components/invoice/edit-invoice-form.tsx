@@ -29,11 +29,12 @@ export function EditInvoiceForm({ invoiceId, initialData, updateAction }: EditIn
         toast.success("Invoice updated successfully")
         router.push(`/app/invoices/${invoiceId}`)
       } else {
-        toast.error(result.error || "Failed to update invoice")
+        toast.error(result.error || "Unknown update error")
       }
     } catch (error) {
       console.error("[v0] Error updating invoice:", error)
-      toast.error("An error occurred while updating the invoice")
+      const errorMessage = error instanceof Error ? error.message : "Unknown update error"
+      toast.error(errorMessage)
     } finally {
       setIsSubmitting(false)
     }
