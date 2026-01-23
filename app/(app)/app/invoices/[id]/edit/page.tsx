@@ -1,5 +1,3 @@
-import type React from "react"
-import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 import { PageHeader } from "@/components/app/page-header"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
@@ -7,8 +5,7 @@ import { AlertCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { type InvoiceFormData, toNumber } from "@/lib/utils/invoice"
-import { updateInvoiceAction } from "@/app/actions/invoice"
-import { EditInvoiceFormServer } from "@/components/invoice/edit-invoice-form-server"
+import { EditInvoiceForm } from "@/components/invoice/edit-invoice-form"
 
 function isValidUUID(id: string): boolean {
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -19,99 +16,10 @@ export default async function InvoiceEditPage({ params }: { params: Promise<{ id
   const { id } = await params
 
   if (!isValidUUID(id)) {
-    redirect("/app/invoices")
-  }
-
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    redirect("/login")
-  }
-
-  let invoice: any
-  let items: any[] | null = null
-  let client: any = null
-  let userSettings: any = null
-
-  try {
-    // Fetch invoice first to check if it exists
-    const invoiceResult = await supabase
-      .from("invoices")
-      .select("*")
-      .eq("id", id)
-      .eq("user_id", user.id)
-      .single()
-
-    if (!invoiceResult.data || invoiceResult.error) {
-      return (
-        <>
-          <PageHeader
-            title="Invoice Not Found"
-            breadcrumbs={[
-              { label: "Dashboard", href: "/app" },
-              { label: "Invoices", href: "/app/invoices" },
-              { label: "Error" },
-            ]}
-          />
-          <div className="flex-1 space-y-6 p-6">
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Invoice Not Found</AlertTitle>
-              <AlertDescription>
-                The invoice you're trying to edit doesn't exist or you don't have permission to edit it.
-              </AlertDescription>
-            </Alert>
-            <div className="flex gap-4">
-              <Link href="/app/invoices">
-                <Button>Back to Invoices</Button>
-              </Link>
-            </div>
-          </div>
-        </>
-      )
-    }
-
-    invoice = invoiceResult.data
-
-    // Fetch related data in parallel
-    const [itemsResult, clientResult, settingsResult] = await Promise.all([
-      supabase.from("invoice_items").select("*").eq("invoice_id", id).order("created_at", { ascending: true }),
-      invoice.client_id
-        ? supabase
-            .from("clients")
-            .select(
-              `
-            id,
-            name,
-            company_name,
-            email,
-            phone,
-            address_line1,
-            address_line2,
-            city,
-            state,
-            postal_code,
-            country
-          `
-            )
-            .eq("id", invoice.client_id)
-            .maybeSingle()
-        : Promise.resolve({ data: null, error: null }),
-      supabase.from("user_settings").select("*").eq("user_id", user.id).maybeSingle(),
-    ])
-
-    items = itemsResult.data
-    client = clientResult.data
-    userSettings = settingsResult.data
-  } catch (error) {
-    console.error("[v0] Error loading invoice:", error)
     return (
       <>
         <PageHeader
-          title="Error Loading Invoice"
+          title="Invalid Invoice ID"
           breadcrumbs={[
             { label: "Dashboard", href: "/app" },
             { label: "Invoices", href: "/app/invoices" },
@@ -121,21 +29,111 @@ export default async function InvoiceEditPage({ params }: { params: Promise<{ id
         <div className="flex-1 space-y-6 p-6">
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Error Loading Invoice</AlertTitle>
-            <AlertDescription>
-              There was an error loading this invoice. Please try again or contact support if the problem persists.
-            </AlertDescription>
+            <AlertTitle>Invalid Invoice ID</AlertTitle>
+            <AlertDescription>The invoice ID is not valid.</AlertDescription>
           </Alert>
-          <div className="flex gap-4">
-            <Link href="/app/invoices">
-              <Button>Back to Invoices</Button>
-            </Link>
-          </div>
+          <Link href="/app/invoices">
+            <Button>Back to Invoices</Button>
+          </Link>
         </div>
       </>
     )
   }
 
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return (
+      <>
+        <PageHeader
+          title="Authentication Required"
+          breadcrumbs={[
+            { label: "Dashboard", href: "/app" },
+            { label: "Invoices", href: "/app/invoices" },
+            { label: "Error" },
+          ]}
+        />
+        <div className="flex-1 space-y-6 p-6">
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Not Authenticated</AlertTitle>
+            <AlertDescription>You must be logged in to edit invoices.</AlertDescription>
+          </Alert>
+          <Link href="/login">
+            <Button>Log In</Button>
+          </Link>
+        </div>
+      </>
+    )
+  }
+
+  // Fetch invoice
+  const invoiceResult = await supabase.from("invoices").select("*").eq("id", id).eq("user_id", user.id).single()
+
+  if (!invoiceResult.data || invoiceResult.error) {
+    return (
+      <>
+        <PageHeader
+          title="Invoice Not Found"
+          breadcrumbs={[
+            { label: "Dashboard", href: "/app" },
+            { label: "Invoices", href: "/app/invoices" },
+            { label: "Error" },
+          ]}
+        />
+        <div className="flex-1 space-y-6 p-6">
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Invoice Not Found</AlertTitle>
+            <AlertDescription>
+              The invoice you're trying to edit doesn't exist or you don't have permission to edit it.
+            </AlertDescription>
+          </Alert>
+          <Link href="/app/invoices">
+            <Button>Back to Invoices</Button>
+          </Link>
+        </div>
+      </>
+    )
+  }
+
+  const invoice = invoiceResult.data
+
+  // Fetch related data
+  const [itemsResult, clientResult, settingsResult] = await Promise.all([
+    supabase.from("invoice_items").select("*").eq("invoice_id", id).order("created_at", { ascending: true }),
+    invoice.client_id
+      ? supabase
+          .from("clients")
+          .select(
+            `
+        id,
+        name,
+        company_name,
+        email,
+        phone,
+        address_line1,
+        address_line2,
+        city,
+        state,
+        postal_code,
+        country
+      `
+          )
+          .eq("id", invoice.client_id)
+          .maybeSingle()
+      : Promise.resolve({ data: null, error: null }),
+    supabase.from("user_settings").select("*").eq("user_id", user.id).maybeSingle(),
+  ])
+
+  const items = itemsResult.data || []
+  const client = clientResult.data
+  const userSettings = settingsResult.data
+
+  // Prepare form data
   const clientAddress = client
     ? [
         client.address_line1,
@@ -168,7 +166,7 @@ export default async function InvoiceEditPage({ params }: { params: Promise<{ id
     .filter(Boolean)
     .join("\n")
 
-  const formData: InvoiceFormData & { clientId?: string | null } = {
+  const initialData: InvoiceFormData & { clientId?: string | null } = {
     fromName: userSettings?.business_name || userSettings?.full_name || user.email || "Your Business Name",
     fromEmail: userSettings?.email || user.email || "",
     fromAddress: senderAddressBlock,
@@ -181,7 +179,7 @@ export default async function InvoiceEditPage({ params }: { params: Promise<{ id
     dueDate: invoice.due_date,
     currency: invoice.currency,
     items:
-      items?.map((item) => ({
+      items.map((item) => ({
         id: item.id,
         description: item.description,
         quantity: toNumber(item.quantity),
@@ -206,7 +204,7 @@ export default async function InvoiceEditPage({ params }: { params: Promise<{ id
         ]}
       />
       <div className="flex-1 space-y-6 p-6">
-        <EditInvoiceFormServer initialData={formData} invoiceId={id} />
+        <EditInvoiceForm invoiceId={id} initialData={initialData} />
       </div>
     </>
   )
