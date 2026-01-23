@@ -36,6 +36,9 @@ export function InvoiceForm({
   isLoading = false,
   submitLabel = "Generate Invoice",
 }: InvoiceFormProps) {
+  console.log("[v0] InvoiceForm mounted with mode:", mode)
+  console.log("[v0] InvoiceForm initialData:", initialData)
+  
   const [formData, setFormData] = useState<InvoiceFormData>(initialData)
   const [clients, setClients] = useState<any[]>([])
   const [selectedClientId, setSelectedClientId] = useState<string | null>(initialData.clientId || null)
@@ -146,7 +149,11 @@ export function InvoiceForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    await onSubmit({ ...formData, clientId: selectedClientId })
+    console.log("[v0] InvoiceForm handleSubmit - formData:", formData)
+    console.log("[v0] InvoiceForm handleSubmit - selectedClientId:", selectedClientId)
+    const submitData = { ...formData, clientId: selectedClientId }
+    console.log("[v0] InvoiceForm submitting data:", submitData)
+    await onSubmit(submitData)
   }
 
   return (
