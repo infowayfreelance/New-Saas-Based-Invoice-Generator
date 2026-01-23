@@ -210,7 +210,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
     notes: invoice.notes || "",
     terms: invoice.terms || "",
     taxRate: 0,
-    discountAmount: toNumber(invoice.discount_total),
+    discountAmount: toNumber(invoice.discount_amount),
   }
 
   const getStatusBadge = (status: string) => {
@@ -252,7 +252,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
             <div className="flex items-center gap-4">
               {getStatusBadge(invoice.status)}
               <div>
-                <p className="font-semibold">{formatCurrency(toNumber(invoice.total), invoice.currency)}</p>
+                <p className="font-semibold">{formatCurrency(toNumber(invoice.total_amount), invoice.currency)}</p>
                 <p className="text-sm text-muted-foreground">Due {formatDate(invoice.due_date)}</p>
               </div>
             </div>
@@ -326,17 +326,17 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Tax</span>
-                    <span>{formatCurrency(toNumber(invoice.tax_total), invoice.currency)}</span>
+                    <span>{formatCurrency(toNumber(invoice.tax_amount), invoice.currency)}</span>
                   </div>
-                  {toNumber(invoice.discount_total) > 0 && (
+                  {toNumber(invoice.discount_amount) > 0 && (
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Discount</span>
-                      <span>-{formatCurrency(toNumber(invoice.discount_total), invoice.currency)}</span>
+                      <span>-{formatCurrency(toNumber(invoice.discount_amount), invoice.currency)}</span>
                     </div>
                   )}
                   <div className="flex justify-between border-t pt-4 font-semibold">
                     <span>Total</span>
-                    <span>{formatCurrency(toNumber(invoice.total), invoice.currency)}</span>
+                    <span>{formatCurrency(toNumber(invoice.total_amount), invoice.currency)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Amount Paid</span>
@@ -345,7 +345,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
                   <div className="flex justify-between font-semibold text-primary">
                     <span>Balance Due</span>
                     <span>
-                      {formatCurrency(toNumber(invoice.total) - toNumber(invoice.amount_paid), invoice.currency)}
+                      {formatCurrency(toNumber(invoice.total_amount) - toNumber(invoice.amount_paid), invoice.currency)}
                     </span>
                   </div>
                 </CardContent>

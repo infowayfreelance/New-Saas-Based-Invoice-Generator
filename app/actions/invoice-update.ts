@@ -51,23 +51,33 @@ export async function updateInvoice(
   // Calculate totals
   const totals = calculateInvoiceTotals(data.items, data.discountAmount)
 
+  // Prepare update payload
+  const updatePayload = {
+    invoice_number: data.invoiceNumber,
+    status: "DRAFT",
+    issue_date: data.issueDate,
+    due_date: data.dueDate,
+    currency: data.currency,
+    subtotal: totals.subtotal,
+    tax_amount: totals.taxAmount,
+    discount_amount: totals.discountAmount,
+    total_amount: totals.totalAmount,
+    notes: data.notes || null,
+    terms: data.terms || null,
+    client_id: data.clientId && data.clientId !== "none" ? data.clientId : null,
+  }
+
+  console.log("[v0] updateInvoice: Final update payload:", {
+    subtotal: updatePayload.subtotal,
+    tax_amount: updatePayload.tax_amount,
+    discount_amount: updatePayload.discount_amount,
+    total_amount: updatePayload.total_amount,
+  })
+
   // Update invoice
   const { error: invoiceError } = await supabase
     .from("invoices")
-    .update({
-      invoice_number: data.invoiceNumber,
-      status: "DRAFT",
-      issue_date: data.issueDate,
-      due_date: data.dueDate,
-      currency: data.currency,
-      subtotal: totals.subtotal,
-      tax_amount: totals.taxAmount,
-      discount_amount: totals.discountAmount,
-      total_amount: totals.totalAmount,
-      notes: data.notes || null,
-      terms: data.terms || null,
-      client_id: data.clientId && data.clientId !== "none" ? data.clientId : null,
-    })
+    .update(updatePayload)
     .eq("id", invoiceId)
 
   if (invoiceError) {
