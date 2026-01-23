@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -25,18 +24,20 @@ interface InvoiceFormProps {
   mode?: "create" | "edit"
   initialData: InvoiceFormData & { clientId?: string | null }
   onSubmit?: (data: InvoiceFormData & { clientId?: string | null }) => void | Promise<void>
-  serverAction?: (data: InvoiceFormData & { clientId?: string | null }) => Promise<any>
+  invoiceId?: string
   isLoading?: boolean
   submitLabel?: string
+  serverAction?: (data: InvoiceFormData & { clientId?: string | null }) => void | Promise<void>
 }
 
 export function InvoiceForm({
   mode = "create",
   initialData,
   onSubmit,
-  serverAction,
+  invoiceId,
   isLoading = false,
   submitLabel = "Generate Invoice",
+  serverAction,
 }: InvoiceFormProps) {
   const [formData, setFormData] = useState<InvoiceFormData>(initialData)
   const [clients, setClients] = useState<any[]>([])
@@ -149,9 +150,7 @@ export function InvoiceForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (serverAction) {
-      await serverAction({ ...formData, clientId: selectedClientId })
-    } else if (onSubmit) {
+    if (onSubmit) {
       await onSubmit({ ...formData, clientId: selectedClientId })
     }
   }
