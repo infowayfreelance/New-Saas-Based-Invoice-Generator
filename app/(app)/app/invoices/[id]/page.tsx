@@ -169,15 +169,28 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
     : ""
 
   // Compose business/sender information from user_settings
-  const businessAddress = userSettings?.company_address || ""
-  const businessPhone = userSettings?.company_phone || ""
+  const senderAddress = userSettings
+    ? [
+        userSettings.address_line1,
+        userSettings.address_line2,
+        [userSettings.city, userSettings.state].filter(Boolean).join(", "),
+        userSettings.postal_code,
+        userSettings.country,
+      ]
+        .filter(Boolean)
+        .join("\n")
+    : ""
   
-  // Build sender address block with phone if available
-  const senderAddressBlock = [businessAddress, businessPhone].filter(Boolean).join("\n")
+  // Build sender address block with contact info
+  const senderAddressBlock = [
+    senderAddress,
+    userSettings?.phone ? `Phone: ${userSettings.phone}` : null,
+    userSettings?.email ? `Email: ${userSettings.email}` : null,
+  ].filter(Boolean).join("\n")
 
   const formData: InvoiceFormData = {
-    fromName: userSettings?.company_name || user.email || "Your Business Name",
-    fromEmail: userSettings?.default_reply_to_email || user.email || "",
+    fromName: userSettings?.business_name || userSettings?.full_name || user.email || "Your Business Name",
+    fromEmail: userSettings?.email || user.email || "",
     fromAddress: senderAddressBlock,
     clientName: client?.name || client?.company_name || "Client Name",
     clientEmail: client?.email || "",

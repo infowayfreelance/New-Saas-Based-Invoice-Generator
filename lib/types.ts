@@ -31,14 +31,10 @@ export interface Plan {
 export interface Subscription {
   id: string
   user_id: string
-  provider: string
-  provider_customer_id: string | null
-  provider_subscription_id: string | null
+  plan_id: string | null
   status: SubscriptionStatus
-  current_plan_id: string | null
-  trial_ends_at: string | null
-  current_period_start: string | null
-  current_period_end: string | null
+  started_at: string | null
+  ends_at: string | null
   created_at: string
   updated_at: string
 }
@@ -135,14 +131,19 @@ export interface UsageLog {
 export interface UserSettings {
   id: string
   user_id: string
-  default_currency: string
+  currency: string
+  timezone: string
+  full_name: string | null
+  business_name: string | null
+  email: string | null
+  phone: string | null
+  address_line1: string | null
+  address_line2: string | null
+  city: string | null
+  state: string | null
+  postal_code: string | null
+  country: string | null
   theme: ThemePreference
-  default_reply_to_email: string | null
-  company_name: string | null
-  company_address: string | null
-  company_tax_id: string | null
-  invoice_start_number: number
-  invoice_prefix: string
   created_at: string
   updated_at: string
 }

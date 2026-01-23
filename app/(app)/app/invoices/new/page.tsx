@@ -78,13 +78,31 @@ export default function NewInvoicePage() {
 
           if (settings) {
             console.log("[v0] Loaded user settings")
+            
+            // Build sender address from user_settings fields
+            const senderAddress = [
+              settings.address_line1,
+              settings.address_line2,
+              [settings.city, settings.state].filter(Boolean).join(", "),
+              settings.postal_code,
+              settings.country,
+            ]
+              .filter(Boolean)
+              .join("\n")
+            
+            const senderAddressBlock = [
+              senderAddress,
+              settings.phone ? `Phone: ${settings.phone}` : null,
+              settings.email ? `Email: ${settings.email}` : null,
+            ].filter(Boolean).join("\n")
+            
             setInitialData((prev) => ({
               ...prev,
-              fromName: settings.company_name || user.email || "",
-              fromEmail: settings.default_reply_to_email || user.email || "",
-              fromAddress: settings.company_address || "",
-              currency: settings.default_currency || "USD",
-              invoiceNumber: `${settings.invoice_prefix || "INV-"}${String(settings.invoice_start_number || 1).padStart(3, "0")}`,
+              fromName: settings.business_name || settings.full_name || user.email || "",
+              fromEmail: settings.email || user.email || "",
+              fromAddress: senderAddressBlock,
+              currency: settings.currency || "USD",
+              invoiceNumber: `INV-${String(1).padStart(3, "0")}`,
             }))
           }
         } catch (settingsErr) {

@@ -29,7 +29,7 @@ export default function EditClientPage() {
     address_line2: "",
     city: "",
     state: "",
-    postcode: "",
+    postal_code: "",
     country: "",
     notes: "",
   })
@@ -60,7 +60,7 @@ export default function EditClientPage() {
         address_line2: data.address_line2 ?? "",
         city: data.city ?? "",
         state: data.state ?? "",
-        postcode: data.postal_code ?? "",
+        postal_code: data.postal_code ?? "",
         country: data.country ?? "",
         notes: data.notes ?? "",
       })
@@ -90,7 +90,7 @@ export default function EditClientPage() {
       address_line2: form.address_line2 || null,
       city: form.city || null,
       state: form.state || null,
-      postal_code: form.postcode || null,
+      postal_code: form.postal_code || null,
       country: form.country || null,
       notes: form.notes || null,
       updated_at: new Date().toISOString(),
@@ -164,7 +164,7 @@ export default function EditClientPage() {
                 ["address_line2", "Address line 2", false],
                 ["city", "City", false],
                 ["state", "State/Province", false],
-                ["postcode", "Postal Code", false],
+                ["postal_code", "Postal Code", false],
                 ["country", "Country", false],
               ].map(([k, label, req]) => (
                 <div className="space-y-2" key={k as string}>
