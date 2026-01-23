@@ -17,16 +17,10 @@ export function EditInvoiceForm({ invoiceId, initialData, updateAction }: EditIn
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  console.log("[v0] EditInvoiceForm mounted with invoiceId:", invoiceId)
-  console.log("[v0] EditInvoiceForm initialData:", initialData)
-
   async function handleSubmit(data: InvoiceFormData & { clientId?: string | null }) {
-    console.log("[v0] EditInvoiceForm handleSubmit called with data:", data)
     setIsSubmitting(true)
     try {
-      console.log("[v0] Calling updateAction...")
       const result = await updateAction(data)
-      console.log("[v0] updateAction result:", result)
       
       if (result.success) {
         toast.success("Invoice updated successfully")

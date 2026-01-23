@@ -90,24 +90,25 @@ export async function generateAuthenticatedInvoice(
       user_id: user.id,
       client_id: data.clientId || null,
       invoice_number: data.invoiceNumber,
-      status: "DRAFT",
+      status: "DRAFT", // Always uppercase
       issue_date: data.issueDate,
       due_date: data.dueDate,
       currency: data.currency,
       subtotal: totals.subtotal,
-      tax_total: totals.taxAmount,
-      discount_total: totals.discountAmount,
-      total: totals.totalAmount,
+      tax_amount: totals.taxAmount, // Correct column name
+      discount_amount: totals.discountAmount, // Correct column name
+      total_amount: totals.totalAmount, // Correct column name
       notes: data.notes || null,
+      terms: data.terms || null,
     })
     .select()
     .single()
 
   if (invoiceError) {
-    console.error("[v0] Error creating invoice:", invoiceError.message)
+    console.error("[v0] Error creating invoice:", invoiceError)
     return {
       success: false,
-      error: `Failed to create invoice: ${invoiceError.message || "Unknown error"}`,
+      error: invoiceError.message || "Failed to create invoice",
     }
   }
 
@@ -123,7 +124,7 @@ export async function generateAuthenticatedInvoice(
       quantity: quantity,
       unit_price: unitPrice,
       tax_rate: taxRate,
-      line_total: quantity * unitPrice,
+      total: quantity * unitPrice, // Correct column name is 'total', not 'line_total'
     }
   })
 
@@ -157,9 +158,6 @@ export async function updateInvoice(
   invoiceId: string,
   data: InvoiceFormData & { clientId?: string | null },
 ): Promise<GenerateInvoiceResult> {
-  console.log("[v0] updateInvoice called with invoiceId:", invoiceId)
-  console.log("[v0] updateInvoice data:", data)
-  
   const supabase = await createClient()
 
   // Get authenticated user
@@ -167,10 +165,7 @@ export async function updateInvoice(
     data: { user },
   } = await supabase.auth.getUser()
 
-  console.log("[v0] updateInvoice user:", user?.id)
-
   if (!user) {
-    console.error("[v0] updateInvoice: No authenticated user")
     return {
       success: false,
       error: "You must be logged in to update invoices",
@@ -193,23 +188,22 @@ export async function updateInvoice(
   }
 
   const totals = calculateInvoiceTotals(data.items, data.discountAmount)
-  console.log("[v0] updateInvoice totals:", totals)
 
-  // Update invoice
-  const updateData = {
-    client_id: data.clientId || null,
+  // Build update payload matching exact schema columns
+  const updateData: any = {
     invoice_number: data.invoiceNumber,
+    status: "DRAFT", // Always uppercase
     issue_date: data.issueDate,
     due_date: data.dueDate,
     currency: data.currency,
     subtotal: totals.subtotal,
-    tax_total: totals.taxAmount,
-    discount_total: totals.discountAmount,
-    total: totals.totalAmount,
+    tax_amount: totals.taxAmount, // Correct column name
+    discount_amount: totals.discountAmount, // Correct column name
+    total_amount: totals.totalAmount, // Correct column name
     notes: data.notes || null,
     terms: data.terms || null,
+    client_id: data.clientId && data.clientId !== "none" ? data.clientId : null,
   }
-  console.log("[v0] Updating invoice with data:", updateData)
   
   const { error: invoiceError } = await supabase
     .from("invoices")
@@ -220,14 +214,11 @@ export async function updateInvoice(
     console.error("[v0] Error updating invoice:", invoiceError)
     return {
       success: false,
-      error: `Failed to update invoice: ${invoiceError.message || "Unknown error"}`,
+      error: invoiceError.message || "Failed to update invoice",
     }
   }
-  
-  console.log("[v0] Invoice updated successfully")
 
   // Delete existing items (scoped by invoice_id AND user_id for security)
-  console.log("[v0] Deleting existing items for invoice:", invoiceId, "user:", user.id)
   const { error: deleteError } = await supabase
     .from("invoice_items")
     .delete()
@@ -238,14 +229,11 @@ export async function updateInvoice(
     console.error("[v0] Error deleting invoice items:", deleteError)
     return {
       success: false,
-      error: `Failed to delete invoice items: ${deleteError.message || "Unknown error"}`,
+      error: deleteError.message || "Failed to delete invoice items",
     }
   }
-  
-  console.log("[v0] Items deleted successfully")
 
   // Insert new items
-  console.log("[v0] Preparing to insert", data.items.length, "items")
   const itemsToInsert = data.items.map((item) => {
     const quantity = toNumber(item.quantity)
     const unitPrice = toNumber(item.unitPrice)
@@ -258,23 +246,19 @@ export async function updateInvoice(
       quantity: quantity,
       unit_price: unitPrice,
       tax_rate: taxRate,
-      line_total: quantity * unitPrice,
+      total: quantity * unitPrice, // Correct column name is 'total', not 'line_total'
     }
   })
-
-  console.log("[v0] Items to insert:", itemsToInsert)
 
   const { error: itemsError } = await supabase.from("invoice_items").insert(itemsToInsert)
 
   if (itemsError) {
-    console.error("[v0] Error creating invoice items:", itemsError)
+    console.error("[v0] Error inserting invoice items:", itemsError)
     return {
       success: false,
-      error: `Failed to create invoice items: ${itemsError.message || "Unknown error"}`,
+      error: itemsError.message || "Failed to insert invoice items",
     }
   }
-
-  console.log("[v0] Items inserted successfully")
 
   return {
     success: true,

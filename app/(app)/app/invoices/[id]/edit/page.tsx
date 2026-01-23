@@ -191,7 +191,7 @@ export default async function InvoiceEditPage({ params }: { params: Promise<{ id
     notes: invoice.notes || "",
     terms: invoice.terms || "",
     taxRate: 0,
-    discountAmount: toNumber(invoice.discount_total),
+    discountAmount: toNumber(invoice.discount_amount),
   }
 
   return (
