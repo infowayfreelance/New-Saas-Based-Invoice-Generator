@@ -1,17 +1,14 @@
-'use client';
-
 import type React from "react"
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 import { PageHeader } from "@/components/app/page-header"
-import { InvoiceForm } from "@/components/invoice/invoice-form"
+import { EditInvoiceForm } from "@/components/invoice/edit-invoice-form"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { AlertCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { type InvoiceFormData, toNumber } from "@/lib/utils/invoice"
-import { updateInvoiceAction } from "@/app/actions/invoice"
-import { updateInvoice } from "@/app/actions/invoice" // Import the updateInvoice function
+import { updateInvoice } from "@/app/actions/invoice"
 
 function isValidUUID(id: string): boolean {
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -208,11 +205,7 @@ export default async function InvoiceEditPage({ params }: { params: Promise<{ id
         ]}
       />
       <div className="flex-1 space-y-6 p-6">
-        <InvoiceForm 
-          initialData={formData} 
-          onSubmit={updateInvoiceAction.bind(null, id)} 
-          submitLabel="Update Invoice" 
-        />
+        <EditInvoiceForm invoiceId={id} initialData={formData} updateAction={updateInvoice.bind(null, id)} />
       </div>
     </>
   )
