@@ -8,7 +8,8 @@ import { AlertCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { type InvoiceFormData, toNumber } from "@/lib/utils/invoice"
-import { updateInvoice } from "@/app/actions/invoice"
+import { updateInvoiceAction } from "@/app/actions/invoice"
+import { updateInvoice } from "@/app/actions/invoice" // Import updateInvoice function
 
 function isValidUUID(id: string): boolean {
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -206,7 +207,7 @@ export default async function InvoiceEditPage({ params }: { params: Promise<{ id
         ]}
       />
       <div className="flex-1 space-y-6 p-6">
-        <EditInvoiceForm invoiceId={id} initialData={formData} updateAction={updateInvoice.bind(null, id)} />
+        <EditInvoiceForm invoiceId={id} initialData={formData} updateAction={updateInvoiceAction} />
       </div>
     </>
   )

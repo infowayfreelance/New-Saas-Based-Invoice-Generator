@@ -158,21 +158,78 @@ export async function updateInvoice(
   invoiceId: string,
   data: InvoiceFormData & { clientId?: string | null },
 ): Promise<GenerateInvoiceResult> {
+  console.log("[v0] ========== UPDATE INVOICE STARTED ==========")
+  console.log("[v0] STEP 1: Received invoiceId:", invoiceId)
+  
+  // Validate invoiceId
+  if (!invoiceId || typeof invoiceId !== "string" || invoiceId.trim() === "") {
+    const error = "VALIDATION ERROR: invoiceId is missing or invalid"
+    console.error("[v0]", error, "| Received:", invoiceId)
+    throw new Error(error)
+  }
+  
+  console.log("[v0] STEP 2: Received form payload:", {
+    hasClientId: !!data.clientId,
+    clientId: data.clientId,
+    invoiceNumber: data.invoiceNumber,
+    issueDate: data.issueDate,
+    dueDate: data.dueDate,
+    currency: data.currency,
+    itemsCount: data.items?.length || 0,
+    items: data.items,
+    discountAmount: data.discountAmount,
+    notes: data.notes ? `${data.notes.substring(0, 50)}...` : null,
+    terms: data.terms ? `${data.terms.substring(0, 50)}...` : null,
+  })
+
+  // Validate required fields in payload
+  if (!data.items || data.items.length === 0) {
+    const error = "VALIDATION ERROR: items array is missing or empty"
+    console.error("[v0]", error, "| Received items:", data.items)
+    throw new Error(error)
+  }
+
   const supabase = await createClient()
+  console.log("[v0] STEP 3: Supabase client created")
 
   // Get authenticated user
+  console.log("[v0] STEP 4: Getting authenticated user...")
   const {
     data: { user },
+    error: authError,
   } = await supabase.auth.getUser()
 
+  if (authError) {
+    const error = `AUTH ERROR: Failed to get user - ${authError.message}`
+    console.error("[v0]", error, "| Full error:", authError)
+    return {
+      success: false,
+      error: error,
+    }
+  }
+
   if (!user) {
+    const error = "AUTH ERROR: User not authenticated"
+    console.error("[v0]", error)
     return {
       success: false,
       error: "You must be logged in to update invoices",
     }
   }
 
+  console.log("[v0] STEP 4 COMPLETE: User authenticated | user_id:", user.id)
+
+  // Validate user_id
+  if (!user.id) {
+    const error = "VALIDATION ERROR: user_id is missing from authenticated user"
+    console.error("[v0]", error)
+    throw new Error(error)
+  }
+
   // Verify invoice ownership
+  console.log("[v0] STEP 5: Verifying invoice ownership...")
+  console.log("[v0] STEP 5: Query params - invoiceId:", invoiceId, "| user_id:", user.id)
+  
   const { data: existingInvoice, error: fetchError } = await supabase
     .from("invoices")
     .select("id")
@@ -180,16 +237,36 @@ export async function updateInvoice(
     .eq("user_id", user.id)
     .single()
 
-  if (fetchError || !existingInvoice) {
+  console.log("[v0] STEP 5 COMPLETE: Invoice ownership check result:", {
+    found: !!existingInvoice,
+    existingInvoice,
+    error: fetchError,
+  })
+
+  if (fetchError) {
+    const error = `FETCH ERROR: Failed to verify invoice ownership - ${fetchError.message} | Code: ${fetchError.code} | Details: ${fetchError.details} | Hint: ${fetchError.hint}`
+    console.error("[v0]", error, "| Full error:", fetchError)
     return {
       success: false,
-      error: "Invoice not found or access denied",
+      error: error,
     }
   }
 
+  if (!existingInvoice) {
+    const error = "AUTHORIZATION ERROR: Invoice not found or access denied"
+    console.error("[v0]", error, "| invoiceId:", invoiceId, "| user_id:", user.id)
+    return {
+      success: false,
+      error: error,
+    }
+  }
+
+  console.log("[v0] STEP 6: Calculating invoice totals...")
   const totals = calculateInvoiceTotals(data.items, data.discountAmount)
+  console.log("[v0] STEP 6 COMPLETE: Totals calculated:", totals)
 
   // Build update payload matching exact schema columns
+  console.log("[v0] STEP 7: Building update payload...")
   const updateData: any = {
     invoice_number: data.invoiceNumber,
     status: "DRAFT", // Always uppercase
@@ -204,42 +281,67 @@ export async function updateInvoice(
     terms: data.terms || null,
     client_id: data.clientId && data.clientId !== "none" ? data.clientId : null,
   }
+  console.log("[v0] STEP 7 COMPLETE: Update payload built:", updateData)
   
-  const { error: invoiceError } = await supabase
+  console.log("[v0] STEP 8: Updating invoices table...")
+  console.log("[v0] STEP 8: Update query - invoiceId:", invoiceId, "| payload:", updateData)
+  
+  const { data: updatedInvoice, error: invoiceError } = await supabase
     .from("invoices")
     .update(updateData)
     .eq("id", invoiceId)
+    .select()
+
+  console.log("[v0] STEP 8 COMPLETE: Invoice update result:", {
+    success: !invoiceError,
+    updatedInvoice,
+    error: invoiceError,
+  })
 
   if (invoiceError) {
-    console.error("[v0] Error updating invoice:", invoiceError)
+    const error = `INVOICE UPDATE ERROR: ${invoiceError.message} | Code: ${invoiceError.code} | Details: ${invoiceError.details} | Hint: ${invoiceError.hint}`
+    console.error("[v0]", error, "| Full error:", invoiceError)
     return {
       success: false,
-      error: invoiceError.message || "Failed to update invoice",
+      error: error,
     }
   }
 
   // Delete existing items (scoped by invoice_id AND user_id for security)
-  const { error: deleteError } = await supabase
+  console.log("[v0] STEP 9: Deleting existing invoice_items...")
+  console.log("[v0] STEP 9: Delete query - invoice_id:", invoiceId, "| user_id:", user.id)
+  
+  const { data: deletedItems, error: deleteError } = await supabase
     .from("invoice_items")
     .delete()
     .eq("invoice_id", invoiceId)
     .eq("user_id", user.id)
+    .select()
+
+  console.log("[v0] STEP 9 COMPLETE: Delete result:", {
+    success: !deleteError,
+    deletedCount: deletedItems?.length || 0,
+    deletedItems,
+    error: deleteError,
+  })
 
   if (deleteError) {
-    console.error("[v0] Error deleting invoice items:", deleteError)
+    const error = `DELETE ITEMS ERROR: ${deleteError.message} | Code: ${deleteError.code} | Details: ${deleteError.details} | Hint: ${deleteError.hint}`
+    console.error("[v0]", error, "| Full error:", deleteError)
     return {
       success: false,
-      error: deleteError.message || "Failed to delete invoice items",
+      error: error,
     }
   }
 
   // Insert new items
-  const itemsToInsert = data.items.map((item) => {
+  console.log("[v0] STEP 10: Preparing items to insert...")
+  const itemsToInsert = data.items.map((item, index) => {
     const quantity = toNumber(item.quantity)
     const unitPrice = toNumber(item.unitPrice)
     const taxRate = toNumber(item.taxRate)
 
-    return {
+    const insertItem = {
       invoice_id: invoiceId,
       user_id: user.id,
       description: item.description,
@@ -248,17 +350,37 @@ export async function updateInvoice(
       tax_rate: taxRate,
       total: quantity * unitPrice, // Correct column name is 'total', not 'line_total'
     }
+
+    console.log(`[v0] STEP 10: Item ${index + 1}:`, insertItem)
+    return insertItem
   })
 
-  const { error: itemsError } = await supabase.from("invoice_items").insert(itemsToInsert)
+  console.log("[v0] STEP 10 COMPLETE: Prepared", itemsToInsert.length, "items for insertion")
+
+  console.log("[v0] STEP 11: Inserting invoice_items...")
+  const { data: insertedItems, error: itemsError } = await supabase
+    .from("invoice_items")
+    .insert(itemsToInsert)
+    .select()
+
+  console.log("[v0] STEP 11 COMPLETE: Insert result:", {
+    success: !itemsError,
+    insertedCount: insertedItems?.length || 0,
+    insertedItems,
+    error: itemsError,
+  })
 
   if (itemsError) {
-    console.error("[v0] Error inserting invoice items:", itemsError)
+    const error = `INSERT ITEMS ERROR: ${itemsError.message} | Code: ${itemsError.code} | Details: ${itemsError.details} | Hint: ${itemsError.hint}`
+    console.error("[v0]", error, "| Full error:", itemsError)
     return {
       success: false,
-      error: itemsError.message || "Failed to insert invoice items",
+      error: error,
     }
   }
+
+  console.log("[v0] ========== UPDATE INVOICE SUCCESS ==========")
+  console.log("[v0] Final result: invoiceId:", invoiceId)
 
   return {
     success: true,

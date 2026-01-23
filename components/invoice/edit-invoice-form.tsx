@@ -10,7 +10,10 @@ import type { GenerateInvoiceResult } from "@/app/actions/invoice"
 interface EditInvoiceFormProps {
   invoiceId: string
   initialData: InvoiceFormData & { clientId?: string | null }
-  updateAction: (data: InvoiceFormData & { clientId?: string | null }) => Promise<GenerateInvoiceResult>
+  updateAction: (
+    invoiceId: string,
+    data: InvoiceFormData & { clientId?: string | null },
+  ) => Promise<GenerateInvoiceResult>
 }
 
 export function EditInvoiceForm({ invoiceId, initialData, updateAction }: EditInvoiceFormProps) {
@@ -20,7 +23,7 @@ export function EditInvoiceForm({ invoiceId, initialData, updateAction }: EditIn
   async function handleSubmit(data: InvoiceFormData & { clientId?: string | null }) {
     setIsSubmitting(true)
     try {
-      const result = await updateAction(data)
+      const result = await updateAction(invoiceId, data)
       
       if (result.success) {
         toast.success("Invoice updated successfully")
