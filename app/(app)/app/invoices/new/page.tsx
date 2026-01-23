@@ -207,6 +207,7 @@ export default function NewInvoicePage() {
           </div>
         ) : (
           <InvoiceForm
+            mode="create"
             initialData={initialData}
             onSubmit={handleSubmit}
             isLoading={isLoading}

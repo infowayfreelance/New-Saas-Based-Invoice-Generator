@@ -22,13 +22,15 @@ import { createClient } from "@/lib/supabase/client"
 import Link from "next/link"
 
 interface InvoiceFormProps {
-  initialData: InvoiceFormData
-  onSubmit: (data: InvoiceFormData & { clientId?: string | null }) => void
+  mode?: "create" | "edit"
+  initialData: InvoiceFormData & { clientId?: string | null }
+  onSubmit: (data: InvoiceFormData & { clientId?: string | null }) => void | Promise<void>
   isLoading?: boolean
   submitLabel?: string
 }
 
 export function InvoiceForm({
+  mode = "create",
   initialData,
   onSubmit,
   isLoading = false,
@@ -36,7 +38,7 @@ export function InvoiceForm({
 }: InvoiceFormProps) {
   const [formData, setFormData] = useState<InvoiceFormData>(initialData)
   const [clients, setClients] = useState<any[]>([])
-  const [selectedClientId, setSelectedClientId] = useState<string | null>(null)
+  const [selectedClientId, setSelectedClientId] = useState<string | null>(initialData.clientId || null)
   const [isLoadingClients, setIsLoadingClients] = useState(true)
 
   useEffect(() => {
@@ -60,6 +62,15 @@ export function InvoiceForm({
 
         if (!error && data) {
           setClients(data)
+          
+          // In edit mode, if we have a clientId, prefill the client data
+          if (mode === "edit" && initialData.clientId && initialData.clientId !== "none") {
+            const client = data.find((c) => c.id === initialData.clientId)
+            if (client) {
+              // Client data is already in initialData, just make sure it's set
+              setSelectedClientId(initialData.clientId)
+            }
+          }
         }
       } catch (err) {
         console.error("[v0] Error loading clients:", err)
@@ -69,7 +80,7 @@ export function InvoiceForm({
     }
 
     loadClients()
-  }, [])
+  }, [mode, initialData.clientId])
 
   const updateField = <K extends keyof InvoiceFormData>(field: K, value: InvoiceFormData[K]) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
@@ -133,9 +144,9 @@ export function InvoiceForm({
 
   const totals = calculateInvoiceTotals(formData.items, formData.discountAmount)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    onSubmit({ ...formData, clientId: selectedClientId })
+    await onSubmit({ ...formData, clientId: selectedClientId })
   }
 
   return (

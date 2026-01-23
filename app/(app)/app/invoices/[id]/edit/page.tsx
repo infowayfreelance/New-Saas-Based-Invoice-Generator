@@ -168,13 +168,14 @@ export default async function InvoiceEditPage({ params }: { params: Promise<{ id
     .filter(Boolean)
     .join("\n")
 
-  const formData: InvoiceFormData = {
+  const formData: InvoiceFormData & { clientId?: string | null } = {
     fromName: userSettings?.business_name || userSettings?.full_name || user.email || "Your Business Name",
     fromEmail: userSettings?.email || user.email || "",
     fromAddress: senderAddressBlock,
     clientName: client?.name || client?.company_name || "",
     clientEmail: client?.email || "",
     clientAddress: clientAddress,
+    clientId: invoice.client_id || null,
     invoiceNumber: invoice.invoice_number,
     issueDate: invoice.issue_date,
     dueDate: invoice.due_date,
