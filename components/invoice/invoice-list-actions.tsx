@@ -2,13 +2,15 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { createRoot } from "react-dom/client"
 import { Button } from "@/components/ui/button"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { MoreHorizontal, Eye, Download, Send } from "lucide-react"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu"
+import { MoreHorizontal, Eye, Download, Send, Trash } from "lucide-react"
 import { InvoicePreview } from "@/components/invoice/invoice-preview"
 import { toast } from "sonner"
 import type { InvoiceFormData } from "@/lib/utils/invoice"
+import { deleteInvoice } from "@/app/actions/invoice-delete"
 
 interface InvoiceListActionsProps {
   invoiceId: string
@@ -17,6 +19,37 @@ interface InvoiceListActionsProps {
 
 export function InvoiceListActions({ invoiceId, invoiceNumber }: InvoiceListActionsProps) {
   const [isDownloading, setIsDownloading] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const router = useRouter()
+
+  const handleDeleteInvoice = async () => {
+    if (isDeleting) return
+
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this invoice? This action cannot be undone."
+    )
+
+    if (!confirmed) return
+
+    setIsDeleting(true)
+    console.log("[v0] Deleting invoice:", invoiceId)
+
+    try {
+      const result = await deleteInvoice(invoiceId)
+
+      if (result.success) {
+        toast.success("Invoice deleted successfully!")
+        router.refresh()
+      } else {
+        toast.error(result.error || "Failed to delete invoice")
+      }
+    } catch (error) {
+      console.error("[v0] Error deleting invoice:", error)
+      toast.error("An unexpected error occurred")
+    } finally {
+      setIsDeleting(false)
+    }
+  }
 
   const handleDownloadPDF = async () => {
     if (isDownloading) return
@@ -119,6 +152,7 @@ export function InvoiceListActions({ invoiceId, invoiceNumber }: InvoiceListActi
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
+        <div className="px-2 py-1.5 text-xs font-semibold text-green-600">DELETE TEST VISIBLE</div>
         <DropdownMenuItem asChild>
           <Link href={`/app/invoices/${invoiceId}`}>
             <Eye className="mr-2 h-4 w-4" />
@@ -132,6 +166,15 @@ export function InvoiceListActions({ invoiceId, invoiceNumber }: InvoiceListActi
         <DropdownMenuItem>
           <Send className="mr-2 h-4 w-4" />
           Send Email
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem 
+          onClick={handleDeleteInvoice} 
+          disabled={isDeleting}
+          className="text-destructive focus:text-destructive"
+        >
+          <Trash className="mr-2 h-4 w-4" />
+          {isDeleting ? "Deleting..." : "Delete Invoice"}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
