@@ -27,6 +27,48 @@ export async function checkInvoiceUsage(userId: string | null): Promise<Generate
   return await checkUsageLimits(userId, ip)
 }
 
+export async function generateNextInvoiceNumber(userId: string): Promise<string> {
+  const supabase = await createClient()
+  
+  // Get the current year and month
+  const now = new Date()
+  const year = now.getFullYear()
+  const month = String(now.getMonth() + 1).padStart(2, "0")
+  const prefix = `INV-${year}${month}-`
+  
+  // Fetch all invoices for this user with the current prefix
+  const { data: invoices, error } = await supabase
+    .from("invoices")
+    .select("invoice_number")
+    .eq("user_id", userId)
+    .like("invoice_number", `${prefix}%`)
+    .order("invoice_number", { ascending: false })
+    .limit(1)
+  
+  if (error) {
+    console.error("[v0] Error fetching invoices for number generation:", error)
+    // Fallback to 001 if there's an error
+    return `${prefix}001`
+  }
+  
+  // If no invoices exist for this month, start at 001
+  if (!invoices || invoices.length === 0) {
+    return `${prefix}001`
+  }
+  
+  // Extract the sequence number from the last invoice
+  const lastInvoiceNumber = invoices[0].invoice_number
+  const lastSequence = lastInvoiceNumber.split("-").pop()
+  
+  if (!lastSequence) {
+    return `${prefix}001`
+  }
+  
+  // Increment the sequence number
+  const nextSequence = parseInt(lastSequence, 10) + 1
+  return `${prefix}${String(nextSequence).padStart(3, "0")}`
+}
+
 export async function generateGuestInvoice(data: InvoiceFormData): Promise<GenerateInvoiceResult> {
   const ip = await getClientIp()
 

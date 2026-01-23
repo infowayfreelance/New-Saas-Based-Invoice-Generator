@@ -6,7 +6,7 @@ import { PageHeader } from "@/components/app/page-header"
 import { InvoiceForm } from "@/components/invoice/invoice-form"
 import { UsageMeter } from "@/components/invoice/usage-meter"
 import { type InvoiceFormData, getDefaultInvoiceData } from "@/lib/utils/invoice"
-import { generateAuthenticatedInvoice, checkInvoiceUsage } from "@/app/actions/invoice"
+import { generateAuthenticatedInvoice, checkInvoiceUsage, generateNextInvoiceNumber } from "@/app/actions/invoice"
 import { toast } from "sonner"
 import { createClient } from "@/lib/supabase/client"
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -102,7 +102,6 @@ export default function NewInvoicePage() {
               fromEmail: settings.email || user.email || "",
               fromAddress: senderAddressBlock,
               currency: settings.currency || "USD",
-              invoiceNumber: `INV-${String(1).padStart(3, "0")}`,
             }))
           }
         } catch (settingsErr) {
@@ -126,6 +125,28 @@ export default function NewInvoicePage() {
         } catch (usageErr) {
           console.error("[v0] Error checking usage:", usageErr)
           // Continue without usage data
+        }
+
+        // Generate next invoice number
+        try {
+          const nextInvoiceNumber = await generateNextInvoiceNumber(user.id)
+          if (!mounted) return
+
+          console.log("[v0] Generated next invoice number:", nextInvoiceNumber)
+          setInitialData((prev) => ({
+            ...prev,
+            invoiceNumber: nextInvoiceNumber,
+          }))
+        } catch (invoiceErr) {
+          console.error("[v0] Error generating invoice number:", invoiceErr)
+          // Fallback to default format
+          const now = new Date()
+          const year = now.getFullYear()
+          const month = String(now.getMonth() + 1).padStart(2, "0")
+          setInitialData((prev) => ({
+            ...prev,
+            invoiceNumber: `INV-${year}${month}-001`,
+          }))
         }
       } catch (err) {
         console.error("[v0] Error loading invoice data:", err)
