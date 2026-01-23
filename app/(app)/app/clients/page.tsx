@@ -1,3 +1,13 @@
+import { DropdownMenuItem } from "@/components/ui/dropdown-menu"
+import { DropdownMenuContent } from "@/components/ui/dropdown-menu"
+import { DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { DropdownMenu } from "@/components/ui/dropdown-menu"
+import { TableCell } from "@/components/ui/table"
+import { TableBody } from "@/components/ui/table"
+import { TableHead } from "@/components/ui/table"
+import { TableRow } from "@/components/ui/table"
+import { TableHeader } from "@/components/ui/table"
+import { Table } from "@/components/ui/table"
 import Link from "next/link"
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
@@ -5,9 +15,8 @@ import { PageHeader } from "@/components/app/page-header"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Plus, Search, MoreHorizontal, Eye, Edit, Trash2, Users, Lock } from "lucide-react"
+import { ClientsList } from "@/components/clients/clients-list"
+import { Plus, Search, Users, Lock, MoreHorizontal, Eye, Edit, Trash2 } from "lucide-react"
 
 export default async function ClientsPage({ searchParams }: { searchParams: Promise<{ search?: string }> }) {
   const params = await searchParams
@@ -126,63 +135,7 @@ export default async function ClientsPage({ searchParams }: { searchParams: Prom
           </CardHeader>
           <CardContent>
             {clients && clients.length > 0 ? (
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Company</TableHead>
-                      <TableHead>Email</TableHead>
-                      <TableHead>Phone</TableHead>
-                      <TableHead>Invoices</TableHead>
-                      <TableHead className="w-10"></TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {clients.map((client) => (
-                      <TableRow key={client.id}>
-                        <TableCell className="font-medium">
-                          <Link href={`/app/clients/${client.id}`} className="hover:text-primary hover:underline">
-                            {client.name}
-                          </Link>
-                        </TableCell>
-                        <TableCell>{client.company_name || "—"}</TableCell>
-                        <TableCell>{client.email || "—"}</TableCell>
-                        <TableCell>{client.phone || "—"}</TableCell>
-                        <TableCell>{invoiceCountMap[client.id] || 0}</TableCell>
-                        <TableCell>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-8 w-8">
-                                <MoreHorizontal className="h-4 w-4" />
-                                <span className="sr-only">Actions</span>
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem asChild>
-                                <Link href={`/app/clients/${client.id}`}>
-                                  <Eye className="mr-2 h-4 w-4" />
-                                  View
-                                </Link>
-                              </DropdownMenuItem>
-                              <DropdownMenuItem asChild>
-                                <Link href={`/app/clients/${client.id}/edit`}>
-                                  <Edit className="mr-2 h-4 w-4" />
-                                  Edit
-                                </Link>
-                              </DropdownMenuItem>
-                              <DropdownMenuItem className="text-destructive">
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                Delete
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
+              <ClientsList clients={clients} invoiceCountMap={invoiceCountMap} />
             ) : (
               <div className="flex flex-col items-center justify-center py-12 text-center">
                 <Users className="h-12 w-12 text-muted-foreground/50" />
