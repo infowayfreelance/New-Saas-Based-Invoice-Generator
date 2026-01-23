@@ -1,19 +1,16 @@
 "use client"
 
 import { Textarea } from "@/components/ui/textarea"
-
-import type React from "react"
-
-import { useState, useEffect } from "react"
-import { createClient } from "@/lib/supabase/client"
-import { PageHeader } from "@/components/app/page-header"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { CURRENCIES } from "@/lib/utils/invoice"
 import { toast } from "sonner"
+import { useState, useEffect } from "react"
+import { createClient } from "@/lib/supabase/client"
+import { PageHeader } from "@/components/app/page-header"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
 export default function CompanySettingsPage() {
   const [fullName, setFullName] = useState("")
@@ -81,28 +78,30 @@ export default function CompanySettingsPage() {
 
       const { error } = await supabase
         .from("user_settings")
-        .upsert({
-          user_id: user.id,
-          full_name: fullName,
-          business_name: businessName,
-          email: email,
-          phone: phone,
-          address_line1: addressLine1,
-          address_line2: addressLine2,
-          city: city,
-          state: state,
-          postal_code: postalCode,
-          country: country,
-          currency: currency,
-          timezone: timezone,
-          company_name: companyName,
-          company_tax_id: companyTaxId,
-          company_address: companyAddress,
-          default_currency: defaultCurrency,
-          invoice_prefix: invoicePrefix,
-          invoice_start_number: invoiceStartNumber,
-        })
-        .eq("user_id", user.id)
+        .upsert(
+          {
+            user_id: user.id,
+            full_name: fullName,
+            business_name: businessName,
+            email: email,
+            phone: phone,
+            address_line1: addressLine1,
+            address_line2: addressLine2,
+            city: city,
+            state: state,
+            postal_code: postalCode,
+            country: country,
+            currency: currency,
+            timezone: timezone,
+            company_name: companyName,
+            company_tax_id: companyTaxId,
+            company_address: companyAddress,
+            default_currency: defaultCurrency,
+            invoice_prefix: invoicePrefix,
+            invoice_start_number: invoiceStartNumber,
+          },
+          { onConflict: "user_id" }
+        )
 
       if (error) throw error
 
@@ -130,7 +129,8 @@ export default function CompanySettingsPage() {
         setInvoicePrefix(data.invoice_prefix || "")
         setInvoiceStartNumber(data.invoice_start_number || 1)
       }
-    } catch {
+    } catch (error) {
+      console.error("[v0] Failed to update settings:", error)
       toast.error("Failed to update settings")
     } finally {
       setIsLoading(false)
@@ -277,6 +277,71 @@ export default function CompanySettingsPage() {
                     placeholder="UTC"
                   />
                 </div>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="companyName">Company Name</Label>
+                  <Input
+                    id="companyName"
+                    value={companyName}
+                    onChange={(e) => setCompanyName(e.target.value)}
+                    placeholder="Your Company Name"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="companyTaxId">Company Tax ID</Label>
+                  <Input
+                    id="companyTaxId"
+                    value={companyTaxId}
+                    onChange={(e) => setCompanyTaxId(e.target.value)}
+                    placeholder="Your Company Tax ID"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="companyAddress">Company Address</Label>
+                <Textarea
+                  id="companyAddress"
+                  value={companyAddress}
+                  onChange={(e) => setCompanyAddress(e.target.value)}
+                  placeholder="Your Company Address"
+                />
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="defaultCurrency">Default Currency</Label>
+                  <Select value={defaultCurrency} onValueChange={setDefaultCurrency}>
+                    <SelectTrigger id="defaultCurrency">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {CURRENCIES.map((curr) => (
+                        <SelectItem key={curr.code} value={curr.code}>
+                          {curr.code} - {curr.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="invoicePrefix">Invoice Prefix</Label>
+                  <Input
+                    id="invoicePrefix"
+                    value={invoicePrefix}
+                    onChange={(e) => setInvoicePrefix(e.target.value)}
+                    placeholder="INV"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="invoiceStartNumber">Invoice Start Number</Label>
+                <Input
+                  id="invoiceStartNumber"
+                  type="number"
+                  value={invoiceStartNumber.toString()}
+                  onChange={(e) => setInvoiceStartNumber(parseInt(e.target.value))}
+                  placeholder="1"
+                />
               </div>
               <Button type="submit" disabled={isLoading}>
                 {isLoading ? "Saving..." : "Save Changes"}
