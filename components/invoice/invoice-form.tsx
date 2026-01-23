@@ -24,7 +24,8 @@ import Link from "next/link"
 interface InvoiceFormProps {
   mode?: "create" | "edit"
   initialData: InvoiceFormData & { clientId?: string | null }
-  onSubmit: (data: InvoiceFormData & { clientId?: string | null }) => void | Promise<void>
+  onSubmit?: (data: InvoiceFormData & { clientId?: string | null }) => void | Promise<void>
+  serverAction?: (data: InvoiceFormData & { clientId?: string | null }) => Promise<any>
   isLoading?: boolean
   submitLabel?: string
 }
@@ -33,6 +34,7 @@ export function InvoiceForm({
   mode = "create",
   initialData,
   onSubmit,
+  serverAction,
   isLoading = false,
   submitLabel = "Generate Invoice",
 }: InvoiceFormProps) {
@@ -147,7 +149,11 @@ export function InvoiceForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    await onSubmit({ ...formData, clientId: selectedClientId })
+    if (serverAction) {
+      await serverAction({ ...formData, clientId: selectedClientId })
+    } else if (onSubmit) {
+      await onSubmit({ ...formData, clientId: selectedClientId })
+    }
   }
 
   return (
