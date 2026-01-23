@@ -1,6 +1,7 @@
 "use client"
 
-import { Textarea } from "@/components/ui/textarea"
+import React from "react"
+
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -25,12 +26,6 @@ export default function CompanySettingsPage() {
   const [country, setCountry] = useState("")
   const [currency, setCurrency] = useState("USD")
   const [timezone, setTimezone] = useState("UTC")
-  const [companyName, setCompanyName] = useState("")
-  const [companyTaxId, setCompanyTaxId] = useState("")
-  const [companyAddress, setCompanyAddress] = useState("")
-  const [defaultCurrency, setDefaultCurrency] = useState("USD")
-  const [invoicePrefix, setInvoicePrefix] = useState("")
-  const [invoiceStartNumber, setInvoiceStartNumber] = useState(1)
   const [isLoading, setIsLoading] = useState(false)
   const supabase = createClient()
 
@@ -54,12 +49,6 @@ export default function CompanySettingsPage() {
           setCountry(data.country || "")
           setCurrency(data.currency || "USD")
           setTimezone(data.timezone || "UTC")
-          setCompanyName(data.company_name || "")
-          setCompanyTaxId(data.company_tax_id || "")
-          setCompanyAddress(data.company_address || "")
-          setDefaultCurrency(data.default_currency || "USD")
-          setInvoicePrefix(data.invoice_prefix || "")
-          setInvoiceStartNumber(data.invoice_start_number || 1)
         }
       }
     }
@@ -74,64 +63,42 @@ export default function CompanySettingsPage() {
       const {
         data: { user },
       } = await supabase.auth.getUser()
-      if (!user) throw new Error("Not authenticated")
+      
+      if (!user) {
+        toast.error("Not authenticated")
+        return
+      }
+
+      const payload = {
+        user_id: user.id,
+        full_name: fullName || null,
+        business_name: businessName || null,
+        email: email || null,
+        phone: phone || null,
+        address_line1: addressLine1 || null,
+        address_line2: addressLine2 || null,
+        city: city || null,
+        state: state || null,
+        postal_code: postalCode || null,
+        country: country || null,
+        currency: currency || "USD",
+        timezone: timezone || "UTC",
+      }
 
       const { error } = await supabase
         .from("user_settings")
-        .upsert(
-          {
-            user_id: user.id,
-            full_name: fullName,
-            business_name: businessName,
-            email: email,
-            phone: phone,
-            address_line1: addressLine1,
-            address_line2: addressLine2,
-            city: city,
-            state: state,
-            postal_code: postalCode,
-            country: country,
-            currency: currency,
-            timezone: timezone,
-            company_name: companyName,
-            company_tax_id: companyTaxId,
-            company_address: companyAddress,
-            default_currency: defaultCurrency,
-            invoice_prefix: invoicePrefix,
-            invoice_start_number: invoiceStartNumber,
-          },
-          { onConflict: "user_id" }
-        )
+        .upsert(payload, { onConflict: "user_id" })
 
-      if (error) throw error
+      if (error) {
+        console.error("[v0] Supabase error:", error)
+        toast.error(error.message || "Failed to update settings")
+        return
+      }
 
       toast.success("Company settings updated successfully")
-      
-      // Reload settings to verify
-      const { data } = await supabase.from("user_settings").select("*").eq("user_id", user.id).single()
-      if (data) {
-        setFullName(data.full_name || "")
-        setBusinessName(data.business_name || "")
-        setEmail(data.email || "")
-        setPhone(data.phone || "")
-        setAddressLine1(data.address_line1 || "")
-        setAddressLine2(data.address_line2 || "")
-        setCity(data.city || "")
-        setState(data.state || "")
-        setPostalCode(data.postal_code || "")
-        setCountry(data.country || "")
-        setCurrency(data.currency || "USD")
-        setTimezone(data.timezone || "UTC")
-        setCompanyName(data.company_name || "")
-        setCompanyTaxId(data.company_tax_id || "")
-        setCompanyAddress(data.company_address || "")
-        setDefaultCurrency(data.default_currency || "USD")
-        setInvoicePrefix(data.invoice_prefix || "")
-        setInvoiceStartNumber(data.invoice_start_number || 1)
-      }
     } catch (error) {
       console.error("[v0] Failed to update settings:", error)
-      toast.error("Failed to update settings")
+      toast.error(error instanceof Error ? error.message : "Failed to update settings")
     } finally {
       setIsLoading(false)
     }
@@ -277,71 +244,6 @@ export default function CompanySettingsPage() {
                     placeholder="UTC"
                   />
                 </div>
-              </div>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="companyName">Company Name</Label>
-                  <Input
-                    id="companyName"
-                    value={companyName}
-                    onChange={(e) => setCompanyName(e.target.value)}
-                    placeholder="Your Company Name"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="companyTaxId">Company Tax ID</Label>
-                  <Input
-                    id="companyTaxId"
-                    value={companyTaxId}
-                    onChange={(e) => setCompanyTaxId(e.target.value)}
-                    placeholder="Your Company Tax ID"
-                  />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="companyAddress">Company Address</Label>
-                <Textarea
-                  id="companyAddress"
-                  value={companyAddress}
-                  onChange={(e) => setCompanyAddress(e.target.value)}
-                  placeholder="Your Company Address"
-                />
-              </div>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="defaultCurrency">Default Currency</Label>
-                  <Select value={defaultCurrency} onValueChange={setDefaultCurrency}>
-                    <SelectTrigger id="defaultCurrency">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {CURRENCIES.map((curr) => (
-                        <SelectItem key={curr.code} value={curr.code}>
-                          {curr.code} - {curr.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="invoicePrefix">Invoice Prefix</Label>
-                  <Input
-                    id="invoicePrefix"
-                    value={invoicePrefix}
-                    onChange={(e) => setInvoicePrefix(e.target.value)}
-                    placeholder="INV"
-                  />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="invoiceStartNumber">Invoice Start Number</Label>
-                <Input
-                  id="invoiceStartNumber"
-                  type="number"
-                  value={invoiceStartNumber.toString()}
-                  onChange={(e) => setInvoiceStartNumber(parseInt(e.target.value))}
-                  placeholder="1"
-                />
               </div>
               <Button type="submit" disabled={isLoading}>
                 {isLoading ? "Saving..." : "Save Changes"}
