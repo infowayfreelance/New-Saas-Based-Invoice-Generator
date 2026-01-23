@@ -35,12 +35,6 @@ export default async function SettingsPage() {
       icon: Mail,
     },
     {
-      title: "Email Setup",
-      description: "Configure SMTP server for sending invoices",
-      href: "/app/settings/email-setup",
-      icon: Settings,
-    },
-    {
       title: "Branding",
       description: "Customize your invoice appearance",
       href: "/app/settings/branding",

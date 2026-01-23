@@ -39,6 +39,7 @@ import {
   Sparkles,
   LogOut,
   ChevronUp,
+  Mail,
 } from "lucide-react"
 
 export function AppSidebar() {
@@ -212,7 +213,13 @@ export function AppSidebar() {
       title: "Settings",
       href: "/app/settings",
       icon: SettingsIcon,
-      active: pathname.startsWith("/app/settings"),
+      active: pathname.startsWith("/app/settings") && !pathname.startsWith("/app/settings/email-setup"),
+    },
+    {
+      title: "Email Setup",
+      href: "/app/settings/email-setup",
+      icon: Mail,
+      active: pathname.startsWith("/app/settings/email-setup"),
     },
   ]
 
