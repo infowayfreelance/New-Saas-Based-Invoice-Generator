@@ -3,7 +3,7 @@ import Link from "next/link"
 import { createClient } from "@/lib/supabase/server"
 import { PageHeader } from "@/components/app/page-header"
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { User, Building, Mail, Palette, ChevronRight } from "lucide-react"
+import { User, Building, Mail, Palette, ChevronRight, Settings } from "lucide-react"
 
 export default async function SettingsPage() {
   const supabase = await createClient()
@@ -33,6 +33,12 @@ export default async function SettingsPage() {
       description: "Email sending preferences",
       href: "/app/settings/email",
       icon: Mail,
+    },
+    {
+      title: "Email Setup",
+      description: "Configure SMTP server for sending invoices",
+      href: "/app/settings/email-setup",
+      icon: Settings,
     },
     {
       title: "Branding",
