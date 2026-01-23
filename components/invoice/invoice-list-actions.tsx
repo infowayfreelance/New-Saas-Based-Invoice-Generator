@@ -2,109 +2,77 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { createRoot } from "react-dom/client"
 import { Button } from "@/components/ui/button"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { MoreHorizontal, Eye, Download, Send } from "lucide-react"
-import { InvoicePreview } from "@/components/invoice/invoice-preview"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { MoreHorizontal, Eye, Edit, Download, Send } from "lucide-react"
 import { toast } from "sonner"
-import type { InvoiceFormData } from "@/lib/utils/invoice"
 
 interface InvoiceListActionsProps {
   invoiceId: string
   invoiceNumber: string
 }
 
-export function InvoiceListActions({ invoiceId, invoiceNumber }: InvoiceListActionsProps) {
+export function InvoiceListActions({
+  invoiceId,
+  invoiceNumber,
+}: InvoiceListActionsProps) {
   const [isDownloading, setIsDownloading] = useState(false)
 
   const handleDownloadPDF = async () => {
     if (isDownloading) return
-    
+
     setIsDownloading(true)
-    console.log("[v0] Starting PDF download for invoice:", invoiceId)
     toast.info("Generating PDF...")
 
     try {
-      // Dynamically import PDF libraries
       const [html2canvas, jsPDF] = await Promise.all([
         import("html2canvas").then((mod) => mod.default),
         import("jspdf").then((mod) => mod.default),
       ])
 
-      // Fetch invoice data
-      const response = await fetch(`/app/invoices/${invoiceId}`)
-      if (!response.ok) throw new Error("Failed to fetch invoice data")
-      
-      const html = await response.text()
-      const parser = new DOMParser()
-      const doc = parser.parseFromString(html, "text/html")
-      
-      // Extract invoice data from the page (this is a simplified approach)
-      // In a real scenario, you'd want to fetch from an API endpoint
-      console.log("[v0] Invoice data fetched, generating PDF...")
-      
-      // Create a hidden container
-      const container = document.createElement("div")
-      container.style.position = "absolute"
-      container.style.left = "-9999px"
-      container.style.top = "0"
-      container.style.width = "800px"
-      document.body.appendChild(container)
-
-      // We need to fetch the actual invoice data - let's use a simple approach
-      // by opening the page in an iframe
       const iframe = document.createElement("iframe")
       iframe.style.position = "absolute"
       iframe.style.left = "-9999px"
       iframe.style.width = "800px"
       iframe.style.height = "1200px"
       document.body.appendChild(iframe)
-      
+
       iframe.src = `/app/invoices/${invoiceId}`
-      
-      // Wait for iframe to load
+
       await new Promise((resolve) => {
         iframe.onload = resolve
       })
 
-      // Wait a bit for content to render
       await new Promise((resolve) => setTimeout(resolve, 1500))
 
-      const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document
-      if (!iframeDoc) throw new Error("Could not access iframe content")
+      const iframeDoc = iframe.contentDocument
+      if (!iframeDoc) throw new Error("Failed to load invoice")
 
-      const previewElement = iframeDoc.getElementById("invoice-preview")
-      if (!previewElement) throw new Error("Invoice preview not found")
+      const preview = iframeDoc.getElementById("invoice-preview")
+      if (!preview) throw new Error("Invoice preview not found")
 
-      console.log("[v0] Capturing invoice preview as image...")
-      const canvas = await html2canvas(previewElement, {
+      const canvas = await html2canvas(preview, {
         scale: 2,
-        useCORS: true,
-        logging: false,
         backgroundColor: "#ffffff",
       })
 
-      console.log("[v0] Creating PDF from image...")
-      const imgWidth = 210
-      const imgHeight = (canvas.height * imgWidth) / canvas.width
       const pdf = new jsPDF("p", "mm", "a4")
       const imgData = canvas.toDataURL("image/png")
-      pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight)
+      const imgWidth = 210
+      const imgHeight = (canvas.height * imgWidth) / canvas.width
 
-      console.log("[v0] Downloading PDF...")
+      pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight)
       pdf.save(`invoice-${invoiceNumber}.pdf`)
 
-      // Cleanup
-      document.body.removeChild(iframe)
-      if (container.parentNode) {
-        document.body.removeChild(container)
-      }
-
-      toast.success("PDF downloaded successfully!")
+      toast.success("PDF downloaded")
     } catch (error) {
-      console.error("[v0] Error generating PDF:", error)
-      toast.error("Failed to generate PDF. Please try again.")
+      console.error("[invoice-pdf]", error)
+      toast.error("Failed to generate PDF")
     } finally {
       setIsDownloading(false)
     }
@@ -115,9 +83,9 @@ export function InvoiceListActions({ invoiceId, invoiceNumber }: InvoiceListActi
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon" className="h-8 w-8">
           <MoreHorizontal className="h-4 w-4" />
-          <span className="sr-only">Actions</span>
         </Button>
       </DropdownMenuTrigger>
+
       <DropdownMenuContent align="end">
         <DropdownMenuItem asChild>
           <Link href={`/app/invoices/${invoiceId}`}>
@@ -125,10 +93,19 @@ export function InvoiceListActions({ invoiceId, invoiceNumber }: InvoiceListActi
             View
           </Link>
         </DropdownMenuItem>
+
+        <DropdownMenuItem asChild>
+          <Link href={`/app/invoices/${invoiceId}/edit`}>
+            <Edit className="mr-2 h-4 w-4" />
+            Edit
+          </Link>
+        </DropdownMenuItem>
+
         <DropdownMenuItem onClick={handleDownloadPDF} disabled={isDownloading}>
           <Download className="mr-2 h-4 w-4" />
-          {isDownloading ? "Generating..." : "Download PDF"}
+          {isDownloading ? "Generating…" : "Download PDF"}
         </DropdownMenuItem>
+
         <DropdownMenuItem>
           <Send className="mr-2 h-4 w-4" />
           Send Email
