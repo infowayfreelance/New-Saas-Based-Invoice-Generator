@@ -31,15 +31,21 @@ export default async function InvoicesPage({
     redirect("/login")
   }
 
-  // Build query
-  let query = supabase.from("invoices").select("*").eq("user_id", user.id).order("created_at", { ascending: false })
+  // Build query - join clients to get client name
+  let query = supabase
+    .from("invoices")
+    .select("*, clients(name, company_name)")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false })
 
   if (params.status && params.status !== "all") {
     query = query.eq("status", params.status.toUpperCase())
   }
 
   if (params.search) {
-    query = query.or(`invoice_number.ilike.%${params.search}%,client_name.ilike.%${params.search}%`)
+    query = query.or(
+      `invoice_number.ilike.%${params.search}%,clients.name.ilike.%${params.search}%,clients.company_name.ilike.%${params.search}%`
+    )
   }
 
   const { data: invoices } = await query.limit(50)
@@ -121,23 +127,28 @@ export default async function InvoicesPage({
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {invoices.map((invoice) => (
-                      <TableRow key={invoice.id}>
-                        <TableCell className="font-medium">
-                          <Link href={`/app/invoices/${invoice.id}`} className="hover:text-primary hover:underline">
-                            {invoice.invoice_number}
-                          </Link>
-                        </TableCell>
-                        <TableCell>{invoice.client_name || "—"}</TableCell>
-                        <TableCell>{formatDate(invoice.issue_date)}</TableCell>
-                        <TableCell>{formatDate(invoice.due_date)}</TableCell>
-                        <TableCell>{formatCurrency(Number(invoice.total), invoice.currency)}</TableCell>
-                        <TableCell>{getStatusBadge(invoice.status)}</TableCell>
-                        <TableCell>
-                          <InvoiceListActions invoiceId={invoice.id} invoiceNumber={invoice.invoice_number} />
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                    {invoices.map((invoice) => {
+                      // Get client name with priority: company_name > name > fallback
+                      const clientName = invoice.clients?.company_name || invoice.clients?.name || "—"
+                      
+                      return (
+                        <TableRow key={invoice.id}>
+                          <TableCell className="font-medium">
+                            <Link href={`/app/invoices/${invoice.id}`} className="hover:text-primary hover:underline">
+                              {invoice.invoice_number}
+                            </Link>
+                          </TableCell>
+                          <TableCell>{clientName}</TableCell>
+                          <TableCell>{formatDate(invoice.issue_date)}</TableCell>
+                          <TableCell>{formatDate(invoice.due_date)}</TableCell>
+                          <TableCell>{formatCurrency(Number(invoice.total), invoice.currency)}</TableCell>
+                          <TableCell>{getStatusBadge(invoice.status)}</TableCell>
+                          <TableCell>
+                            <InvoiceListActions invoiceId={invoice.id} invoiceNumber={invoice.invoice_number} />
+                          </TableCell>
+                        </TableRow>
+                      )
+                    })}
                   </TableBody>
                 </Table>
               </div>
