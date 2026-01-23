@@ -11,16 +11,11 @@ import { updateInvoiceAction } from "@/app/actions/invoice"
 import { EditInvoiceFormServer } from "@/components/invoice/edit-invoice-form-server"
 
 function isValidUUID(id: string): boolean {
-  const uuidRegex =
-    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
   return uuidRegex.test(id)
 }
 
-export default async function InvoiceEditPage({
-  params,
-}: {
-  params: Promise<{ id: string }>
-}) {
+export default async function InvoiceEditPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
 
   if (!isValidUUID(id)) {
@@ -42,81 +37,77 @@ export default async function InvoiceEditPage({
   let userSettings: any = null
 
   try {
-    /* ============================
-       FIXED BLOCK (IMPORTANT)
-    ============================ */
-
+    // Fetch invoice first to check if it exists
     const invoiceResult = await supabase
       .from("invoices")
       .select("*")
       .eq("id", id)
       .eq("user_id", user.id)
-      .maybeSingle()
+      .single()
 
-    if (invoiceResult.error) {
-      console.error(
-        "[EDIT INVOICE] Supabase error while fetching invoice:",
-        invoiceResult.error
+    if (!invoiceResult.data || invoiceResult.error) {
+      return (
+        <>
+          <PageHeader
+            title="Invoice Not Found"
+            breadcrumbs={[
+              { label: "Dashboard", href: "/app" },
+              { label: "Invoices", href: "/app/invoices" },
+              { label: "Error" },
+            ]}
+          />
+          <div className="flex-1 space-y-6 p-6">
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Invoice Not Found</AlertTitle>
+              <AlertDescription>
+                The invoice you're trying to edit doesn't exist or you don't have permission to edit it.
+              </AlertDescription>
+            </Alert>
+            <div className="flex gap-4">
+              <Link href="/app/invoices">
+                <Button>Back to Invoices</Button>
+              </Link>
+            </div>
+          </div>
+        </>
       )
-      throw invoiceResult.error
-    }
-
-    if (!invoiceResult.data) {
-      console.error(
-        "[EDIT INVOICE] Invoice not found for id:",
-        id,
-        "user:",
-        user.id
-      )
-      throw new Error("Invoice not found")
     }
 
     invoice = invoiceResult.data
 
-    /* ============================
-       FETCH RELATED DATA
-    ============================ */
-
+    // Fetch related data in parallel
     const [itemsResult, clientResult, settingsResult] = await Promise.all([
-      supabase
-        .from("invoice_items")
-        .select("*")
-        .eq("invoice_id", id)
-        .order("created_at", { ascending: true }),
-
+      supabase.from("invoice_items").select("*").eq("invoice_id", id).order("created_at", { ascending: true }),
       invoice.client_id
         ? supabase
             .from("clients")
-            .select(`
-              id,
-              name,
-              company_name,
-              email,
-              phone,
-              address_line1,
-              address_line2,
-              city,
-              state,
-              postal_code,
-              country
-            `)
+            .select(
+              `
+            id,
+            name,
+            company_name,
+            email,
+            phone,
+            address_line1,
+            address_line2,
+            city,
+            state,
+            postal_code,
+            country
+          `
+            )
             .eq("id", invoice.client_id)
             .maybeSingle()
         : Promise.resolve({ data: null, error: null }),
-
-      supabase
-        .from("user_settings")
-        .select("*")
-        .eq("user_id", user.id)
-        .maybeSingle(),
+      supabase.from("user_settings").select("*").eq("user_id", user.id).maybeSingle(),
     ])
 
     items = itemsResult.data
     client = clientResult.data
     userSettings = settingsResult.data
   } catch (error) {
-    console.error("[EDIT INVOICE] Fatal error loading invoice:", error)
-
+    console.error("[v0] Error loading invoice:", error)
     return (
       <>
         <PageHeader
@@ -132,20 +123,18 @@ export default async function InvoiceEditPage({
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>Error Loading Invoice</AlertTitle>
             <AlertDescription>
-              Failed to load invoice for editing.
+              There was an error loading this invoice. Please try again or contact support if the problem persists.
             </AlertDescription>
           </Alert>
-          <Link href="/app/invoices">
-            <Button>Back to Invoices</Button>
-          </Link>
+          <div className="flex gap-4">
+            <Link href="/app/invoices">
+              <Button>Back to Invoices</Button>
+            </Link>
+          </div>
         </div>
       </>
     )
   }
-
-  /* ============================
-     FORMAT ADDRESSES
-  ============================ */
 
   const clientAddress = client
     ? [
@@ -180,16 +169,12 @@ export default async function InvoiceEditPage({
     .join("\n")
 
   const formData: InvoiceFormData & { clientId?: string | null } = {
-    fromName:
-      userSettings?.business_name ||
-      userSettings?.full_name ||
-      user.email ||
-      "Your Business Name",
+    fromName: userSettings?.business_name || userSettings?.full_name || user.email || "Your Business Name",
     fromEmail: userSettings?.email || user.email || "",
     fromAddress: senderAddressBlock,
     clientName: client?.name || client?.company_name || "",
     clientEmail: client?.email || "",
-    clientAddress,
+    clientAddress: clientAddress,
     clientId: invoice.client_id || null,
     invoiceNumber: invoice.invoice_number,
     issueDate: invoice.issue_date,
@@ -209,9 +194,8 @@ export default async function InvoiceEditPage({
     discountAmount: toNumber(invoice.discount_amount),
   }
 
-  async function boundUpdateAction(
-    data: InvoiceFormData & { clientId?: string | null }
-  ) {
+  // Bind the server action to this specific invoice
+  async function boundUpdateAction(data: InvoiceFormData & { clientId?: string | null }) {
     "use server"
     return updateInvoiceAction(id, data)
   }
@@ -228,10 +212,7 @@ export default async function InvoiceEditPage({
         ]}
       />
       <div className="flex-1 space-y-6 p-6">
-        <EditInvoiceFormServer
-          initialData={formData}
-          updateAction={boundUpdateAction}
-        />
+        <EditInvoiceFormServer initialData={formData} updateAction={boundUpdateAction} />
       </div>
     </>
   )
