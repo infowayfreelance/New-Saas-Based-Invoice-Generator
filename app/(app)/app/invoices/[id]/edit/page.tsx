@@ -194,12 +194,6 @@ export default async function InvoiceEditPage({ params }: { params: Promise<{ id
     discountAmount: toNumber(invoice.discount_amount),
   }
 
-  // Bind the server action to this specific invoice
-  async function boundUpdateAction(data: InvoiceFormData & { clientId?: string | null }) {
-    "use server"
-    return updateInvoiceAction(id, data)
-  }
-
   return (
     <>
       <PageHeader
@@ -212,7 +206,7 @@ export default async function InvoiceEditPage({ params }: { params: Promise<{ id
         ]}
       />
       <div className="flex-1 space-y-6 p-6">
-        <EditInvoiceFormServer initialData={formData} updateAction={boundUpdateAction} />
+        <EditInvoiceFormServer initialData={formData} invoiceId={id} />
       </div>
     </>
   )

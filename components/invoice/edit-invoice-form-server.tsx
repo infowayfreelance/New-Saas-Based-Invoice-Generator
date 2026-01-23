@@ -19,18 +19,20 @@ import {
 } from "@/lib/utils/invoice"
 import { createClient } from "@/lib/supabase/client"
 import Link from "next/link"
+import { updateInvoiceAction } from "@/app/actions/invoice"
 
 interface EditInvoiceFormServerProps {
   initialData: InvoiceFormData & { clientId?: string | null }
-  updateAction: (data: InvoiceFormData & { clientId?: string | null }) => Promise<void>
-  invoiceId: string // Added invoiceId as a prop
+  invoiceId: string
 }
 
-export function EditInvoiceFormServer({ initialData, updateAction, invoiceId }: EditInvoiceFormServerProps) {
+export function EditInvoiceFormServer({ initialData, invoiceId }: EditInvoiceFormServerProps) {
   const [formData, setFormData] = useState<InvoiceFormData>(initialData)
   const [clients, setClients] = useState<any[]>([])
   const [selectedClientId, setSelectedClientId] = useState<string | null>(initialData.clientId || null)
   const [isLoadingClients, setIsLoadingClients] = useState(true)
+
+  const updateAction = updateInvoiceAction; // Declare the updateAction variable
 
   useEffect(() => {
     const loadClients = async () => {
@@ -135,7 +137,7 @@ export function EditInvoiceFormServer({ initialData, updateAction, invoiceId }: 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    await updateAction({ ...formData, clientId: selectedClientId })
+    await updateInvoiceAction(invoiceId, { ...formData, clientId: selectedClientId })
   }
 
   return (
