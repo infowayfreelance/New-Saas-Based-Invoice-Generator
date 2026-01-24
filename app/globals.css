@@ -4,6 +4,9 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
+  --font-sans: 'Geist', 'Geist Fallback';
+  --font-mono: 'Geist Mono', 'Geist Mono Fallback';
+  --radius: 0.625rem;
   --color-background: #fafafa;
   --color-foreground: #171717;
   --color-card: #ffffff;
@@ -28,53 +31,17 @@
   --color-chart-3: #0ea5e9;
   --color-chart-4: #f59e0b;
   --color-chart-5: #f97316;
-  --radius: 0.625rem;
-  --color-sidebar: oklch(0.985 0 0); /* Default from shadcn */
-  --color-sidebar-foreground: oklch(0.145 0 0); /* Default from shadcn */
-  --color-sidebar-primary: oklch(0.205 0 0); /* Default from shadcn */
-  --color-sidebar-primary-foreground: oklch(0.985 0 0); /* Default from shadcn */
-  --color-sidebar-accent: oklch(0.97 0 0); /* Default from shadcn */
-  --color-sidebar-accent-foreground: oklch(0.205 0 0); /* Default from shadcn */
-  --color-sidebar-border: oklch(0.922 0 0); /* Default from shadcn */
-  --color-sidebar-ring: oklch(0.708 0 0); /* Default from shadcn */
+  --color-sidebar: #fcfcfc;
+  --color-sidebar-foreground: #171717;
+  --color-sidebar-primary: #262626;
+  --color-sidebar-primary-foreground: #fcfcfc;
+  --color-sidebar-accent: #f5f5f5;
+  --color-sidebar-accent-foreground: #262626;
+  --color-sidebar-border: #e5e5e5;
+  --color-sidebar-ring: #a3a3a3;
 }
 
 @layer base {
-  :root {
-    --background: var(--color-background);
-    --foreground: var(--color-foreground);
-    --card: var(--color-card);
-    --card-foreground: var(--color-card-foreground);
-    --popover: var(--color-popover);
-    --popover-foreground: var(--color-popover-foreground);
-    --primary: var(--color-primary);
-    --primary-foreground: var(--color-primary-foreground);
-    --secondary: var(--color-secondary);
-    --secondary-foreground: var(--color-secondary-foreground);
-    --muted: var(--color-muted);
-    --muted-foreground: var(--color-muted-foreground);
-    --accent: var(--color-accent);
-    --accent-foreground: var(--color-accent-foreground);
-    --destructive: var(--color-destructive);
-    --destructive-foreground: var(--color-destructive-foreground);
-    --border: var(--color-border);
-    --input: var(--color-input);
-    --ring: var(--color-ring);
-    --chart-1: var(--color-chart-1);
-    --chart-2: var(--color-chart-2);
-    --chart-3: var(--color-chart-3);
-    --chart-4: var(--color-chart-4);
-    --chart-5: var(--color-chart-5);
-    --sidebar: var(--color-sidebar); /* Added sidebar variables */
-    --sidebar-foreground: var(--color-sidebar-foreground);
-    --sidebar-primary: var(--color-sidebar-primary);
-    --sidebar-primary-foreground: var(--color-sidebar-primary-foreground);
-    --sidebar-accent: var(--color-sidebar-accent);
-    --sidebar-accent-foreground: var(--color-sidebar-accent-foreground);
-    --sidebar-border: var(--color-sidebar-border);
-    --sidebar-ring: var(--color-sidebar-ring);
-  }
-
   .dark {
     --color-background: #171717;
     --color-foreground: #fafafa;
@@ -100,14 +67,14 @@
     --color-chart-3: #f97316;
     --color-chart-4: #a855f7;
     --color-chart-5: #f43f5e;
-    --color-sidebar: oklch(0.205 0 0); /* Default from shadcn */
-    --color-sidebar-foreground: oklch(0.985 0 0); /* Default from shadcn */
-    --color-sidebar-primary: oklch(0.488 0.243 264.376); /* Default from shadcn */
-    --color-sidebar-primary-foreground: oklch(0.985 0 0); /* Default from shadcn */
-    --color-sidebar-accent: oklch(0.269 0 0); /* Default from shadcn */
-    --color-sidebar-accent-foreground: oklch(0.985 0 0); /* Default from shadcn */
-    --color-sidebar-border: oklch(0.269 0 0); /* Default from shadcn */
-    --color-sidebar-ring: oklch(0.439 0 0); /* Default from shadcn */
+    --color-sidebar: #262626;
+    --color-sidebar-foreground: #fcfcfc;
+    --color-sidebar-primary: #7c3aed;
+    --color-sidebar-primary-foreground: #fcfcfc;
+    --color-sidebar-accent: #404040;
+    --color-sidebar-accent-foreground: #fcfcfc;
+    --color-sidebar-border: #404040;
+    --color-sidebar-ring: #737373;
   }
 
   * {
