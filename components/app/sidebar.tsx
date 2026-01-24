@@ -40,6 +40,7 @@ import {
   LogOut,
   ChevronUp,
   Mail,
+  DollarSign,
 } from "lucide-react"
 
 export function AppSidebar() {
@@ -202,6 +203,12 @@ export function AppSidebar() {
       href: "/app/templates",
       icon: Palette,
       active: pathname.startsWith("/app/templates"),
+    },
+    {
+      title: "Setup Currencies",
+      href: "/app/setup-currencies",
+      icon: DollarSign,
+      active: pathname.startsWith("/app/setup-currencies"),
     },
     {
       title: "Subscription",

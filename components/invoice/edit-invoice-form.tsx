@@ -23,6 +23,8 @@ import { createClient } from "@/lib/supabase/client"
 import Link from "next/link"
 import { updateInvoice } from "@/app/actions/invoice-update"
 import { toast } from "sonner"
+import { useCurrencyOrDefault } from "@/components/app/currency-provider"
+import { ALL_CURRENCIES } from "@/lib/utils/currency"
 
 interface EditInvoiceFormProps {
   invoiceId: string
@@ -36,6 +38,13 @@ export function EditInvoiceForm({ invoiceId, initialData }: EditInvoiceFormProps
   const [selectedClientId, setSelectedClientId] = useState<string | null>(initialData.clientId || null)
   const [isLoadingClients, setIsLoadingClients] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const { enabledCurrencies } = useCurrencyOrDefault()
+  
+  // Filter currencies to only show enabled ones
+  // If no currencies are enabled (public pages), show all currencies
+  const availableCurrencies = enabledCurrencies && enabledCurrencies.length > 0
+    ? ALL_CURRENCIES.filter(currency => enabledCurrencies.includes(currency.code))
+    : ALL_CURRENCIES
 
   useEffect(() => {
     const loadClients = async () => {
@@ -291,7 +300,7 @@ export function EditInvoiceForm({ invoiceId, initialData }: EditInvoiceFormProps
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {CURRENCIES.map((currency) => (
+                  {availableCurrencies.map((currency) => (
                     <SelectItem key={currency.code} value={currency.code}>
                       {currency.code} - {currency.name}
                     </SelectItem>

@@ -19,6 +19,8 @@ import {
 } from "@/lib/utils/invoice"
 import { createClient } from "@/lib/supabase/client"
 import Link from "next/link"
+import { useCurrencyOrDefault } from "@/components/app/currency-provider"
+import { ALL_CURRENCIES } from "@/lib/utils/currency"
 
 interface InvoiceFormProps {
   mode?: "create" | "edit"
@@ -43,6 +45,13 @@ export function InvoiceForm({
   const [clients, setClients] = useState<any[]>([])
   const [selectedClientId, setSelectedClientId] = useState<string | null>(initialData.clientId || null)
   const [isLoadingClients, setIsLoadingClients] = useState(true)
+  const { enabledCurrencies } = useCurrencyOrDefault()
+  
+  // Filter currencies to only show enabled ones
+  // If no currencies are enabled (public pages), show all currencies
+  const availableCurrencies = enabledCurrencies && enabledCurrencies.length > 0
+    ? ALL_CURRENCIES.filter(currency => enabledCurrencies.includes(currency.code))
+    : ALL_CURRENCIES
 
   useEffect(() => {
     const loadClients = async () => {
@@ -288,7 +297,7 @@ export function InvoiceForm({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {CURRENCIES.map((currency) => (
+                  {availableCurrencies.map((currency) => (
                     <SelectItem key={currency.code} value={currency.code}>
                       {currency.code} - {currency.name}
                     </SelectItem>
