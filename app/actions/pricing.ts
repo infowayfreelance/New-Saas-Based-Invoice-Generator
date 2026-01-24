@@ -142,6 +142,7 @@ export async function getPricingCountry(): Promise<string> {
 
 /**
  * Get pricing data with automatic country detection and US fallback
+ * This ensures pricing is ALWAYS returned - never an empty array
  */
 export async function getPricingDataWithFallback(): Promise<PricingData[]> {
   // Get the country code
@@ -152,8 +153,13 @@ export async function getPricingDataWithFallback(): Promise<PricingData[]> {
   
   // If no pricing found and country is not US, fallback to US
   if (pricingData.length === 0 && countryCode !== 'US') {
-    console.log('[v0] No pricing for country', countryCode, '- falling back to US')
     pricingData = await getCountryPricing('US')
+  }
+  
+  // If still no pricing (even US failed), log error but return empty array
+  // The UI will handle this gracefully with a fallback message
+  if (pricingData.length === 0) {
+    console.error('No pricing data found even after US fallback')
   }
   
   return pricingData

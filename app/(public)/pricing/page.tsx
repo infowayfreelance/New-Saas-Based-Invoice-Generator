@@ -79,7 +79,7 @@ export default async function PricingPage() {
         </div>
 
         {/* Pricing Cards */}
-        {pricingData.length > 0 && (
+        {pricingData.length > 0 ? (
           <>
             <div className="mt-12 grid gap-6 lg:grid-cols-4">
               {/* Guest Plan */}
@@ -195,6 +195,17 @@ export default async function PricingPage() {
               </p>
             </div>
           </>
+        ) : (
+          <div className="mt-12 rounded-lg border border-border bg-card p-12 text-center">
+            <h3 className="text-xl font-semibold">Pricing Information Unavailable</h3>
+            <p className="mt-2 text-muted-foreground">
+              We're having trouble loading pricing information. Please try again later or{' '}
+              <Link href="/contact" className="font-medium text-primary hover:underline">
+                contact us
+              </Link>{' '}
+              for assistance.
+            </p>
+          </div>
         )}
       </div>
     </div>
