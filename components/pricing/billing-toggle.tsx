@@ -1,13 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 export function BillingToggle() {
   const [isYearly, setIsYearly] = useState(true)
 
-  const handleToggle = (yearly: boolean) => {
-    setIsYearly(yearly)
-    
+  const updatePricing = (yearly: boolean) => {
     // Update all pricing cards
     const cards = document.querySelectorAll('[data-plan]')
     
@@ -35,6 +33,16 @@ export function BillingToggle() {
       }
     })
   }
+
+  const handleToggle = (yearly: boolean) => {
+    setIsYearly(yearly)
+    updatePricing(yearly)
+  }
+
+  // Initialize with yearly pricing on mount
+  useEffect(() => {
+    updatePricing(true)
+  }, [])
 
   return (
     <div className="inline-flex items-center gap-3 rounded-lg border bg-card p-1 text-card-foreground shadow-sm">

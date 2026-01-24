@@ -78,7 +78,7 @@ export default async function PricingPage() {
           <BillingToggle />
         </div>
 
-        {/* Pricing Cards */}
+        {/* Pricing Cards - Always render when data exists */}
         {pricingData.length > 0 ? (
           <>
             <div className="mt-12 grid gap-6 lg:grid-cols-4">
@@ -196,14 +196,19 @@ export default async function PricingPage() {
             </div>
           </>
         ) : (
-          <div className="mt-12 rounded-lg border border-border bg-card p-12 text-center">
-            <h3 className="text-xl font-semibold">Pricing Information Unavailable</h3>
+          <div className="mt-12 rounded-lg border border-destructive/50 bg-destructive/10 p-12 text-center">
+            <h3 className="text-xl font-semibold">Unable to Load Pricing</h3>
             <p className="mt-2 text-muted-foreground">
-              We're having trouble loading pricing information. Please try again later or{' '}
-              <Link href="/contact" className="font-medium text-primary hover:underline">
-                contact us
-              </Link>{' '}
-              for assistance.
+              We're experiencing technical difficulties loading pricing information. Please refresh the page or try again in a few moments.
+            </p>
+            <p className="mt-4">
+              <Link href="/register" className="font-medium text-primary hover:underline">
+                Sign up for free
+              </Link>
+              {' '}or{' '}
+              <Link href="/" className="font-medium text-primary hover:underline">
+                return home
+              </Link>
             </p>
           </div>
         )}

@@ -23,9 +23,12 @@ export interface CountryOption {
 /**
  * Get pricing data for a specific country from Supabase
  * Fetches from country_pricing table with join to currencies
+ * Only returns active pricing
  */
 export async function getCountryPricing(countryCode: string = 'US'): Promise<PricingData[]> {
   const supabase = await createClient()
+  
+  console.log('[v0] Fetching pricing for country:', countryCode)
   
   const { data, error } = await supabase
     .from('country_pricing')
@@ -37,11 +40,13 @@ export async function getCountryPricing(countryCode: string = 'US'): Promise<Pri
       currency_code,
       price_amount,
       price_yearly,
+      is_active,
       currencies!inner (
         symbol
       )
     `)
     .eq('country_code', countryCode)
+    .eq('is_active', true)
     .order('price_amount', { ascending: true })
   
   if (error) {
@@ -53,6 +58,8 @@ export async function getCountryPricing(countryCode: string = 'US'): Promise<Pri
     console.log('[v0] No pricing data found for country:', countryCode)
     return []
   }
+  
+  console.log('[v0] Found', data.length, 'pricing rows for country:', countryCode)
   
   // Transform database response
   return data.map(item => ({
@@ -99,44 +106,37 @@ export async function getAvailableCountries(): Promise<CountryOption[]> {
 }
 
 /**
- * Get the appropriate country code for pricing
- * Priority: 1) User's selected country (if logged in), 2) IP-based detection, 3) US fallback
+ * Get the appropriate country code for pricing using IP detection
+ * Priority: 1) x-vercel-ip-country header, 2) cf-ipcountry header, 3) US fallback
+ * This is for PUBLIC pricing page - no user authentication required
  */
 export async function getPricingCountry(): Promise<string> {
-  const supabase = await createClient()
-  
-  // Check if user is logged in
-  const { data: { user } } = await supabase.auth.getUser()
-  
-  if (user) {
-    // User is logged in - get their selected country from user_settings
-    const { data: settings } = await supabase
-      .from('user_settings')
-      .select('country_code')
-      .eq('user_id', user.id)
-      .single()
-    
-    if (settings?.country_code) {
-      console.log('[v0] Using user country from settings:', settings.country_code)
-      return settings.country_code
-    }
-  }
-  
-  // User not logged in - detect from IP using Vercel headers
   try {
     const headersList = await headers()
-    const vercelCountry = headersList.get('x-vercel-ip-country')
     
-    if (vercelCountry && vercelCountry !== 'unknown') {
-      console.log('[v0] Detected country from Vercel IP header:', vercelCountry)
-      return vercelCountry.toUpperCase()
+    // Try Vercel IP country header first
+    const vercelCountry = headersList.get('x-vercel-ip-country')
+    if (vercelCountry && vercelCountry !== 'unknown' && vercelCountry.trim() !== '') {
+      const countryCode = vercelCountry.toUpperCase()
+      console.log('[v0] Detected country from x-vercel-ip-country:', countryCode)
+      return countryCode
     }
+    
+    // Fallback to Cloudflare IP country header
+    const cfCountry = headersList.get('cf-ipcountry')
+    if (cfCountry && cfCountry !== 'unknown' && cfCountry !== 'XX' && cfCountry.trim() !== '') {
+      const countryCode = cfCountry.toUpperCase()
+      console.log('[v0] Detected country from cf-ipcountry:', countryCode)
+      return countryCode
+    }
+    
+    console.log('[v0] No valid country header found, falling back to US')
   } catch (error) {
     console.error('[v0] Error reading headers:', error)
   }
   
   // Fallback to US
-  console.log('[v0] No country detected, using US as default')
+  console.log('[v0] Using US as fallback country')
   return 'US'
 }
 
@@ -145,7 +145,7 @@ export async function getPricingCountry(): Promise<string> {
  * This ensures pricing is ALWAYS returned - never an empty array
  */
 export async function getPricingDataWithFallback(): Promise<PricingData[]> {
-  // Get the country code
+  // Get the country code from IP headers
   const countryCode = await getPricingCountry()
   
   // Try to get pricing for detected country
@@ -153,13 +153,13 @@ export async function getPricingDataWithFallback(): Promise<PricingData[]> {
   
   // If no pricing found and country is not US, fallback to US
   if (pricingData.length === 0 && countryCode !== 'US') {
+    console.log('[v0] No pricing for', countryCode, '- falling back to US pricing')
     pricingData = await getCountryPricing('US')
   }
   
-  // If still no pricing (even US failed), log error but return empty array
-  // The UI will handle this gracefully with a fallback message
+  // If still no pricing (even US failed), log error
   if (pricingData.length === 0) {
-    console.error('No pricing data found even after US fallback')
+    console.error('[v0] CRITICAL: No pricing data found even after US fallback')
   }
   
   return pricingData
