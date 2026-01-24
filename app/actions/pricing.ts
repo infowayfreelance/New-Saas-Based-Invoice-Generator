@@ -22,69 +22,94 @@ export interface CountryOption {
 
 /**
  * Get pricing data for a specific country from Supabase
- * Fetches from country_pricing table with join to currencies
- * Only returns active pricing
+ * CORRECT SCHEMA: country_pricing(country_code, plan_id, currency_code, price_amount, price_yearly)
+ * Joins with plans(id, code, name) and currencies(code, symbol)
  */
 export async function getCountryPricing(countryCode: string = 'US'): Promise<PricingData[]> {
   const supabase = await createClient()
   
-  console.log('[v0] Fetching pricing for country:', countryCode)
+  console.log('[v0] === PRICING FETCH START ===')
+  console.log('[v0] Detected country code:', countryCode)
   
   const { data, error } = await supabase
     .from('country_pricing')
     .select(`
       country_code,
-      country_name,
-      plan_code,
-      plan_name,
-      currency_code,
       price_amount,
       price_yearly,
-      is_active,
-      currencies!inner (
+      currency_code,
+      plans (
+        id,
+        code,
+        name
+      ),
+      currencies (
         symbol
       )
     `)
     .eq('country_code', countryCode)
-    .eq('is_active', true)
     .order('price_amount', { ascending: true })
   
   if (error) {
-    console.error('[v0] Error fetching country pricing:', error)
+    console.error('[v0] ERROR fetching country pricing:', error)
+    console.error('[v0] Error details:', JSON.stringify(error, null, 2))
     return []
   }
+  
+  console.log('[v0] Query result - Row count:', data?.length || 0)
   
   if (!data || data.length === 0) {
-    console.log('[v0] No pricing data found for country:', countryCode)
+    console.log('[v0] WARNING: No pricing data returned for country:', countryCode)
     return []
   }
   
-  console.log('[v0] Found', data.length, 'pricing rows for country:', countryCode)
+  console.log('[v0] Raw first row (before normalization):', JSON.stringify(data[0], null, 2))
   
-  // Transform database response
-  return data.map(item => ({
-    plan_code: item.plan_code,
-    plan_name: item.plan_name,
-    plan_description: null, // Can be added to schema later if needed
-    country_code: item.country_code,
-    country_name: item.country_name,
-    currency_code: item.currency_code,
-    currency_symbol: (item.currencies as any).symbol,
-    price_amount: item.price_amount,
-    price_yearly: item.price_yearly,
-  }))
+  // Transform database response - handle Supabase join arrays
+  const transformed = data.map(item => {
+    // Supabase returns foreign key joins as arrays or objects - normalize them
+    const plan = Array.isArray(item.plans) ? item.plans[0] : item.plans
+    const currency = Array.isArray(item.currencies) ? item.currencies[0] : item.currencies
+    
+    if (!plan || !currency) {
+      console.error('[v0] ERROR: Missing join data for row:', item)
+      return null
+    }
+    
+    return {
+      plan_code: plan.code,
+      plan_name: plan.name,
+      plan_description: null,
+      country_code: item.country_code,
+      country_name: countryCode, // We don't have country_name in DB, use code
+      currency_code: item.currency_code,
+      currency_symbol: currency.symbol,
+      price_amount: item.price_amount,
+      price_yearly: item.price_yearly,
+    }
+  }).filter(Boolean) as PricingData[]
+  
+  console.log('[v0] Transformed row count:', transformed.length)
+  if (transformed.length > 0) {
+    console.log('[v0] First normalized row:', JSON.stringify(transformed[0], null, 2))
+    console.log('[v0] All plan codes:', transformed.map(p => p.plan_code).join(', '))
+  }
+  console.log('[v0] === PRICING FETCH END ===')
+  
+  return transformed
 }
 
 /**
  * Get list of all available countries with pricing data
+ * Note: country_pricing only has country_code, not country_name
  */
 export async function getAvailableCountries(): Promise<CountryOption[]> {
   const supabase = await createClient()
   
   const { data, error } = await supabase
     .from('country_pricing')
-    .select('country_code, country_name')
-    .order('country_name', { ascending: true })
+    .select('country_code')
+    .order('country_code', { ascending: true })
   
   if (error) {
     console.error('[v0] Error fetching countries:', error)
@@ -96,7 +121,7 @@ export async function getAvailableCountries(): Promise<CountryOption[]> {
     if (!acc.find(c => c.code === curr.country_code)) {
       acc.push({
         code: curr.country_code,
-        name: curr.country_name
+        name: curr.country_code // Use code as name since we don't have a mapping
       })
     }
     return acc
@@ -145,22 +170,37 @@ export async function getPricingCountry(): Promise<string> {
  * This ensures pricing is ALWAYS returned - never an empty array
  */
 export async function getPricingDataWithFallback(): Promise<PricingData[]> {
+  console.log('[v0] ======================================')
+  console.log('[v0] PRICING PAGE DATA FETCH')
+  console.log('[v0] ======================================')
+  
   // Get the country code from IP headers
   const countryCode = await getPricingCountry()
+  console.log('[v0] Step 1: Country detection result:', countryCode)
   
   // Try to get pricing for detected country
+  console.log('[v0] Step 2: Fetching pricing for detected country...')
   let pricingData = await getCountryPricing(countryCode)
+  console.log('[v0] Step 2 result: Found', pricingData.length, 'pricing rows')
   
   // If no pricing found and country is not US, fallback to US
   if (pricingData.length === 0 && countryCode !== 'US') {
-    console.log('[v0] No pricing for', countryCode, '- falling back to US pricing')
+    console.log('[v0] Step 3: No pricing for', countryCode, '- ATTEMPTING US FALLBACK')
     pricingData = await getCountryPricing('US')
+    console.log('[v0] Step 3 result: US fallback returned', pricingData.length, 'rows')
   }
   
-  // If still no pricing (even US failed), log error
+  // If still no pricing (even US failed), log critical error
   if (pricingData.length === 0) {
-    console.error('[v0] CRITICAL: No pricing data found even after US fallback')
+    console.error('[v0] ❌ CRITICAL ERROR: No pricing data found even after US fallback!')
+    console.error('[v0] This means the country_pricing table has no active rows.')
+    console.error('[v0] Check database: SELECT * FROM country_pricing WHERE country_code = \'US\';')
+  } else {
+    console.log('[v0] ✅ SUCCESS: Returning', pricingData.length, 'pricing plans')
+    console.log('[v0] Plans:', pricingData.map(p => p.plan_code).join(', '))
   }
+  
+  console.log('[v0] ======================================')
   
   return pricingData
 }

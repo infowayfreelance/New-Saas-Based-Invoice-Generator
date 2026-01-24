@@ -60,6 +60,11 @@ const planDescriptions = {
 export default async function PricingPage() {
   // Get pricing data with automatic country detection and US fallback
   const pricingData = await getPricingDataWithFallback()
+  
+  console.log('[v0] Pricing Page Render - Data length:', pricingData.length)
+  if (pricingData.length > 0) {
+    console.log('[v0] Sample pricing item:', JSON.stringify(pricingData[0], null, 2))
+  }
 
   return (
     <div className="px-4 py-20 sm:px-6 lg:px-8">
@@ -196,20 +201,37 @@ export default async function PricingPage() {
             </div>
           </>
         ) : (
-          <div className="mt-12 rounded-lg border border-destructive/50 bg-destructive/10 p-12 text-center">
-            <h3 className="text-xl font-semibold">Unable to Load Pricing</h3>
-            <p className="mt-2 text-muted-foreground">
-              We're experiencing technical difficulties loading pricing information. Please refresh the page or try again in a few moments.
-            </p>
-            <p className="mt-4">
-              <Link href="/register" className="font-medium text-primary hover:underline">
-                Sign up for free
-              </Link>
-              {' '}or{' '}
-              <Link href="/" className="font-medium text-primary hover:underline">
-                return home
-              </Link>
-            </p>
+          <div className="mt-12 space-y-4">
+            <div className="rounded-lg border border-destructive bg-destructive/10 p-6">
+              <h3 className="font-semibold text-destructive">⚠️ Debug: No Pricing Data Loaded</h3>
+              <div className="mt-2 space-y-1 text-sm">
+                <p><strong>Issue:</strong> No rows returned from country_pricing table</p>
+                <p><strong>Expected:</strong> US pricing should always be available as fallback</p>
+                <p><strong>Check server logs for:</strong></p>
+                <ul className="ml-4 list-disc space-y-1 text-xs">
+                  <li>Detected country code</li>
+                  <li>Query result row counts</li>
+                  <li>Sample data structure</li>
+                  <li>Database connection errors</li>
+                </ul>
+                <p className="mt-2"><strong>Database query:</strong> SELECT * FROM country_pricing WHERE country_code = 'US';</p>
+              </div>
+            </div>
+            <div className="rounded-lg border border-border bg-card p-8 text-center">
+              <h3 className="text-xl font-semibold">Pricing Information Unavailable</h3>
+              <p className="mt-2 text-muted-foreground">
+                We're experiencing technical difficulties. Please check the server logs or contact support.
+              </p>
+              <div className="mt-4 flex justify-center gap-4">
+                <Link href="/register" className="font-medium text-primary hover:underline">
+                  Sign up for free
+                </Link>
+                <span className="text-muted-foreground">·</span>
+                <Link href="/" className="font-medium text-primary hover:underline">
+                  Return home
+                </Link>
+              </div>
+            </div>
           </div>
         )}
       </div>
