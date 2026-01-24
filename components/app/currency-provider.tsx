@@ -82,8 +82,21 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
 
 export function useCurrency() {
   const context = useContext(CurrencyContext)
+  return context
+}
+
+export function useCurrencyOrDefault() {
+  const context = useContext(CurrencyContext)
+  // Return default values if not in a provider (e.g., public pages)
   if (!context) {
-    throw new Error("useCurrency must be used within a CurrencyProvider")
+    return {
+      enabledCurrencies: ["USD", "EUR", "GBP", "PKR"], // All currencies available on public pages
+      defaultCurrency: "USD",
+      setEnabledCurrencies: () => {},
+      setDefaultCurrency: () => {},
+      isCurrencyEnabled: () => true,
+      toggleCurrency: () => {},
+    }
   }
   return context
 }
