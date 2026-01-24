@@ -60,6 +60,17 @@ const planDescriptions = {
 export default async function PricingPage() {
   // Get pricing data with automatic country detection and US fallback
   const pricingData = await getPricingDataWithFallback()
+  
+  // Helper function to format currency amounts
+  const formatCurrency = (amount: number, currencyCode: string, currencySymbol: string) => {
+    // For display purposes, use the symbol directly without complex formatting
+    // This ensures consistency across all currencies (PKR, USD, GBP, etc.)
+    const formatted = amount.toLocaleString('en-US', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    })
+    return `${currencySymbol}${formatted}`
+  }
 
   return (
     <div className="px-4 py-20 sm:px-6 lg:px-8">
@@ -124,8 +135,26 @@ export default async function PricingPage() {
                   const features = planFeatures[plan.plan_code as keyof typeof planFeatures] || []
                   const description = planDescriptions[plan.plan_code as keyof typeof planDescriptions] || ''
                   
-                  // Calculate monthly-equivalent for yearly pricing
-                  const yearlyMonthly = Math.round(plan.price_yearly / 12)
+                  // MANDATORY DATA RULES:
+                  // Monthly price comes from: country_pricing.price_amount
+                  // Yearly total comes from: country_pricing.price_yearly (SOURCE OF TRUTH)
+                  // In Yearly toggle: displayPerMonth = price_yearly / 12
+                  
+                  // NO DOUBLE DISCOUNT - price_yearly already has discount applied
+                  const displayMonthly = plan.price_amount
+                  const displayYearlyTotal = plan.price_yearly
+                  const displayYearlyPerMonth = plan.price_yearly / 12
+                  
+                  // Debug logging
+                  console.log('[v0] Pricing Card Render:', {
+                    plan_code: plan.plan_code,
+                    price_amount: plan.price_amount,
+                    price_yearly: plan.price_yearly,
+                    displayMonthly,
+                    displayYearlyPerMonth: displayYearlyPerMonth.toFixed(2),
+                    displayYearlyTotal,
+                    currency: plan.currency_code,
+                  })
 
                   return (
                     <Card
@@ -148,7 +177,7 @@ export default async function PricingPage() {
                           <div data-price-monthly>
                             <div className="flex items-baseline gap-1">
                               <span className="text-4xl font-bold">
-                                {plan.currency_symbol}{plan.price_amount}
+                                {formatCurrency(displayMonthly, plan.currency_code, plan.currency_symbol)}
                               </span>
                               <span className="text-muted-foreground">/month</span>
                             </div>
@@ -158,7 +187,7 @@ export default async function PricingPage() {
                           <div data-price-yearly className="hidden">
                             <div className="flex items-baseline gap-1">
                               <span className="text-4xl font-bold">
-                                {plan.currency_symbol}{yearlyMonthly}
+                                {formatCurrency(displayYearlyPerMonth, plan.currency_code, plan.currency_symbol)}
                               </span>
                               <span className="text-muted-foreground">/month</span>
                             </div>
@@ -166,11 +195,11 @@ export default async function PricingPage() {
                               <p className="text-sm text-muted-foreground">billed annually</p>
                               <p className="text-sm">
                                 <span className="text-muted-foreground line-through">
-                                  {plan.currency_symbol}{plan.price_amount}
+                                  {formatCurrency(displayMonthly, plan.currency_code, plan.currency_symbol)}
                                 </span>
                               </p>
                               <p className="text-xs text-muted-foreground">
-                                Billed {plan.currency_symbol}{plan.price_yearly} yearly
+                                Billed {formatCurrency(displayYearlyTotal, plan.currency_code, plan.currency_symbol)} yearly
                               </p>
                             </div>
                           </div>
