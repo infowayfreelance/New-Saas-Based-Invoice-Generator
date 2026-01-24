@@ -1,7 +1,7 @@
 'use server'
 
 import { createClient } from "@/lib/supabase/server"
-import { getClientIp } from "@/lib/utils/ip"
+import { headers } from "next/headers"
 
 export interface PricingData {
   plan_code: string
@@ -99,40 +99,62 @@ export async function getAvailableCountries(): Promise<CountryOption[]> {
 }
 
 /**
- * Detect user's country based on IP address
- * Uses an external API service to get country from IP
- * Falls back to US if detection fails
+ * Get the appropriate country code for pricing
+ * Priority: 1) User's selected country (if logged in), 2) IP-based detection, 3) US fallback
  */
-export async function getUserCountryFromIp(): Promise<string> {
-  try {
-    const ip = await getClientIp()
+export async function getPricingCountry(): Promise<string> {
+  const supabase = await createClient()
+  
+  // Check if user is logged in
+  const { data: { user } } = await supabase.auth.getUser()
+  
+  if (user) {
+    // User is logged in - get their selected country from user_settings
+    const { data: settings } = await supabase
+      .from('user_settings')
+      .select('country_code')
+      .eq('user_id', user.id)
+      .single()
     
-    // Skip country detection for local/unknown IPs
-    if (ip === 'unknown' || ip === '127.0.0.1' || ip === '::1') {
-      return 'US'
+    if (settings?.country_code) {
+      console.log('[v0] Using user country from settings:', settings.country_code)
+      return settings.country_code
     }
-    
-    // Use ipapi.co for IP geolocation (free tier: 1000 requests/day)
-    const response = await fetch(`https://ipapi.co/${ip}/country/`, {
-      next: { revalidate: 3600 } // Cache for 1 hour
-    })
-    
-    if (!response.ok) {
-      console.log('[v0] IP geolocation failed, using default country')
-      return 'US'
-    }
-    
-    const countryCode = await response.text()
-    
-    // Validate country code format (should be 2 letters)
-    if (countryCode && countryCode.length === 2) {
-      console.log('[v0] Detected country from IP:', countryCode)
-      return countryCode.toUpperCase()
-    }
-    
-    return 'US'
-  } catch (error) {
-    console.error('[v0] Error detecting country from IP:', error)
-    return 'US'
   }
+  
+  // User not logged in - detect from IP using Vercel headers
+  try {
+    const headersList = await headers()
+    const vercelCountry = headersList.get('x-vercel-ip-country')
+    
+    if (vercelCountry && vercelCountry !== 'unknown') {
+      console.log('[v0] Detected country from Vercel IP header:', vercelCountry)
+      return vercelCountry.toUpperCase()
+    }
+  } catch (error) {
+    console.error('[v0] Error reading headers:', error)
+  }
+  
+  // Fallback to US
+  console.log('[v0] No country detected, using US as default')
+  return 'US'
+}
+
+/**
+ * Get pricing data with automatic country detection and US fallback
+ */
+export async function getPricingDataWithFallback(): Promise<PricingData[]> {
+  // Get the country code
+  const countryCode = await getPricingCountry()
+  
+  // Try to get pricing for detected country
+  let pricingData = await getCountryPricing(countryCode)
+  
+  // If no pricing found and country is not US, fallback to US
+  if (pricingData.length === 0 && countryCode !== 'US') {
+    console.log('[v0] No pricing for country', countryCode, '- falling back to US')
+    pricingData = await getCountryPricing('US')
+  }
+  
+  return pricingData
 }

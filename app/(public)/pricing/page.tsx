@@ -4,16 +4,11 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Check, X } from "lucide-react"
 import { PricingButton } from "@/components/pricing/pricing-button"
 import { BillingToggle } from "@/components/pricing/billing-toggle"
-import { CountrySelector } from "@/components/pricing/country-selector"
-import { getCountryPricing, getAvailableCountries, getUserCountryFromIp } from "@/app/actions/pricing"
+import { getPricingDataWithFallback } from "@/app/actions/pricing"
 
 export const metadata: Metadata = {
   title: "Pricing - Choose Your Plan",
   description: "Simple, transparent pricing for everyone. Choose the plan that fits your needs with country-specific pricing.",
-}
-
-interface PageProps {
-  searchParams: Promise<{ country?: string }>
 }
 
 const planFeatures = {
@@ -62,21 +57,9 @@ const planDescriptions = {
   PRO: "For power users",
 }
 
-export default async function PricingPage({ searchParams }: PageProps) {
-  const params = await searchParams
-  
-  // Get country from URL query param or detect from IP
-  const detectedCountry = await getUserCountryFromIp()
-  const countryCode = params.country || detectedCountry
-  
-  // Fetch pricing data and available countries
-  const [pricingData, availableCountries] = await Promise.all([
-    getCountryPricing(countryCode),
-    getAvailableCountries()
-  ])
-
-  // Check if pricing data is available
-  const hasPricingData = pricingData.length > 0
+export default async function PricingPage() {
+  // Get pricing data with automatic country detection and US fallback
+  const pricingData = await getPricingDataWithFallback()
 
   return (
     <div className="px-4 py-20 sm:px-6 lg:px-8">
@@ -90,33 +73,13 @@ export default async function PricingPage({ searchParams }: PageProps) {
           </p>
         </div>
 
-        {/* Country Selector */}
-        <div className="mt-8 flex justify-center">
-          <CountrySelector countries={availableCountries} selectedCountry={countryCode} />
-        </div>
-
         {/* Billing Toggle */}
-        <div className="mt-8 flex justify-center">
+        <div className="mt-12 flex justify-center">
           <BillingToggle />
         </div>
 
-        {/* Show error if no pricing data */}
-        {!hasPricingData && (
-          <div className="mt-12 text-center">
-            <Card className="mx-auto max-w-md border-destructive/50">
-              <CardHeader>
-                <CardTitle className="text-destructive">Pricing Unavailable</CardTitle>
-                <CardDescription>
-                  Pricing information is not available for the selected country at this time.
-                  Please select a different country or contact us for more information.
-                </CardDescription>
-              </CardHeader>
-            </Card>
-          </div>
-        )}
-
         {/* Pricing Cards */}
-        {hasPricingData && (
+        {pricingData.length > 0 && (
           <>
             <div className="mt-12 grid gap-6 lg:grid-cols-4">
               {/* Guest Plan */}
@@ -224,8 +187,7 @@ export default async function PricingPage({ searchParams }: PageProps) {
 
             <div className="mt-16 text-center">
               <p className="text-muted-foreground">
-                All prices in {pricingData[0]?.currency_code || 'USD'}.{' '}
-                Pricing for {pricingData[0]?.country_name || countryCode}.{' '}
+                All prices in {pricingData[0]?.currency_code || 'USD'} for {pricingData[0]?.country_name || 'your region'}.{' '}
                 Need a custom plan?{" "}
                 <Link href="/contact" className="font-medium text-primary hover:underline">
                   Contact us

@@ -4,8 +4,8 @@ import type React from "react"
 
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
-import { useState, Suspense } from "react"
-import { signUp } from "@/app/actions/auth"
+import { useState, useEffect, Suspense } from "react"
+import { signUp, detectCountryFromIp } from "@/app/actions/auth"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -20,8 +20,25 @@ function RegisterForm() {
   const [success, setSuccess] = useState(false)
   const [successEmail, setSuccessEmail] = useState("")
   const [selectedCountry, setSelectedCountry] = useState<string>("")
+  const [isDetectingCountry, setIsDetectingCountry] = useState(true)
   const searchParams = useSearchParams()
   const plan = searchParams.get("plan") || "basic"
+
+  // Auto-detect country on mount
+  useEffect(() => {
+    const detectCountry = async () => {
+      try {
+        const detectedCountry = await detectCountryFromIp()
+        setSelectedCountry(detectedCountry)
+      } catch (error) {
+        console.error('[v0] Failed to detect country:', error)
+        setSelectedCountry('US') // Fallback to US
+      } finally {
+        setIsDetectingCountry(false)
+      }
+    }
+    detectCountry()
+  }, [])
 
   const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -32,9 +49,10 @@ function RegisterForm() {
     formData.set("plan", plan)
     formData.set("redirectUrl", `${window.location.origin}/auth/callback`)
     
-    // Add default currency based on selected country
+    // Add country_code and default currency
+    formData.set("country_code", selectedCountry)
     const defaultCurrency = getDefaultCurrencyForCountry(selectedCountry)
-    formData.set("defaultCurrency", defaultCurrency)
+    formData.set("default_currency", defaultCurrency)
 
     try {
       const result = await signUp(formData)
@@ -102,10 +120,10 @@ function RegisterForm() {
                   <Input id="name" name="name" type="text" placeholder="John Doe" />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="country">Country</Label>
-                  <Select value={selectedCountry} onValueChange={setSelectedCountry} required>
+                  <Label htmlFor="country">Country *</Label>
+                  <Select value={selectedCountry} onValueChange={setSelectedCountry} required disabled={isDetectingCountry}>
                     <SelectTrigger id="country">
-                      <SelectValue placeholder="Select your country" />
+                      <SelectValue placeholder={isDetectingCountry ? "Detecting..." : "Select your country"} />
                     </SelectTrigger>
                     <SelectContent>
                       {COUNTRIES.map((country) => (
@@ -115,10 +133,13 @@ function RegisterForm() {
                       ))}
                     </SelectContent>
                   </Select>
-                  <input type="hidden" name="country" value={selectedCountry} />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="city">City *</Label>
+                  <Input id="city" name="city" type="text" placeholder="New York" required />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="email">Email *</Label>
                   <Input id="email" name="email" type="email" placeholder="you@example.com" required />
                 </div>
                 <div className="grid gap-2">
@@ -130,8 +151,8 @@ function RegisterForm() {
                   <Input id="confirmPassword" name="confirmPassword" type="password" required />
                 </div>
                 {error && <p className="text-sm text-destructive">{error}</p>}
-                <Button type="submit" className="w-full" disabled={isLoading || !selectedCountry}>
-                  {isLoading ? "Creating account..." : "Create account"}
+                <Button type="submit" className="w-full" disabled={isLoading || !selectedCountry || isDetectingCountry}>
+                  {isLoading ? "Creating account..." : isDetectingCountry ? "Detecting country..." : "Create account"}
                 </Button>
               </div>
               <div className="mt-4 text-center text-sm">
