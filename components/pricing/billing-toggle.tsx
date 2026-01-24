@@ -58,18 +58,16 @@ export function BillingToggle() {
       </button>
       <button
         onClick={() => handleToggle(true)}
-        className={`relative rounded-md px-4 py-2 text-sm font-medium transition-colors ${
+        className={`relative rounded-md px-4 py-2 pr-16 text-sm font-medium transition-colors ${
           isYearly
             ? 'bg-primary text-primary-foreground shadow-sm'
             : 'text-muted-foreground hover:text-foreground'
         }`}
       >
         Yearly
-        {isYearly && (
-          <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-green-500 text-[10px] font-bold text-white">
-            -20%
-          </span>
-        )}
+        <span className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-green-500 px-2 py-0.5 text-[10px] font-semibold text-white">
+          Save 20%
+        </span>
       </button>
     </div>
   )

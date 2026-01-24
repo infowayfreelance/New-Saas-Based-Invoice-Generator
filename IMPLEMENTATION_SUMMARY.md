@@ -12,7 +12,7 @@ I've implemented comprehensive debugging and fixes for the pricing page accordin
 **Before:** Query referenced non-existent columns (`is_active`, `plan_id`)
 
 **After:** Query uses EXACT columns from schema:
-```typescript
+\`\`\`typescript
 .select(`
   country_code,
   country_name,
@@ -27,7 +27,7 @@ I've implemented comprehensive debugging and fixes for the pricing page accordin
 `)
 .eq('country_code', countryCode)
 .order('price_amount', { ascending: true })
-```
+\`\`\`
 
 ### 2. Comprehensive Logging (As Required)
 **Added logging for:**
@@ -39,7 +39,7 @@ I've implemented comprehensive debugging and fixes for the pricing page accordin
 - ✅ Step-by-step execution flow
 
 **Example log output:**
-```
+\`\`\`
 [v0] ======================================
 [v0] PRICING PAGE DATA FETCH
 [v0] ======================================
@@ -53,11 +53,11 @@ I've implemented comprehensive debugging and fixes for the pricing page accordin
 [v0] Transformed row count: 3
 [v0] === PRICING FETCH END ===
 [v0] ✅ SUCCESS: Returning 3 pricing plans
-```
+\`\`\`
 
 ### 3. Deterministic Query Approach (As Required)
 **Exact implementation:**
-```typescript
+\`\`\`typescript
 A) Try pricing for resolved country:
    - Query country_pricing with detected country_code
    - Join with currencies for symbol
@@ -67,7 +67,7 @@ B) If rows.length === 0 AND countryCode !== "US":
    - Log fallback attempt
    - Repeat query with countryCode = "US"
    - Log fallback result
-```
+\`\`\`
 
 ### 4. Rendering Uses Correct Fields (As Required)
 **File:** `/app/(public)/pricing/page.tsx`
@@ -123,18 +123,18 @@ When no data is returned, page shows:
    - Check sample data structure
 
 2. **Run Database Check**
-   ```sql
+   \`\`\`sql
    SELECT * FROM country_pricing WHERE country_code = 'US';
-   ```
+   \`\`\`
    Should return 3 rows.
 
 3. **Verify Join Works**
-   ```sql
+   \`\`\`sql
    SELECT cp.*, c.symbol 
    FROM country_pricing cp
    INNER JOIN currencies c ON cp.currency_code = c.code
    WHERE cp.country_code = 'US';
-   ```
+   \`\`\`
    Should return 3 rows with symbol field.
 
 ## Documentation Files
