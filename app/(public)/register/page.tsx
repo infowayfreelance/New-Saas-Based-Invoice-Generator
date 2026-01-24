@@ -11,12 +11,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { FileText } from "lucide-react"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { COUNTRIES, getDefaultCurrencyForCountry } from "@/lib/utils/currency"
 
 function RegisterForm() {
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [successEmail, setSuccessEmail] = useState("")
+  const [selectedCountry, setSelectedCountry] = useState<string>("")
   const searchParams = useSearchParams()
   const plan = searchParams.get("plan") || "basic"
 
@@ -28,6 +31,10 @@ function RegisterForm() {
     const formData = new FormData(e.currentTarget)
     formData.set("plan", plan)
     formData.set("redirectUrl", `${window.location.origin}/auth/callback`)
+    
+    // Add default currency based on selected country
+    const defaultCurrency = getDefaultCurrencyForCountry(selectedCountry)
+    formData.set("defaultCurrency", defaultCurrency)
 
     try {
       const result = await signUp(formData)
@@ -95,6 +102,22 @@ function RegisterForm() {
                   <Input id="name" name="name" type="text" placeholder="John Doe" />
                 </div>
                 <div className="grid gap-2">
+                  <Label htmlFor="country">Country</Label>
+                  <Select value={selectedCountry} onValueChange={setSelectedCountry} required>
+                    <SelectTrigger id="country">
+                      <SelectValue placeholder="Select your country" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {COUNTRIES.map((country) => (
+                        <SelectItem key={country.code} value={country.code}>
+                          {country.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <input type="hidden" name="country" value={selectedCountry} />
+                </div>
+                <div className="grid gap-2">
                   <Label htmlFor="email">Email</Label>
                   <Input id="email" name="email" type="email" placeholder="you@example.com" required />
                 </div>
@@ -107,7 +130,7 @@ function RegisterForm() {
                   <Input id="confirmPassword" name="confirmPassword" type="password" required />
                 </div>
                 {error && <p className="text-sm text-destructive">{error}</p>}
-                <Button type="submit" className="w-full" disabled={isLoading}>
+                <Button type="submit" className="w-full" disabled={isLoading || !selectedCountry}>
                   {isLoading ? "Creating account..." : "Create account"}
                 </Button>
               </div>
