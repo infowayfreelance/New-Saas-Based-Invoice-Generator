@@ -58,35 +58,35 @@ The pricing page has been updated with comprehensive logging to identify why pri
 ## How to Debug
 
 1. **Check Server Logs** (most important):
-   ```
+   \`\`\`
    [v0] === PRICING FETCH START ===
    [v0] Detected country code: US
    [v0] Query result - Row count: 3
    [v0] First row sample: {...}
    [v0] All plan codes returned: BASIC, STANDARD, PRO
    [v0] === PRICING FETCH END ===
-   ```
+   \`\`\`
 
 2. **Verify Database Has Data**:
-   ```sql
+   \`\`\`sql
    SELECT * FROM country_pricing WHERE country_code = 'US';
    -- Should return 3 rows (BASIC, STANDARD, PRO)
-   ```
+   \`\`\`
 
 3. **Check Currencies Table**:
-   ```sql
+   \`\`\`sql
    SELECT * FROM currencies WHERE code = 'USD';
    -- Should return 1 row with symbol '$'
-   ```
+   \`\`\`
 
 4. **Verify Join Works**:
-   ```sql
+   \`\`\`sql
    SELECT cp.*, c.symbol 
    FROM country_pricing cp
    INNER JOIN currencies c ON cp.currency_code = c.code
    WHERE cp.country_code = 'US';
    -- Should return 3 rows with symbol included
-   ```
+   \`\`\`
 
 ## How It Works (When Fixed)
 
@@ -107,7 +107,7 @@ To test different countries locally:
 ## Expected Console Log Output
 
 Successful fetch should show:
-```
+\`\`\`
 [v0] ======================================
 [v0] PRICING PAGE DATA FETCH
 [v0] ======================================
@@ -125,7 +125,7 @@ Successful fetch should show:
 [v0] Plans: BASIC, STANDARD, PRO
 [v0] ======================================
 [v0] Pricing Page Render - Data length: 3
-```
+\`\`\`
 
 ## Troubleshooting
 

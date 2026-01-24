@@ -24,11 +24,11 @@
 1. **Open browser console or server logs**
 2. **Look for the log sequence:**
 
-```
+\`\`\`
 [v0] ======================================
 [v0] PRICING PAGE DATA FETCH
 [v0] ======================================
-```
+\`\`\`
 
 3. **Check each step:**
 
@@ -43,30 +43,30 @@
 ## Quick Database Checks
 
 ### 1. Check if table exists
-```sql
+\`\`\`sql
 SELECT COUNT(*) FROM country_pricing;
-```
+\`\`\`
 **Expected:** At least 3 rows
 
 ### 2. Check US pricing exists
-```sql
+\`\`\`sql
 SELECT * FROM country_pricing WHERE country_code = 'US';
-```
+\`\`\`
 **Expected:** 3 rows (BASIC, STANDARD, PRO)
 
 ### 3. Check join works
-```sql
+\`\`\`sql
 SELECT cp.*, c.symbol 
 FROM country_pricing cp
 INNER JOIN currencies c ON cp.currency_code = c.code
 WHERE cp.country_code = 'US';
-```
+\`\`\`
 **Expected:** 3 rows with `symbol` field populated
 
 ### 4. Check currencies table
-```sql
+\`\`\`sql
 SELECT * FROM currencies WHERE code = 'USD';
-```
+\`\`\`
 **Expected:** 1 row with symbol = '$'
 
 ## Common Issues & Solutions
@@ -76,25 +76,25 @@ SELECT * FROM currencies WHERE code = 'USD';
 **Cause:** No data in country_pricing table
 
 **Solution:**
-```sql
+\`\`\`sql
 -- Run seed data script
 -- File: /scripts/010_create_country_pricing.sql
 INSERT INTO country_pricing (country_code, country_name, plan_code, plan_name, currency_code, price_amount, price_yearly) VALUES
   ('US', 'United States', 'BASIC', 'Basic', 'USD', 5.00, 48.00),
   ('US', 'United States', 'STANDARD', 'Standard', 'USD', 12.00, 115.20),
   ('US', 'United States', 'PRO', 'Pro', 'USD', 29.99, 287.90);
-```
+\`\`\`
 
 ### Issue: Join error with currencies
 
 **Cause:** currencies table missing or no USD row
 
 **Solution:**
-```sql
+\`\`\`sql
 -- File: /scripts/009_create_currencies.sql
 INSERT INTO currencies (code, name, symbol) VALUES
   ('USD', 'US Dollar', '$');
-```
+\`\`\`
 
 ### Issue: Query error in logs
 
