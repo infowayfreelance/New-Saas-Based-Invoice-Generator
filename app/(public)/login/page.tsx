@@ -39,17 +39,23 @@ export default function LoginPage() {
     try {
       const result = await signIn(formData)
 
+      // Only set error if result exists and has an error property
       if (result?.error) {
         setError(result.error)
         if (result.suggestion === "register") {
           setShowSignUpPrompt(true)
         }
+        setIsLoading(false)
       }
-      // If successful, signIn redirects to /app
-    } catch (err) {
-      // signIn redirects on success, so we only get here on error
+      // If successful, signIn redirects to /app (no result returned)
+    } catch (err: any) {
+      // Next.js redirect throws a special error - let it propagate
+      if (err?.digest?.startsWith("NEXT_REDIRECT")) {
+        throw err
+      }
+      // Only show error for actual failures
+      console.error("[v0] Login error:", err)
       setError("An unexpected error occurred. Please try again.")
-    } finally {
       setIsLoading(false)
     }
   }
