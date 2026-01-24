@@ -4,11 +4,11 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Check, X } from "lucide-react"
 import { PricingButton } from "@/components/pricing/pricing-button"
 import { BillingToggle } from "@/components/pricing/billing-toggle"
-import { getCountryPricing, getUserCountry } from "@/app/actions/pricing"
+import { getPricingDataWithFallback } from "@/app/actions/pricing"
 
 export const metadata: Metadata = {
-  title: "Pricing",
-  description: "Simple, transparent pricing for everyone. Choose the plan that fits your needs.",
+  title: "Pricing - Choose Your Plan",
+  description: "Simple, transparent pricing for everyone. Choose the plan that fits your needs with country-specific pricing.",
 }
 
 const planFeatures = {
@@ -58,8 +58,8 @@ const planDescriptions = {
 }
 
 export default async function PricingPage() {
-  const countryCode = await getUserCountry()
-  const pricingData = await getCountryPricing(countryCode)
+  // Get pricing data with automatic country detection and US fallback
+  const pricingData = await getPricingDataWithFallback()
 
   return (
     <div className="px-4 py-20 sm:px-6 lg:px-8">
@@ -79,84 +79,21 @@ export default async function PricingPage() {
         </div>
 
         {/* Pricing Cards */}
-        <div className="mt-12 grid gap-6 lg:grid-cols-4">
-          {/* Guest Plan */}
-          <Card className="relative flex flex-col border-border">
-            <CardHeader>
-              <CardTitle>Guest</CardTitle>
-              <CardDescription>{planDescriptions.GUEST}</CardDescription>
-              <div className="mt-4">
-                <span className="text-4xl font-bold">Free</span>
-              </div>
-            </CardHeader>
-            <CardContent className="flex-1">
-              <ul className="space-y-3">
-                {planFeatures.GUEST.map((feature) => (
-                  <li key={feature.text} className="flex items-start gap-3">
-                    {feature.included ? (
-                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                    ) : (
-                      <X className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground/50" />
-                    )}
-                    <span className={feature.included ? "" : "text-muted-foreground/50"}>
-                      {feature.text}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </CardContent>
-            <CardFooter>
-              <Link href="/free-invoice" className="w-full">
-                <button className="w-full rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground">
-                  Create Free Invoice
-                </button>
-              </Link>
-            </CardFooter>
-          </Card>
-
-          {/* Paid Plans */}
-          {pricingData.map((plan, index) => {
-            const isPopular = plan.plan_code === 'STANDARD'
-            const features = planFeatures[plan.plan_code as keyof typeof planFeatures] || []
-            const description = planDescriptions[plan.plan_code as keyof typeof planDescriptions] || ''
-
-            return (
-              <Card
-                key={plan.plan_code}
-                className={`relative flex flex-col ${isPopular ? "border-primary shadow-lg" : "border-border"}`}
-                data-plan={plan.plan_code.toLowerCase()}
-              >
-                {isPopular && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <span className="rounded-full bg-primary px-3 py-1 text-xs font-medium text-primary-foreground">
-                      Most Popular
-                    </span>
-                  </div>
-                )}
+        {pricingData.length > 0 && (
+          <>
+            <div className="mt-12 grid gap-6 lg:grid-cols-4">
+              {/* Guest Plan */}
+              <Card className="relative flex flex-col border-border">
                 <CardHeader>
-                  <CardTitle>{plan.plan_name}</CardTitle>
-                  <CardDescription>{description}</CardDescription>
+                  <CardTitle>Guest</CardTitle>
+                  <CardDescription>{planDescriptions.GUEST}</CardDescription>
                   <div className="mt-4">
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-4xl font-bold">
-                        <span data-price-monthly>{plan.currency_symbol}{plan.price_amount}</span>
-                        <span data-price-yearly className="hidden">{plan.currency_symbol}{plan.price_yearly}</span>
-                      </span>
-                      <span className="text-muted-foreground">
-                        <span data-period-monthly>/month</span>
-                        <span data-period-yearly className="hidden">/year</span>
-                      </span>
-                    </div>
-                    <div data-savings className="mt-1 hidden">
-                      <span className="inline-flex items-center rounded-full bg-green-50 px-2 py-1 text-xs font-medium text-green-700 dark:bg-green-500/10 dark:text-green-400">
-                        Save 20%
-                      </span>
-                    </div>
+                    <span className="text-4xl font-bold">Free</span>
                   </div>
                 </CardHeader>
                 <CardContent className="flex-1">
                   <ul className="space-y-3">
-                    {features.map((feature) => (
+                    {planFeatures.GUEST.map((feature) => (
                       <li key={feature.text} className="flex items-start gap-3">
                         {feature.included ? (
                           <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
@@ -171,26 +108,94 @@ export default async function PricingPage() {
                   </ul>
                 </CardContent>
                 <CardFooter>
-                  <PricingButton
-                    planSlug={plan.plan_code.toLowerCase() as "basic" | "standard" | "pro"}
-                    variant={isPopular ? "default" : "outline"}
-                  >
-                    Upgrade to {plan.plan_name}
-                  </PricingButton>
+                  <Link href="/free-invoice" className="w-full">
+                    <button className="w-full rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground">
+                      Create Free Invoice
+                    </button>
+                  </Link>
                 </CardFooter>
               </Card>
-            )
-          })}
-        </div>
 
-        <div className="mt-16 text-center">
-          <p className="text-muted-foreground">
-            All prices in {pricingData[0]?.currency_code || 'USD'}. Need a custom plan?{" "}
-            <Link href="/contact" className="font-medium text-primary hover:underline">
-              Contact us
-            </Link>
-          </p>
-        </div>
+              {/* Paid Plans */}
+              {pricingData.map((plan) => {
+                const isPopular = plan.plan_code === 'STANDARD'
+                const features = planFeatures[plan.plan_code as keyof typeof planFeatures] || []
+                const description = planDescriptions[plan.plan_code as keyof typeof planDescriptions] || ''
+
+                return (
+                  <Card
+                    key={plan.plan_code}
+                    className={`relative flex flex-col ${isPopular ? "border-primary shadow-lg" : "border-border"}`}
+                    data-plan={plan.plan_code.toLowerCase()}
+                  >
+                    {isPopular && (
+                      <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                        <span className="rounded-full bg-primary px-3 py-1 text-xs font-medium text-primary-foreground">
+                          Most Popular
+                        </span>
+                      </div>
+                    )}
+                    <CardHeader>
+                      <CardTitle>{plan.plan_name}</CardTitle>
+                      <CardDescription>{description}</CardDescription>
+                      <div className="mt-4">
+                        <div className="flex items-baseline gap-1">
+                          <span className="text-4xl font-bold">
+                            <span data-price-monthly>{plan.currency_symbol}{plan.price_amount}</span>
+                            <span data-price-yearly className="hidden">{plan.currency_symbol}{plan.price_yearly}</span>
+                          </span>
+                          <span className="text-muted-foreground">
+                            <span data-period-monthly>/month</span>
+                            <span data-period-yearly className="hidden">/year</span>
+                          </span>
+                        </div>
+                        <div data-savings className="mt-1 hidden">
+                          <span className="inline-flex items-center rounded-full bg-green-50 px-2 py-1 text-xs font-medium text-green-700 dark:bg-green-500/10 dark:text-green-400">
+                            Save 20%
+                          </span>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="flex-1">
+                      <ul className="space-y-3">
+                        {features.map((feature) => (
+                          <li key={feature.text} className="flex items-start gap-3">
+                            {feature.included ? (
+                              <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                            ) : (
+                              <X className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground/50" />
+                            )}
+                            <span className={feature.included ? "" : "text-muted-foreground/50"}>
+                              {feature.text}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    </CardContent>
+                    <CardFooter>
+                      <PricingButton
+                        planSlug={plan.plan_code.toLowerCase() as "basic" | "standard" | "pro"}
+                        variant={isPopular ? "default" : "outline"}
+                      >
+                        Upgrade to {plan.plan_name}
+                      </PricingButton>
+                    </CardFooter>
+                  </Card>
+                )
+              })}
+            </div>
+
+            <div className="mt-16 text-center">
+              <p className="text-muted-foreground">
+                All prices in {pricingData[0]?.currency_code || 'USD'} for {pricingData[0]?.country_name || 'your region'}.{' '}
+                Need a custom plan?{" "}
+                <Link href="/contact" className="font-medium text-primary hover:underline">
+                  Contact us
+                </Link>
+              </p>
+            </div>
+          </>
+        )}
       </div>
     </div>
   )

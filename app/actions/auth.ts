@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
+import { headers } from "next/headers"
 
 export async function signUp(formData: FormData) {
   const name = formData.get("name") as string
@@ -10,9 +11,20 @@ export async function signUp(formData: FormData) {
   const confirmPassword = formData.get("confirmPassword") as string
   const plan = (formData.get("plan") as string) || "basic"
   const redirectUrl = formData.get("redirectUrl") as string
+  const countryCode = formData.get("country_code") as string
+  const city = formData.get("city") as string
+  const defaultCurrency = formData.get("default_currency") as string
 
   if (!email || !password) {
     return { error: "Email and password are required" }
+  }
+
+  if (!countryCode) {
+    return { error: "Country is required" }
+  }
+
+  if (!city) {
+    return { error: "City is required" }
   }
 
   if (password !== confirmPassword) {
@@ -34,6 +46,9 @@ export async function signUp(formData: FormData) {
         data: {
           name,
           plan,
+          country_code: countryCode,
+          city,
+          default_currency: defaultCurrency || 'USD',
         },
       },
     })
@@ -51,6 +66,29 @@ export async function signUp(formData: FormData) {
     console.error("Sign up error:", err)
     const errorMessage = typeof err === "string" ? err : err?.message || "Failed to create account. Please try again."
     return { error: errorMessage }
+  }
+}
+
+/**
+ * Detect user's country from IP address using Vercel headers
+ */
+export async function detectCountryFromIp(): Promise<string> {
+  try {
+    const headersList = await headers()
+    
+    // Use Vercel's x-vercel-ip-country header (most reliable on Vercel)
+    const vercelCountry = headersList.get('x-vercel-ip-country')
+    if (vercelCountry && vercelCountry !== 'unknown') {
+      console.log('[v0] Detected country from Vercel header:', vercelCountry)
+      return vercelCountry.toUpperCase()
+    }
+    
+    // Fallback to US
+    console.log('[v0] No country detected, using US as default')
+    return 'US'
+  } catch (error) {
+    console.error('[v0] Error detecting country:', error)
+    return 'US'
   }
 }
 
