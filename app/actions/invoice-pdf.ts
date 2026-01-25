@@ -1,0 +1,97 @@
+"use server"
+
+import { createClient } from "@/lib/supabase/server"
+import { redirect } from "next/navigation"
+import type { InvoiceFormData } from "@/lib/utils/invoice"
+
+export async function getInvoiceDataForPDF(invoiceId: string): Promise<{ 
+  success: boolean
+  data?: InvoiceFormData
+  error?: string 
+}> {
+  const supabase = await createClient()
+
+  // Get authenticated user
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { success: false, error: "Unauthorized" }
+  }
+
+  console.log("[v0] PDF: Fetching invoice data for ID:", invoiceId)
+
+  // Fetch invoice with items and client data
+  const { data: invoice, error: invoiceError } = await supabase
+    .from("invoices")
+    .select(`
+      *,
+      invoice_items (*),
+      clients (
+        id,
+        name,
+        email,
+        address,
+        company_name
+      )
+    `)
+    .eq("id", invoiceId)
+    .eq("user_id", user.id)
+    .single()
+
+  if (invoiceError || !invoice) {
+    console.error("[v0] PDF: Invoice not found or access denied:", invoiceError)
+    return { success: false, error: "Invoice not found or access denied" }
+  }
+
+  console.log("[v0] PDF: Invoice fetched successfully")
+
+  // Get user data for "from" information
+  const { data: userData, error: userError } = await supabase
+    .from("users")
+    .select("full_name, email")
+    .eq("id", user.id)
+    .single()
+
+  if (userError) {
+    console.error("[v0] PDF: Error fetching user data:", userError)
+  }
+
+  // Transform to InvoiceFormData format
+  const invoiceData: InvoiceFormData = {
+    invoiceNumber: invoice.invoice_number,
+    issueDate: invoice.issue_date,
+    dueDate: invoice.due_date,
+    currency: invoice.currency || "USD",
+    
+    // From (business) info
+    fromName: userData?.full_name || "Your Business",
+    fromEmail: userData?.email || "",
+    fromAddress: "", // Not stored in current schema
+    
+    // Client info
+    clientId: invoice.client_id || undefined,
+    clientName: invoice.clients?.company_name || invoice.clients?.name || "",
+    clientEmail: invoice.clients?.email || "",
+    clientAddress: invoice.clients?.address || "",
+    
+    // Items
+    items: (invoice.invoice_items || []).map((item: any) => ({
+      id: item.id,
+      description: item.description || "",
+      quantity: item.quantity?.toString() || "1",
+      unitPrice: item.unit_price?.toString() || "0",
+      taxRate: item.tax_rate?.toString() || "0",
+    })),
+    
+    // Totals
+    discountAmount: invoice.discount_amount?.toString() || "0",
+    
+    // Notes
+    notes: invoice.notes || "",
+    terms: invoice.terms || "",
+  }
+
+  return { success: true, data: invoiceData }
+}

@@ -29,25 +29,25 @@
 ## Queries Implemented
 
 ### Query 1: Total Invoices Card
-```typescript
+\`\`\`typescript
 Source: invoices table
 Filters:
   - user_id = auth user id
   - issue_date >= startDate
   - issue_date <= endDate
 Returns: COUNT of matching rows
-```
+\`\`\`
 
 ### Query 2: Total Clients Card
-```typescript
+\`\`\`typescript
 Source: clients table
 Filters:
   - user_id = auth user id
 Returns: COUNT of matching rows (no date filter)
-```
+\`\`\`
 
 ### Query 3: Total Received Card
-```typescript
+\`\`\`typescript
 Source: invoices table
 Filters:
   - user_id = auth user id
@@ -55,19 +55,19 @@ Filters:
   - issue_date >= startDate
   - issue_date <= endDate
 Returns: Array of invoices, then SUM of total_amount
-```
+\`\`\`
 
 ### Query 4: Total Pending Card
-```typescript
+\`\`\`typescript
 Source: dashboard_pending_converted view
 Filters:
   - user_id = auth user id
 Returns: Array of rows, then SUM of pending_converted_amount
 Note: NO date filter (pending is current state regardless of issue date)
-```
+\`\`\`
 
 ### Query 5: Draft Invoices List
-```typescript
+\`\`\`typescript
 Source: dashboard_invoices_base view
 Columns: invoice_id, invoice_number, client_name, invoice_total, issue_date, status
 Filters:
@@ -77,10 +77,10 @@ Filters:
   - issue_date <= endDate
 Order: issue_date DESC
 Returns: Array of draft invoice objects
-```
+\`\`\`
 
 ### Query 6: Pending Invoices List
-```typescript
+\`\`\`typescript
 Source: dashboard_invoices_base view
 Columns: invoice_id, invoice_number, client_name, invoice_total, total_paid, issue_date, status
 Filters:
@@ -90,10 +90,10 @@ Filters:
   - issue_date <= endDate
 Order: issue_date DESC
 Returns: Array of pending invoice objects
-```
+\`\`\`
 
 ### Query 7: Paid Invoices List
-```typescript
+\`\`\`typescript
 Source: dashboard_invoices_base view
 Columns: invoice_id, invoice_number, client_name, invoice_total, total_paid, issue_date, status
 Filters:
@@ -104,7 +104,7 @@ Filters:
 Order: issue_date DESC
 Limit: 10 most recent
 Returns: Array of paid invoice objects
-```
+\`\`\`
 
 ---
 
@@ -136,7 +136,7 @@ The code was querying for wrong column names:
 - Used `amount_paid` instead of `total_paid`
 
 ### Confirmed Correct Columns (from Supabase)
-```
+\`\`\`
 dashboard_invoices_base view columns:
 - invoice_id
 - user_id
@@ -148,7 +148,7 @@ dashboard_invoices_base view columns:
 - total_paid     ← NOT amount_paid
 - remaining_amount
 - client_name (from join)
-```
+\`\`\`
 
 ### Fix Applied
 Updated all queries to use correct column names:

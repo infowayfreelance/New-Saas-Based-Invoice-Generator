@@ -5,9 +5,9 @@ The dashboard was showing red error banners when data was unavailable or when qu
 
 ## Root Cause
 The server actions (`getDashboardStats` and `getInvoiceWorkflowData`) were returning error objects:
-```typescript
+\`\`\`typescript
 Promise<DashboardStats | { error: string }>
-```
+\`\`\`
 
 When errors occurred, the UI components would receive `{ error: string }` and display red error alerts.
 
@@ -27,7 +27,7 @@ When errors occurred, the UI components would receive `{ error: string }` and di
 - Uses `.maybeSingle()` pattern for view queries (when applicable)
 
 **Key Changes:**
-```typescript
+\`\`\`typescript
 // Before
 if (invoicesError) {
   console.error("[v0] Error fetching total invoices:", invoicesError)
@@ -39,7 +39,7 @@ if (invoicesError) {
   console.error("[v0] Error fetching total invoices:", invoicesError)
 }
 // Continue execution, use zero values
-```
+\`\`\`
 
 ### 2. UI Components Changes
 

@@ -132,7 +132,7 @@ export async function generateAuthenticatedInvoice(
       user_id: user.id,
       client_id: data.clientId || null,
       invoice_number: data.invoiceNumber,
-      status: "DRAFT", // Always uppercase
+      status: "draft", // Lowercase to match DB schema
       issue_date: data.issueDate,
       due_date: data.dueDate,
       currency: data.currency,
@@ -311,7 +311,7 @@ export async function updateInvoice(
   console.log("[v0] STEP 7: Building update payload...")
   const updateData: any = {
     invoice_number: data.invoiceNumber,
-    status: "DRAFT", // Always uppercase
+    status: "draft", // Lowercase to match DB schema
     issue_date: data.issueDate,
     due_date: data.dueDate,
     currency: data.currency,
@@ -492,11 +492,11 @@ export async function sendInvoiceEmail(invoiceId: string): Promise<{ success: bo
   }
 
   // TODO: Implement actual email sending logic here
-  // For now, just update the invoice status to SENT
+  // For now, just update the invoice status to 'sent' (lowercase to match DB schema)
   const { error: updateError } = await supabase
     .from("invoices")
     .update({
-      status: "SENT",
+      status: "sent",
       sent_at: new Date().toISOString(),
     })
     .eq("id", invoiceId)

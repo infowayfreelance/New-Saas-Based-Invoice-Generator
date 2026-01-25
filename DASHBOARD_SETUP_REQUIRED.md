@@ -6,9 +6,9 @@ The dashboard code is correctly written to use the `dashboard_invoices_base` vie
 
 ## Error Messages You're Seeing
 
-```
+\`\`\`
 column dashboard_invoices_base.invoice_id does not exist
-```
+\`\`\`
 
 This happens because the view hasn't been created in Supabase.
 
@@ -67,7 +67,7 @@ The `dashboard_invoices_base` view provides these columns:
 
 After running the migrations, you can verify they worked:
 
-```sql
+\`\`\`sql
 -- Check if view exists
 SELECT * FROM dashboard_invoices_base LIMIT 1;
 
@@ -75,7 +75,7 @@ SELECT * FROM dashboard_invoices_base LIMIT 1;
 SELECT column_name 
 FROM information_schema.columns 
 WHERE table_name = 'dashboard_invoices_base';
-```
+\`\`\`
 
 ## Current Code Status
 
