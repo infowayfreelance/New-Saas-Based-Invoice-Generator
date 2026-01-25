@@ -3,9 +3,12 @@
 
 @custom-variant dark (&:is(.dark *));
 
-@theme {
+@theme inline {
   --font-sans: 'Geist', 'Geist Fallback';
   --font-mono: 'Geist Mono', 'Geist Mono Fallback';
+}
+
+@theme {
   --radius: 0.625rem;
   --color-background: #fafafa;
   --color-foreground: #171717;
