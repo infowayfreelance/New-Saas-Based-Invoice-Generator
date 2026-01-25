@@ -120,22 +120,21 @@ export async function getDashboardStats(
     )
 
     // Fetch total pending from dashboard_pending_converted view
-    // Sum pending amounts for invoices within the date range
-    const { data: pendingInvoices, error: pendingError } = await supabase
-      .from("invoices")
-      .select("total_amount, amount_paid")
+    // This view returns multiple rows (one per pending invoice)
+    // We need to sum the pending_converted_amount column
+    const { data: pendingRows, error: pendingError } = await supabase
+      .from("dashboard_pending_converted")
+      .select("pending_converted_amount")
       .eq("user_id", user.id)
-      .in("status", ["SENT", "PARTIALLY_PAID", "OVERDUE"])
-      .gte("issue_date", startDate)
-      .lte("issue_date", endDate)
 
     if (pendingError) {
-      console.error("[v0] Error fetching pending invoices:", pendingError)
+      console.error("[v0] Error fetching pending amounts:", pendingError)
     }
 
-    const totalPending = (pendingInvoices || []).reduce((sum, inv) => {
-      const pending = Number(inv.total_amount || 0) - Number(inv.amount_paid || 0)
-      return sum + (pending > 0 ? pending : 0)
+    // Sum all pending_converted_amount values from the array of rows
+    // If no rows exist (empty array), totalPending will be 0
+    const totalPending = (pendingRows || []).reduce((sum, row) => {
+      return sum + Number(row.pending_converted_amount || 0)
     }, 0)
 
     return {
