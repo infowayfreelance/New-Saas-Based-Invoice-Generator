@@ -73,7 +73,7 @@ async function getFXRate(
  */
 export async function recordPayment(
   input: RecordPaymentInput,
-): Promise<{ success: true } | { error: string }> {
+): Promise<{ success: true; newStatus: string; totalPaid: number; remaining: number } | { error: string }> {
   try {
     const supabase = await createClient()
 
@@ -89,7 +89,7 @@ export async function recordPayment(
     // Get invoice details
     const { data: invoice, error: invoiceError } = await supabase
       .from("invoices")
-      .select("id, user_id, client_id, currency, total_amount, amount_paid")
+      .select("id, user_id, client_id, currency, total_amount, amount_paid, status")
       .eq("id", input.invoiceId)
       .single()
 
@@ -102,6 +102,13 @@ export async function recordPayment(
     if (invoice.user_id !== user.id) {
       return { error: "Unauthorized" }
     }
+
+    // Block additional payments if invoice is already fully paid
+    if (invoice.status === 'paid') {
+      return { error: "This invoice is already fully paid" }
+    }
+
+    const invoiceTotal = Number(invoice.total_amount || 0)
 
     // Get FX rate
     const fxResult = await getFXRate(invoice.currency, input.dashboardCurrency)
@@ -136,12 +143,60 @@ export async function recordPayment(
       return { error: "Failed to record payment" }
     }
 
+    // STEP 2: Calculate total paid from all payment_entries for this invoice
+    const { data: paymentData, error: paymentError } = await supabase
+      .from("payment_entries")
+      .select("amount")
+      .eq("invoice_id", input.invoiceId)
+      .eq("user_id", user.id)
+
+    if (paymentError) {
+      console.error("[v0] Error calculating total paid:", paymentError)
+      return { error: "Failed to calculate payment total" }
+    }
+
+    const totalPaid = (paymentData || []).reduce(
+      (sum, payment) => sum + Number(payment.amount || 0),
+      0,
+    )
+
+    // STEP 3: Calculate remaining
+    const remaining = invoiceTotal - totalPaid
+
+    // STEP 4: Update invoice status and amount_paid
+    let newStatus: string
+    if (remaining <= 0) {
+      newStatus = 'paid'
+    } else {
+      newStatus = 'partially_paid'
+    }
+
+    const { error: updateError } = await supabase
+      .from("invoices")
+      .update({
+        status: newStatus,
+        amount_paid: totalPaid,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", input.invoiceId)
+      .eq("user_id", user.id)
+
+    if (updateError) {
+      console.error("[v0] Error updating invoice status:", updateError)
+      return { error: "Payment recorded but failed to update invoice status" }
+    }
+
     // Revalidate dashboard and payment pages
     revalidatePath("/app")
     revalidatePath("/app/payments")
     revalidatePath("/app/invoices")
 
-    return { success: true }
+    return { 
+      success: true,
+      newStatus,
+      totalPaid,
+      remaining: remaining > 0 ? remaining : 0,
+    }
   } catch (error: any) {
     console.error("[v0] Error in recordPayment:", error)
     return { error: error.message || "An unexpected error occurred" }

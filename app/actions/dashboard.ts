@@ -250,9 +250,9 @@ export async function getInvoiceWorkflowData(
       console.error("[v0] Dashboard: Draft error:", draftError)
     }
 
-    // Fetch pending invoices (sent, partially_paid, overdue)
+    // Fetch pending invoices (sent and partially_paid with remaining balance > 0)
     // STEP 1 CONFIRMATION: Data source = invoices table (NOT payment_entries)
-    // STEP 2 IMPLEMENTATION: Added remaining_amount > 0 filter and date range
+    // STEP 2 IMPLEMENTATION: Include both 'sent' and 'partially_paid' statuses
     const { data: pendingData, error: pendingError } = await supabase
       .from("invoices")
       .select(`
@@ -270,10 +270,8 @@ export async function getInvoiceWorkflowData(
         )
       `)
       .eq("user_id", user.id)
-      .eq("status", "sent")
+      .in("status", ["sent", "partially_paid"])
       .gt("total_amount", 0)
-      .gte("issue_date", startDate)
-      .lte("issue_date", endDate)
       .order("issue_date", { ascending: false })
 
     console.log("[v0] Dashboard: PENDING query result")
