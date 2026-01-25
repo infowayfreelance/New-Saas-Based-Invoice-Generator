@@ -77,6 +77,11 @@ export async function getDashboardStats(
 
     const { startDate, endDate } = getDateRange(filter)
 
+    console.log("[v0] AUDIT: getDashboardStats called")
+    console.log("[v0] AUDIT: Auth user ID:", user.id)
+    console.log("[v0] AUDIT: Currency:", currency)
+    console.log("[v0] AUDIT: Date filter:", { startDate, endDate })
+
     // Fetch total invoices (filtered by date)
     const { count: totalInvoices, error: invoicesError } = await supabase
       .from("invoices")
@@ -85,8 +90,14 @@ export async function getDashboardStats(
       .gte("issue_date", startDate)
       .lte("issue_date", endDate)
 
+    console.log("[v0] AUDIT: TOTAL INVOICES query")
+    console.log("[v0] AUDIT: - Source: invoices table")
+    console.log("[v0] AUDIT: - Filters: user_id =", user.id)
+    console.log("[v0] AUDIT: - Date range:", startDate, "to", endDate)
+    console.log("[v0] AUDIT: - Count returned:", totalInvoices || 0)
+
     if (invoicesError) {
-      console.error("[v0] Error fetching total invoices:", invoicesError)
+      console.error("[v0] AUDIT: Total invoices error:", invoicesError)
     }
 
     // Fetch total clients (all clients, not filtered by date)
@@ -127,8 +138,21 @@ export async function getDashboardStats(
       .select("pending_converted_amount")
       .eq("user_id", user.id)
 
+    console.log("[v0] AUDIT: TOTAL PENDING query")
+    console.log("[v0] AUDIT: - Source: dashboard_pending_converted view")
+    console.log("[v0] AUDIT: - Filters: user_id =", user.id)
+    console.log("[v0] AUDIT: - Rows returned:", pendingRows?.length || 0)
+    if (pendingRows && pendingRows.length > 0) {
+      console.log(
+        "[v0] AUDIT: - First 2 rows:",
+        pendingRows.slice(0, 2).map((r: any) => ({
+          pending_converted_amount: r.pending_converted_amount,
+        })),
+      )
+    }
+
     if (pendingError) {
-      console.error("[v0] Error fetching pending amounts:", pendingError)
+      console.error("[v0] AUDIT: Pending amounts error:", pendingError)
     }
 
     // Sum all pending_converted_amount values from the array of rows
@@ -136,6 +160,8 @@ export async function getDashboardStats(
     const totalPending = (pendingRows || []).reduce((sum, row) => {
       return sum + Number(row.pending_converted_amount || 0)
     }, 0)
+
+    console.log("[v0] AUDIT: - Total pending calculated:", totalPending)
 
     return {
       totalInvoices: totalInvoices || 0,
@@ -190,25 +216,47 @@ export async function getInvoiceWorkflowData(
 
     const { startDate, endDate } = getDateRange(filter)
 
+    console.log("[v0] AUDIT: getInvoiceWorkflowData called")
+    console.log("[v0] AUDIT: Auth user ID:", user.id)
+    console.log("[v0] AUDIT: Date filter:", { startDate, endDate })
+
     // Fetch draft invoices from dashboard_invoices_base view
+    // NOTE: View confirmed to have columns: invoice_id, invoice_total, total_paid, remaining_amount
     const { data: draftData, error: draftError } = await supabase
       .from("dashboard_invoices_base")
-      .select("invoice_id, invoice_number, client_name, total_amount, issue_date, status")
+      .select("invoice_id, invoice_number, client_name, invoice_total, issue_date, status")
       .eq("user_id", user.id)
       .eq("status", "draft")
       .gte("issue_date", startDate)
       .lte("issue_date", endDate)
       .order("issue_date", { ascending: false })
 
+    console.log("[v0] AUDIT: DRAFT query")
+    console.log("[v0] AUDIT: - Source: dashboard_invoices_base")
+    console.log("[v0] AUDIT: - Filters: user_id =", user.id, ", status = 'draft'")
+    console.log("[v0] AUDIT: - Date range:", startDate, "to", endDate)
+    console.log("[v0] AUDIT: - Rows returned:", draftData?.length || 0)
+    if (draftData && draftData.length > 0) {
+      console.log(
+        "[v0] AUDIT: - First 2 rows:",
+        draftData.slice(0, 2).map((r: any) => ({
+          invoice_id: r.invoice_id,
+          issue_date: r.issue_date,
+          status: r.status,
+          invoice_total: r.invoice_total,
+          user_id: r.user_id,
+        })),
+      )
+    }
     if (draftError) {
-      console.error("[v0] Error fetching draft invoices:", draftError)
+      console.error("[v0] AUDIT: Draft error:", draftError)
     }
 
     // Fetch pending invoices from dashboard_invoices_base view
     const { data: pendingData, error: pendingError } = await supabase
       .from("dashboard_invoices_base")
       .select(
-        "invoice_id, invoice_number, client_name, total_amount, amount_paid, issue_date, status",
+        "invoice_id, invoice_number, client_name, invoice_total, total_paid, issue_date, status",
       )
       .eq("user_id", user.id)
       .in("status", ["sent", "partially_paid", "overdue"])
@@ -216,15 +264,37 @@ export async function getInvoiceWorkflowData(
       .lte("issue_date", endDate)
       .order("issue_date", { ascending: false })
 
+    console.log("[v0] AUDIT: PENDING query")
+    console.log("[v0] AUDIT: - Source: dashboard_invoices_base")
+    console.log(
+      "[v0] AUDIT: - Filters: user_id =",
+      user.id,
+      ", status IN ['sent', 'partially_paid', 'overdue']",
+    )
+    console.log("[v0] AUDIT: - Date range:", startDate, "to", endDate)
+    console.log("[v0] AUDIT: - Rows returned:", pendingData?.length || 0)
+    if (pendingData && pendingData.length > 0) {
+      console.log(
+        "[v0] AUDIT: - First 2 rows:",
+        pendingData.slice(0, 2).map((r: any) => ({
+          invoice_id: r.invoice_id,
+          issue_date: r.issue_date,
+          status: r.status,
+          invoice_total: r.invoice_total,
+          total_paid: r.total_paid,
+          remaining_amount: r.remaining_amount,
+        })),
+      )
+    }
     if (pendingError) {
-      console.error("[v0] Error fetching pending invoices:", pendingError)
+      console.error("[v0] AUDIT: Pending error:", pendingError)
     }
 
     // Fetch paid invoices from dashboard_invoices_base view
     const { data: paidData, error: paidError } = await supabase
       .from("dashboard_invoices_base")
       .select(
-        "invoice_id, invoice_number, client_name, total_amount, amount_paid, issue_date, status",
+        "invoice_id, invoice_number, client_name, invoice_total, total_paid, issue_date, status",
       )
       .eq("user_id", user.id)
       .in("status", ["paid", "partially_paid"])
@@ -233,19 +303,37 @@ export async function getInvoiceWorkflowData(
       .order("issue_date", { ascending: false })
       .limit(10) // Limit to recent 10 paid invoices
 
+    console.log("[v0] AUDIT: PAID query")
+    console.log("[v0] AUDIT: - Source: dashboard_invoices_base")
+    console.log("[v0] AUDIT: - Filters: user_id =", user.id, ", status IN ['paid', 'partially_paid']")
+    console.log("[v0] AUDIT: - Date range:", startDate, "to", endDate)
+    console.log("[v0] AUDIT: - Rows returned:", paidData?.length || 0)
+    if (paidData && paidData.length > 0) {
+      console.log(
+        "[v0] AUDIT: - First 2 rows:",
+        paidData.slice(0, 2).map((r: any) => ({
+          invoice_id: r.invoice_id,
+          issue_date: r.issue_date,
+          status: r.status,
+          invoice_total: r.invoice_total,
+          total_paid: r.total_paid,
+        })),
+      )
+    }
     if (paidError) {
-      console.error("[v0] Error fetching paid invoices:", paidError)
+      console.error("[v0] AUDIT: Paid error:", paidError)
     }
 
     // Transform data to workflow format - use empty arrays if data is null
     // Use invoice_id from the view (not id)
+    // Use invoice_total (not total_amount) and total_paid (not amount_paid)
     const draft: WorkflowInvoice[] =
       draftData?.map((inv: any) => ({
         id: inv.invoice_id,
         invoice_number: inv.invoice_number,
         client_name: inv.client_name || "Unknown Client",
-        total_amount: Number(inv.total_amount || 0),
-        remaining_amount: Number(inv.total_amount || 0),
+        total_amount: Number(inv.invoice_total || 0),
+        remaining_amount: Number(inv.invoice_total || 0),
         total_paid: 0,
         status: inv.status,
         issue_date: inv.issue_date,
@@ -256,9 +344,9 @@ export async function getInvoiceWorkflowData(
         id: inv.invoice_id,
         invoice_number: inv.invoice_number,
         client_name: inv.client_name || "Unknown Client",
-        total_amount: Number(inv.total_amount || 0),
-        remaining_amount: Number(inv.total_amount || 0) - Number(inv.amount_paid || 0),
-        total_paid: Number(inv.amount_paid || 0),
+        total_amount: Number(inv.invoice_total || 0),
+        remaining_amount: Number(inv.invoice_total || 0) - Number(inv.total_paid || 0),
+        total_paid: Number(inv.total_paid || 0),
         status: inv.status,
         issue_date: inv.issue_date,
       })) || []
@@ -268,9 +356,9 @@ export async function getInvoiceWorkflowData(
         id: inv.invoice_id,
         invoice_number: inv.invoice_number,
         client_name: inv.client_name || "Unknown Client",
-        total_amount: Number(inv.total_amount || 0),
-        remaining_amount: Number(inv.total_amount || 0) - Number(inv.amount_paid || 0),
-        total_paid: Number(inv.amount_paid || 0),
+        total_amount: Number(inv.invoice_total || 0),
+        remaining_amount: Number(inv.invoice_total || 0) - Number(inv.total_paid || 0),
+        total_paid: Number(inv.total_paid || 0),
         status: inv.status,
         issue_date: inv.issue_date,
       })) || []
