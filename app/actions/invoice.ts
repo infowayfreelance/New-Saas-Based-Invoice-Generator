@@ -132,7 +132,7 @@ export async function generateAuthenticatedInvoice(
       user_id: user.id,
       client_id: data.clientId || null,
       invoice_number: data.invoiceNumber,
-      status: "DRAFT", // Always uppercase
+      status: "draft", // Lowercase to match DB schema
       issue_date: data.issueDate,
       due_date: data.dueDate,
       currency: data.currency,
@@ -311,7 +311,7 @@ export async function updateInvoice(
   console.log("[v0] STEP 7: Building update payload...")
   const updateData: any = {
     invoice_number: data.invoiceNumber,
-    status: "DRAFT", // Always uppercase
+    status: "draft", // Lowercase to match DB schema
     issue_date: data.issueDate,
     due_date: data.dueDate,
     currency: data.currency,
@@ -441,6 +441,59 @@ export async function updateInvoiceAction(
   return result
 }
 
+export async function markInvoiceAsSent(invoiceId: string): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient()
+
+  // Get authenticated user
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return {
+      success: false,
+      error: "You must be logged in to update invoices",
+    }
+  }
+
+  // Fetch invoice to verify ownership
+  const { data: invoice, error: invoiceError } = await supabase
+    .from("invoices")
+    .select("id, status")
+    .eq("id", invoiceId)
+    .eq("user_id", user.id)
+    .single()
+
+  if (invoiceError || !invoice) {
+    return {
+      success: false,
+      error: "Invoice not found or access denied",
+    }
+  }
+
+  // Update invoice status to 'sent' (lowercase to match DB schema)
+  const { error: updateError } = await supabase
+    .from("invoices")
+    .update({
+      status: "sent",
+      sent_at: new Date().toISOString(),
+    })
+    .eq("id", invoiceId)
+    .eq("user_id", user.id)
+
+  if (updateError) {
+    console.error("[v0] Error updating invoice status:", updateError)
+    return {
+      success: false,
+      error: "Failed to update invoice status",
+    }
+  }
+
+  return {
+    success: true,
+  }
+}
+
 export async function sendInvoiceEmail(invoiceId: string): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient()
 
@@ -492,11 +545,11 @@ export async function sendInvoiceEmail(invoiceId: string): Promise<{ success: bo
   }
 
   // TODO: Implement actual email sending logic here
-  // For now, just update the invoice status to SENT
+  // For now, just update the invoice status to 'sent' (lowercase to match DB schema)
   const { error: updateError } = await supabase
     .from("invoices")
     .update({
-      status: "SENT",
+      status: "sent",
       sent_at: new Date().toISOString(),
     })
     .eq("id", invoiceId)

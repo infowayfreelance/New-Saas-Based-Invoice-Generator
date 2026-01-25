@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -14,11 +15,13 @@ import {
 } from "@/components/ui/dialog"
 import { FileText, Mail, Download, DollarSign, Clock } from "lucide-react"
 import { formatCurrency } from "@/lib/utils/invoice"
+import { toast } from "sonner"
 import {
   getInvoiceWorkflowData,
   type WorkflowInvoice,
   type InvoiceWorkflowData,
 } from "@/app/actions/dashboard"
+import { markInvoiceAsSent } from "@/app/actions/invoice"
 import { PaymentRecordModal } from "./payment-record-modal"
 import type { DateFilter } from "./dashboard-client"
 
@@ -28,6 +31,7 @@ interface InvoiceWorkflowProps {
 }
 
 export function InvoiceWorkflow({ currency, filter }: InvoiceWorkflowProps) {
+  const router = useRouter()
   const [data, setData] = useState<InvoiceWorkflowData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [selectedInvoice, setSelectedInvoice] = useState<WorkflowInvoice | null>(null)
@@ -35,6 +39,7 @@ export function InvoiceWorkflow({ currency, filter }: InvoiceWorkflowProps) {
   const [actionType, setActionType] = useState<"draft" | "pending" | null>(null)
   const [paymentModalOpen, setPaymentModalOpen] = useState(false)
   const [paymentType, setPaymentType] = useState<"partial" | "full">("partial")
+  const [isProcessing, setIsProcessing] = useState(false)
 
   const fetchWorkflowData = async () => {
     setIsLoading(true)
@@ -60,21 +65,44 @@ export function InvoiceWorkflow({ currency, filter }: InvoiceWorkflowProps) {
   }, [filter])
 
   const handleInvoiceClick = (invoice: WorkflowInvoice, type: "draft" | "pending") => {
+    console.log("[Dashboard] Invoice clicked:", invoice.id, "| type:", type)
     setSelectedInvoice(invoice)
     setActionType(type)
     setActionDialogOpen(true)
   }
 
-  const handleSendInvoice = () => {
-    // TODO: Implement send invoice logic
-    console.log("[v0] Send invoice:", selectedInvoice?.id)
-    setActionDialogOpen(false)
+  const handleSendInvoice = async () => {
+    if (!selectedInvoice) return
+
+    console.log("[Dashboard] Send email clicked for invoice_id=", selectedInvoice.id)
+    setIsProcessing(true)
+    
+    try {
+      const result = await markInvoiceAsSent(selectedInvoice.id)
+      
+      if (result.success) {
+        toast.success("Invoice marked as sent!")
+        setActionDialogOpen(false)
+        // Refresh data to move invoice from Draft to Pending
+        await fetchWorkflowData()
+      } else {
+        toast.error(result.error || "Failed to mark invoice as sent")
+      }
+    } catch (error) {
+      console.error("[Dashboard] Error marking invoice as sent:", error)
+      toast.error("Failed to mark invoice as sent")
+    } finally {
+      setIsProcessing(false)
+    }
   }
 
   const handleDownloadPDF = () => {
-    // TODO: Implement download PDF logic
-    console.log("[v0] Download PDF:", selectedInvoice?.id)
+    if (!selectedInvoice) return
+
+    console.log("[Dashboard] Download clicked for invoice_id=", selectedInvoice.id)
     setActionDialogOpen(false)
+    // Navigate to the invoice detail page where PDF download is available
+    router.push(`/app/invoices/${selectedInvoice.id}`)
   }
 
   const handleRecordPayment = (type: "partial" | "full") => {
@@ -272,17 +300,19 @@ export function InvoiceWorkflow({ currency, filter }: InvoiceWorkflowProps) {
                   className="w-full justify-start"
                   variant="outline"
                   onClick={handleSendInvoice}
+                  disabled={isProcessing}
                 >
                   <Mail className="mr-2 h-4 w-4" />
-                  Send Invoice (Email)
+                  {isProcessing ? "Sending..." : "Mark as Sent"}
                 </Button>
                 <Button
                   className="w-full justify-start"
                   variant="outline"
                   onClick={handleDownloadPDF}
+                  disabled={isProcessing}
                 >
                   <Download className="mr-2 h-4 w-4" />
-                  Download PDF
+                  View & Download
                 </Button>
               </>
             )}
@@ -292,6 +322,7 @@ export function InvoiceWorkflow({ currency, filter }: InvoiceWorkflowProps) {
                   className="w-full justify-start"
                   variant="outline"
                   onClick={() => handleRecordPayment("partial")}
+                  disabled={isProcessing}
                 >
                   <DollarSign className="mr-2 h-4 w-4" />
                   Record Partial Payment
@@ -300,6 +331,7 @@ export function InvoiceWorkflow({ currency, filter }: InvoiceWorkflowProps) {
                   className="w-full justify-start"
                   variant="outline"
                   onClick={() => handleRecordPayment("full")}
+                  disabled={isProcessing}
                 >
                   <DollarSign className="mr-2 h-4 w-4" />
                   Record Full Payment
