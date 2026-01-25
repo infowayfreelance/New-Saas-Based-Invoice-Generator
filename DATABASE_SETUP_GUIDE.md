@@ -57,6 +57,45 @@ This creates a trigger that automatically:
 
 Run this if you need to update the default plan assignment for new users.
 
+### 6. Create Dashboard Views
+**File:** `scripts/014_create_dashboard_views.sql`
+
+This creates database views for the dashboard statistics:
+- `dashboard_totals` - Aggregated stats (total invoices, clients, received amounts)
+- `dashboard_pending_converted` - Pending invoice amounts
+
+**Important:** These views are required for the dashboard stats cards to display data!
+
+### 7. Create Invoice Workflow Views
+**File:** `scripts/015_create_invoice_workflow_views.sql`
+
+This creates database views for the invoice workflow columns:
+- `dashboard_invoices_base` - Base invoice data with client information
+- `invoice_payment_summary` - Payment calculations (total paid, remaining amounts)
+
+**Important:** These views are required for the invoice workflow (Draft, Pending, Paid) to display data!
+
+### 8. Create FX Tables
+**File:** `scripts/016_create_fx_tables.sql`
+
+This creates foreign exchange rate tables for currency conversion:
+- `fx_rates` - Historical FX rates table
+- `fx_latest_rates` - View for quick lookups of the latest rates
+- Default rates for common currencies (USD, EUR, GBP, JPY, AUD, CAD)
+
+**Important:** These tables are required for payment recording with currency conversion!
+
+### 9. Add FX Fields to Payment Entries
+**File:** `scripts/017_add_fx_fields_to_payments.sql`
+
+This adds currency conversion fields to the payment_entries table:
+- `payment_currency` - Currency of the invoice
+- `fx_rate` - Exchange rate at time of payment
+- `converted_amount` - Amount converted to dashboard currency
+- `converted_currency` - Dashboard currency at time of payment
+
+**Important:** These fields enable multi-currency payment tracking!
+
 ## Verification
 
 After running all scripts, verify the setup:

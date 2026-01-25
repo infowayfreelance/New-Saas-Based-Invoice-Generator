@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { FileText, DollarSign, Clock, Users } from "lucide-react"
 import { formatCurrency } from "@/lib/utils/invoice"
+import { getDashboardStats, type DashboardStats as Stats } from "@/app/actions/dashboard"
 import type { DateFilter } from "./dashboard-client"
 
 interface DashboardStatsProps {
@@ -12,32 +13,32 @@ interface DashboardStatsProps {
   filter: DateFilter
 }
 
-interface Stats {
-  totalInvoices: number
-  totalReceived: number
-  totalPending: number
-  totalClients: number
-}
-
 export function DashboardStats({ currency, filter }: DashboardStatsProps) {
   const [stats, setStats] = useState<Stats | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    // Simulate loading - in production, fetch real data here
-    setIsLoading(true)
-    const timer = setTimeout(() => {
-      // Placeholder stats - replace with actual API call
-      setStats({
-        totalInvoices: 0,
-        totalReceived: 0,
-        totalPending: 0,
-        totalClients: 0,
-      })
-      setIsLoading(false)
-    }, 500)
+    async function fetchStats() {
+      setIsLoading(true)
 
-    return () => clearTimeout(timer)
+      try {
+        const result = await getDashboardStats(currency, filter)
+        setStats(result)
+      } catch (err: any) {
+        console.error("[v0] Error fetching dashboard stats:", err)
+        // Set zero values on error instead of showing error UI
+        setStats({
+          totalInvoices: 0,
+          totalClients: 0,
+          totalReceived: 0,
+          totalPending: 0,
+        })
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchStats()
   }, [filter, currency])
 
   if (isLoading) {
@@ -59,34 +60,39 @@ export function DashboardStats({ currency, filter }: DashboardStatsProps) {
     )
   }
 
+  // Always show stats (with zero values if necessary)
+  if (!stats) {
+    return null
+  }
+
   const cards = [
     {
       title: "Total Invoices",
-      value: stats?.totalInvoices || 0,
+      value: stats.totalInvoices,
       icon: FileText,
       description: "All invoices",
-      format: (val: number) => val.toString(),
+      format: (val: number) => val.toLocaleString(),
     },
     {
       title: "Total Received",
-      value: stats?.totalReceived || 0,
+      value: stats.totalReceived,
       icon: DollarSign,
       description: "Paid invoices",
       format: (val: number) => formatCurrency(val, currency),
     },
     {
       title: "Total Pending",
-      value: stats?.totalPending || 0,
+      value: stats.totalPending,
       icon: Clock,
       description: "Awaiting payment",
       format: (val: number) => formatCurrency(val, currency),
     },
     {
       title: "Total Clients",
-      value: stats?.totalClients || 0,
+      value: stats.totalClients,
       icon: Users,
       description: "Active clients",
-      format: (val: number) => val.toString(),
+      format: (val: number) => val.toLocaleString(),
     },
   ]
 
