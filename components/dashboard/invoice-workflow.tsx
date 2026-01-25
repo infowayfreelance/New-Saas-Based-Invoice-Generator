@@ -12,7 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { FileText, Mail, Download, DollarSign } from "lucide-react"
+import { FileText, Mail, Download, DollarSign, Clock } from "lucide-react"
 import { formatCurrency } from "@/lib/utils/invoice"
 import type { DateFilter } from "./dashboard-client"
 
