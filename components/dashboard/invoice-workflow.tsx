@@ -21,7 +21,7 @@ import {
   type WorkflowInvoice,
   type InvoiceWorkflowData,
 } from "@/app/actions/dashboard"
-import { markInvoiceAsSent } from "@/app/actions/invoice"
+import { markInvoiceAsSent } from "@/app/actions/invoice-status"
 import { PaymentRecordModal } from "./payment-record-modal"
 import type { DateFilter } from "./dashboard-client"
 
@@ -101,8 +101,11 @@ export function InvoiceWorkflow({ currency, filter }: InvoiceWorkflowProps) {
 
     console.log("[Dashboard] Download clicked for invoice_id=", selectedInvoice.id)
     setActionDialogOpen(false)
-    // Navigate to the invoice detail page where PDF download is available
-    router.push(`/app/invoices/${selectedInvoice.id}`)
+    
+    // Trigger browser download via API route
+    // Opens in new window which will auto-close after download
+    window.open(`/api/invoices/${selectedInvoice.id}/download`, '_blank')
+    toast.success("Downloading invoice PDF...")
   }
 
   const handleRecordPayment = (type: "partial" | "full") => {
@@ -312,7 +315,7 @@ export function InvoiceWorkflow({ currency, filter }: InvoiceWorkflowProps) {
                   disabled={isProcessing}
                 >
                   <Download className="mr-2 h-4 w-4" />
-                  View & Download
+                  Download PDF
                 </Button>
               </>
             )}

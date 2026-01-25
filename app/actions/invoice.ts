@@ -441,59 +441,6 @@ export async function updateInvoiceAction(
   return result
 }
 
-export async function markInvoiceAsSent(invoiceId: string): Promise<{ success: boolean; error?: string }> {
-  const supabase = await createClient()
-
-  // Get authenticated user
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    return {
-      success: false,
-      error: "You must be logged in to update invoices",
-    }
-  }
-
-  // Fetch invoice to verify ownership
-  const { data: invoice, error: invoiceError } = await supabase
-    .from("invoices")
-    .select("id, status")
-    .eq("id", invoiceId)
-    .eq("user_id", user.id)
-    .single()
-
-  if (invoiceError || !invoice) {
-    return {
-      success: false,
-      error: "Invoice not found or access denied",
-    }
-  }
-
-  // Update invoice status to 'sent' (lowercase to match DB schema)
-  const { error: updateError } = await supabase
-    .from("invoices")
-    .update({
-      status: "sent",
-      sent_at: new Date().toISOString(),
-    })
-    .eq("id", invoiceId)
-    .eq("user_id", user.id)
-
-  if (updateError) {
-    console.error("[v0] Error updating invoice status:", updateError)
-    return {
-      success: false,
-      error: "Failed to update invoice status",
-    }
-  }
-
-  return {
-    success: true,
-  }
-}
-
 export async function sendInvoiceEmail(invoiceId: string): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient()
 

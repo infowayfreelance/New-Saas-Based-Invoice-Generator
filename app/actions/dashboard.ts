@@ -251,6 +251,8 @@ export async function getInvoiceWorkflowData(
     }
 
     // Fetch pending invoices (sent, partially_paid, overdue)
+    // STEP 1 CONFIRMATION: Data source = invoices table (NOT payment_entries)
+    // STEP 2 IMPLEMENTATION: Added remaining_amount > 0 filter and date range
     const { data: pendingData, error: pendingError } = await supabase
       .from("invoices")
       .select(`
@@ -268,7 +270,10 @@ export async function getInvoiceWorkflowData(
         )
       `)
       .eq("user_id", user.id)
-      .in("status", ["sent", "partially_paid", "overdue"])
+      .eq("status", "sent")
+      .gt("total_amount", 0)
+      .gte("issue_date", startDate)
+      .lte("issue_date", endDate)
       .order("issue_date", { ascending: false })
 
     console.log("[v0] Dashboard: PENDING query result")
@@ -333,18 +338,22 @@ export async function getInvoiceWorkflowData(
       pendingData?.map((inv: any) => {
         const clientInfo = inv.clients
         const clientName = clientInfo?.company_name || clientInfo?.name || "No Client"
+        const totalAmount = Number(inv.total_amount || 0)
+        const amountPaid = Number(inv.amount_paid || 0)
+        const remainingAmount = totalAmount - amountPaid
         
+        // Filter: Only include if remaining_amount > 0 (unpaid invoices)
         return {
           id: inv.id,
           invoice_number: inv.invoice_number,
           client_name: clientName,
-          total_amount: Number(inv.total_amount || 0),
-          remaining_amount: Number(inv.total_amount || 0) - Number(inv.amount_paid || 0),
-          total_paid: Number(inv.amount_paid || 0),
+          total_amount: totalAmount,
+          remaining_amount: remainingAmount,
+          total_paid: amountPaid,
           status: inv.status,
           issue_date: inv.issue_date,
         }
-      }) || []
+      }).filter((inv) => inv.remaining_amount > 0) || []
 
     const paid: WorkflowInvoice[] =
       paidData?.map((inv: any) => {
