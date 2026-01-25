@@ -190,23 +190,12 @@ export async function getInvoiceWorkflowData(
 
     const { startDate, endDate } = getDateRange(filter)
 
-    // Fetch draft invoices - query invoices table and join with clients
+    // Fetch draft invoices from dashboard_invoices_base view
     const { data: draftData, error: draftError } = await supabase
-      .from("invoices")
-      .select(
-        `
-        id,
-        invoice_number,
-        total_amount,
-        issue_date,
-        status,
-        clients:client_id (
-          name
-        )
-      `,
-      )
+      .from("dashboard_invoices_base")
+      .select("invoice_id, invoice_number, client_name, total_amount, issue_date, status")
       .eq("user_id", user.id)
-      .eq("status", "DRAFT")
+      .eq("status", "draft")
       .gte("issue_date", startDate)
       .lte("issue_date", endDate)
       .order("issue_date", { ascending: false })
@@ -215,24 +204,14 @@ export async function getInvoiceWorkflowData(
       console.error("[v0] Error fetching draft invoices:", draftError)
     }
 
-    // Fetch pending invoices with payment summary
+    // Fetch pending invoices from dashboard_invoices_base view
     const { data: pendingData, error: pendingError } = await supabase
-      .from("invoices")
+      .from("dashboard_invoices_base")
       .select(
-        `
-        id,
-        invoice_number,
-        total_amount,
-        amount_paid,
-        issue_date,
-        status,
-        clients:client_id (
-          name
-        )
-      `,
+        "invoice_id, invoice_number, client_name, total_amount, amount_paid, issue_date, status",
       )
       .eq("user_id", user.id)
-      .in("status", ["SENT", "PARTIALLY_PAID", "OVERDUE"])
+      .in("status", ["sent", "partially_paid", "overdue"])
       .gte("issue_date", startDate)
       .lte("issue_date", endDate)
       .order("issue_date", { ascending: false })
@@ -241,24 +220,14 @@ export async function getInvoiceWorkflowData(
       console.error("[v0] Error fetching pending invoices:", pendingError)
     }
 
-    // Fetch paid invoices with payment summary
+    // Fetch paid invoices from dashboard_invoices_base view
     const { data: paidData, error: paidError } = await supabase
-      .from("invoices")
+      .from("dashboard_invoices_base")
       .select(
-        `
-        id,
-        invoice_number,
-        total_amount,
-        amount_paid,
-        issue_date,
-        status,
-        clients:client_id (
-          name
-        )
-      `,
+        "invoice_id, invoice_number, client_name, total_amount, amount_paid, issue_date, status",
       )
       .eq("user_id", user.id)
-      .in("status", ["PAID", "PARTIALLY_PAID"])
+      .in("status", ["paid", "partially_paid"])
       .gte("issue_date", startDate)
       .lte("issue_date", endDate)
       .order("issue_date", { ascending: false })
@@ -269,12 +238,12 @@ export async function getInvoiceWorkflowData(
     }
 
     // Transform data to workflow format - use empty arrays if data is null
-    // Handle nested client data from the join
+    // Use invoice_id from the view (not id)
     const draft: WorkflowInvoice[] =
       draftData?.map((inv: any) => ({
-        id: inv.id,
+        id: inv.invoice_id,
         invoice_number: inv.invoice_number,
-        client_name: inv.clients?.name || "Unknown Client",
+        client_name: inv.client_name || "Unknown Client",
         total_amount: Number(inv.total_amount || 0),
         remaining_amount: Number(inv.total_amount || 0),
         total_paid: 0,
@@ -284,9 +253,9 @@ export async function getInvoiceWorkflowData(
 
     const pending: WorkflowInvoice[] =
       pendingData?.map((inv: any) => ({
-        id: inv.id,
+        id: inv.invoice_id,
         invoice_number: inv.invoice_number,
-        client_name: inv.clients?.name || "Unknown Client",
+        client_name: inv.client_name || "Unknown Client",
         total_amount: Number(inv.total_amount || 0),
         remaining_amount: Number(inv.total_amount || 0) - Number(inv.amount_paid || 0),
         total_paid: Number(inv.amount_paid || 0),
@@ -296,9 +265,9 @@ export async function getInvoiceWorkflowData(
 
     const paid: WorkflowInvoice[] =
       paidData?.map((inv: any) => ({
-        id: inv.id,
+        id: inv.invoice_id,
         invoice_number: inv.invoice_number,
-        client_name: inv.clients?.name || "Unknown Client",
+        client_name: inv.client_name || "Unknown Client",
         total_amount: Number(inv.total_amount || 0),
         remaining_amount: Number(inv.total_amount || 0) - Number(inv.amount_paid || 0),
         total_paid: Number(inv.amount_paid || 0),

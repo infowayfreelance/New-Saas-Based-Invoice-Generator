@@ -2,13 +2,13 @@
 -- This view provides base invoice data joined with client information
 CREATE OR REPLACE VIEW dashboard_invoices_base AS
 SELECT
-  i.id,
+  i.id AS invoice_id,
   i.user_id,
   i.client_id,
   i.invoice_number,
   i.issue_date,
   i.due_date,
-  i.status,
+  LOWER(i.status) AS status,
   i.total_amount,
   i.amount_paid,
   i.currency,
