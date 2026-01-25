@@ -24,8 +24,6 @@ export function DashboardClient({ userData }: DashboardClientProps) {
     preset: "this-month",
   })
 
-  console.log("[v0] Dashboard client rendering", { userData, selectedCurrency, dateFilter })
-
   return (
     <>
       <PageHeader

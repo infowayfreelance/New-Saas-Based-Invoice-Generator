@@ -75,6 +75,9 @@ export default async function DashboardPage() {
                   <li>
                     <code className="rounded bg-muted px-1">scripts/005_fix_default_plan.sql</code>
                   </li>
+                  <li>
+                    <code className="rounded bg-muted px-1">scripts/014_create_dashboard_views.sql</code>
+                  </li>
                 </ol>
               </AlertDescription>
             </Alert>

@@ -57,6 +57,15 @@ This creates a trigger that automatically:
 
 Run this if you need to update the default plan assignment for new users.
 
+### 6. Create Dashboard Views
+**File:** `scripts/014_create_dashboard_views.sql`
+
+This creates database views for the dashboard statistics:
+- `dashboard_totals` - Aggregated stats (total invoices, clients, received amounts)
+- `dashboard_pending_converted` - Pending invoice amounts
+
+**Important:** These views are required for the dashboard stats cards to display data!
+
 ## Verification
 
 After running all scripts, verify the setup:
