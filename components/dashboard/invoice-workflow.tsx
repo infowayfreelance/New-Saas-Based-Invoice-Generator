@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import {
   Dialog,
   DialogContent,
@@ -12,8 +13,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { FileText, Mail, Download, DollarSign, Clock } from "lucide-react"
+import { FileText, Mail, Download, DollarSign, Clock, AlertCircle } from "lucide-react"
 import { formatCurrency } from "@/lib/utils/invoice"
+import {
+  getInvoiceWorkflowData,
+  type WorkflowInvoice,
+  type InvoiceWorkflowData,
+} from "@/app/actions/dashboard"
+import { PaymentRecordModal } from "./payment-record-modal"
 import type { DateFilter } from "./dashboard-client"
 
 interface InvoiceWorkflowProps {
@@ -21,66 +28,69 @@ interface InvoiceWorkflowProps {
   filter: DateFilter
 }
 
-interface Invoice {
-  id: string
-  invoiceNumber: string
-  clientName: string
-  amount: number
-  remainingAmount?: number
-  status: "draft" | "pending" | "paid" | "partial"
-}
-
-interface WorkflowData {
-  draft: Invoice[]
-  pending: Invoice[]
-  paid: Invoice[]
-}
-
 export function InvoiceWorkflow({ currency, filter }: InvoiceWorkflowProps) {
-  const [data, setData] = useState<WorkflowData | null>(null)
+  const [data, setData] = useState<InvoiceWorkflowData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const [selectedInvoice, setSelectedInvoice] = useState<WorkflowInvoice | null>(null)
   const [actionDialogOpen, setActionDialogOpen] = useState(false)
   const [actionType, setActionType] = useState<"draft" | "pending" | null>(null)
+  const [paymentModalOpen, setPaymentModalOpen] = useState(false)
+  const [paymentType, setPaymentType] = useState<"partial" | "full">("partial")
+
+  const fetchWorkflowData = async () => {
+    setIsLoading(true)
+    setError(null)
+
+    try {
+      const result = await getInvoiceWorkflowData(filter)
+
+      if ("error" in result) {
+        setError(result.error)
+        setData(null)
+      } else {
+        setData(result)
+      }
+    } catch (err: any) {
+      console.error("[v0] Error fetching workflow data:", err)
+      setError("Failed to load invoice workflow data")
+      setData(null)
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   useEffect(() => {
-    // Simulate loading - in production, fetch real data here
-    setIsLoading(true)
-    const timer = setTimeout(() => {
-      // Placeholder data - replace with actual API call
-      setData({
-        draft: [],
-        pending: [],
-        paid: [],
-      })
-      setIsLoading(false)
-    }, 500)
+    fetchWorkflowData()
+  }, [filter])
 
-    return () => clearTimeout(timer)
-  }, [filter, currency])
-
-  const handleInvoiceClick = (invoice: Invoice, type: "draft" | "pending") => {
+  const handleInvoiceClick = (invoice: WorkflowInvoice, type: "draft" | "pending") => {
     setSelectedInvoice(invoice)
     setActionType(type)
     setActionDialogOpen(true)
   }
 
   const handleSendInvoice = () => {
-    // Implement send invoice logic
+    // TODO: Implement send invoice logic
     console.log("[v0] Send invoice:", selectedInvoice?.id)
     setActionDialogOpen(false)
   }
 
   const handleDownloadPDF = () => {
-    // Implement download PDF logic
+    // TODO: Implement download PDF logic
     console.log("[v0] Download PDF:", selectedInvoice?.id)
     setActionDialogOpen(false)
   }
 
   const handleRecordPayment = (type: "partial" | "full") => {
-    // Implement record payment logic
-    console.log("[v0] Record payment:", type, selectedInvoice?.id)
+    setPaymentType(type)
     setActionDialogOpen(false)
+    setPaymentModalOpen(true)
+  }
+
+  const handlePaymentSuccess = () => {
+    // Refresh the workflow data after successful payment
+    fetchWorkflowData()
   }
 
   if (isLoading) {
@@ -106,6 +116,24 @@ export function InvoiceWorkflow({ currency, filter }: InvoiceWorkflowProps) {
     )
   }
 
+  if (error) {
+    return (
+      <Alert variant="destructive">
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription>{error}</AlertDescription>
+      </Alert>
+    )
+  }
+
+  if (!data) {
+    return (
+      <Alert>
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription>No data available</AlertDescription>
+      </Alert>
+    )
+  }
+
   return (
     <>
       <div className="grid gap-4 md:grid-cols-3">
@@ -115,7 +143,7 @@ export function InvoiceWorkflow({ currency, filter }: InvoiceWorkflowProps) {
             <CardTitle className="text-base">Draft Invoices</CardTitle>
           </CardHeader>
           <CardContent>
-            {data?.draft && data.draft.length > 0 ? (
+            {data.draft && data.draft.length > 0 ? (
               <div className="space-y-3">
                 {data.draft.map((invoice) => (
                   <div
@@ -124,13 +152,13 @@ export function InvoiceWorkflow({ currency, filter }: InvoiceWorkflowProps) {
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        <p className="font-medium">{invoice.clientName}</p>
-                        <p className="text-sm text-muted-foreground">{invoice.invoiceNumber}</p>
+                        <p className="font-medium">{invoice.client_name}</p>
+                        <p className="text-sm text-muted-foreground">{invoice.invoice_number}</p>
                       </div>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-semibold">
-                        {formatCurrency(invoice.amount, currency)}
+                        {formatCurrency(invoice.total_amount, currency)}
                       </span>
                     </div>
                     <Button
@@ -159,7 +187,7 @@ export function InvoiceWorkflow({ currency, filter }: InvoiceWorkflowProps) {
             <CardTitle className="text-base">Pending Payments</CardTitle>
           </CardHeader>
           <CardContent>
-            {data?.pending && data.pending.length > 0 ? (
+            {data.pending && data.pending.length > 0 ? (
               <div className="space-y-3">
                 {data.pending.map((invoice) => (
                   <div
@@ -168,13 +196,13 @@ export function InvoiceWorkflow({ currency, filter }: InvoiceWorkflowProps) {
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        <p className="font-medium">{invoice.clientName}</p>
-                        <p className="text-sm text-muted-foreground">{invoice.invoiceNumber}</p>
+                        <p className="font-medium">{invoice.client_name}</p>
+                        <p className="text-sm text-muted-foreground">{invoice.invoice_number}</p>
                       </div>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-semibold">
-                        {formatCurrency(invoice.remainingAmount || invoice.amount, currency)}
+                        {formatCurrency(invoice.remaining_amount, currency)}
                       </span>
                     </div>
                     <Button
@@ -203,7 +231,7 @@ export function InvoiceWorkflow({ currency, filter }: InvoiceWorkflowProps) {
             <CardTitle className="text-base">Paid Invoices</CardTitle>
           </CardHeader>
           <CardContent>
-            {data?.paid && data.paid.length > 0 ? (
+            {data.paid && data.paid.length > 0 ? (
               <div className="space-y-3">
                 {data.paid.map((invoice) => (
                   <div
@@ -212,19 +240,25 @@ export function InvoiceWorkflow({ currency, filter }: InvoiceWorkflowProps) {
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        <p className="font-medium">{invoice.clientName}</p>
-                        <p className="text-sm text-muted-foreground">{invoice.invoiceNumber}</p>
+                        <p className="font-medium">{invoice.client_name}</p>
+                        <p className="text-sm text-muted-foreground">{invoice.invoice_number}</p>
                       </div>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-semibold">
-                        {formatCurrency(invoice.amount, currency)}
+                        {formatCurrency(invoice.total_paid, currency)}
                       </span>
                       <Badge
-                        variant={invoice.status === "partial" ? "secondary" : "default"}
+                        variant={
+                          invoice.status === "PARTIALLY_PAID" || invoice.remaining_amount > 0
+                            ? "secondary"
+                            : "default"
+                        }
                         className="text-xs"
                       >
-                        {invoice.status === "partial" ? "Partial" : "Paid"}
+                        {invoice.status === "PARTIALLY_PAID" || invoice.remaining_amount > 0
+                          ? "Partial"
+                          : "Paid"}
                       </Badge>
                     </div>
                   </div>
@@ -246,7 +280,7 @@ export function InvoiceWorkflow({ currency, filter }: InvoiceWorkflowProps) {
           <DialogHeader>
             <DialogTitle>Invoice Actions</DialogTitle>
             <DialogDescription>
-              {selectedInvoice?.invoiceNumber} - {selectedInvoice?.clientName}
+              {selectedInvoice?.invoice_number} - {selectedInvoice?.client_name}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3 pt-4">
@@ -293,6 +327,22 @@ export function InvoiceWorkflow({ currency, filter }: InvoiceWorkflowProps) {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Payment Record Modal */}
+      {selectedInvoice && (
+        <PaymentRecordModal
+          open={paymentModalOpen}
+          onOpenChange={setPaymentModalOpen}
+          invoiceId={selectedInvoice.id}
+          invoiceNumber={selectedInvoice.invoice_number}
+          clientName={selectedInvoice.client_name}
+          currency={currency}
+          remainingAmount={selectedInvoice.remaining_amount}
+          dashboardCurrency={currency}
+          paymentType={paymentType}
+          onSuccess={handlePaymentSuccess}
+        />
+      )}
     </>
   )
 }

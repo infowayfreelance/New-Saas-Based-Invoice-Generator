@@ -150,3 +150,152 @@ export async function getDashboardStats(
     return { error: error.message || "An unexpected error occurred" }
   }
 }
+
+// Invoice Workflow Data Types
+export interface WorkflowInvoice {
+  id: string
+  invoice_number: string
+  client_name: string
+  total_amount: number
+  remaining_amount: number
+  total_paid: number
+  status: string
+  issue_date: string
+}
+
+export interface InvoiceWorkflowData {
+  draft: WorkflowInvoice[]
+  pending: WorkflowInvoice[]
+  paid: WorkflowInvoice[]
+}
+
+export async function getInvoiceWorkflowData(
+  filter: DateFilter,
+): Promise<InvoiceWorkflowData | { error: string }> {
+  try {
+    const supabase = await createClient()
+
+    // Get authenticated user
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    if (!user) {
+      redirect("/login")
+    }
+
+    const { startDate, endDate } = getDateRange(filter)
+
+    // Fetch draft invoices
+    const { data: draftData, error: draftError } = await supabase
+      .from("dashboard_invoices_base")
+      .select("id, invoice_number, client_name, total_amount, issue_date, status")
+      .eq("user_id", user.id)
+      .eq("status", "DRAFT")
+      .gte("issue_date", startDate)
+      .lte("issue_date", endDate)
+      .order("issue_date", { ascending: false })
+
+    if (draftError) {
+      console.error("[v0] Error fetching draft invoices:", draftError)
+      return { error: "Failed to fetch draft invoices" }
+    }
+
+    // Fetch pending invoices with payment summary
+    const { data: pendingData, error: pendingError } = await supabase
+      .from("dashboard_invoices_base")
+      .select(
+        `
+        id,
+        invoice_number,
+        client_name,
+        total_amount,
+        issue_date,
+        status,
+        amount_paid
+      `,
+      )
+      .eq("user_id", user.id)
+      .in("status", ["SENT", "PARTIALLY_PAID", "OVERDUE"])
+      .gte("issue_date", startDate)
+      .lte("issue_date", endDate)
+      .order("issue_date", { ascending: false })
+
+    if (pendingError) {
+      console.error("[v0] Error fetching pending invoices:", pendingError)
+      return { error: "Failed to fetch pending invoices" }
+    }
+
+    // Fetch paid invoices with payment summary
+    const { data: paidData, error: paidError } = await supabase
+      .from("dashboard_invoices_base")
+      .select(
+        `
+        id,
+        invoice_number,
+        client_name,
+        total_amount,
+        issue_date,
+        status,
+        amount_paid
+      `,
+      )
+      .eq("user_id", user.id)
+      .in("status", ["PAID", "PARTIALLY_PAID"])
+      .gte("issue_date", startDate)
+      .lte("issue_date", endDate)
+      .order("issue_date", { ascending: false })
+      .limit(10) // Limit to recent 10 paid invoices
+
+    if (paidError) {
+      console.error("[v0] Error fetching paid invoices:", paidError)
+      return { error: "Failed to fetch paid invoices" }
+    }
+
+    // Transform data to workflow format
+    const draft: WorkflowInvoice[] =
+      draftData?.map((inv) => ({
+        id: inv.id,
+        invoice_number: inv.invoice_number,
+        client_name: inv.client_name || "Unknown Client",
+        total_amount: Number(inv.total_amount || 0),
+        remaining_amount: Number(inv.total_amount || 0),
+        total_paid: 0,
+        status: inv.status,
+        issue_date: inv.issue_date,
+      })) || []
+
+    const pending: WorkflowInvoice[] =
+      pendingData?.map((inv) => ({
+        id: inv.id,
+        invoice_number: inv.invoice_number,
+        client_name: inv.client_name || "Unknown Client",
+        total_amount: Number(inv.total_amount || 0),
+        remaining_amount: Number(inv.total_amount || 0) - Number(inv.amount_paid || 0),
+        total_paid: Number(inv.amount_paid || 0),
+        status: inv.status,
+        issue_date: inv.issue_date,
+      })) || []
+
+    const paid: WorkflowInvoice[] =
+      paidData?.map((inv) => ({
+        id: inv.id,
+        invoice_number: inv.invoice_number,
+        client_name: inv.client_name || "Unknown Client",
+        total_amount: Number(inv.total_amount || 0),
+        remaining_amount: Number(inv.total_amount || 0) - Number(inv.amount_paid || 0),
+        total_paid: Number(inv.amount_paid || 0),
+        status: inv.status,
+        issue_date: inv.issue_date,
+      })) || []
+
+    return {
+      draft,
+      pending,
+      paid,
+    }
+  } catch (error: any) {
+    console.error("[v0] Error in getInvoiceWorkflowData:", error)
+    return { error: error.message || "An unexpected error occurred" }
+  }
+}

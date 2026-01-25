@@ -78,6 +78,15 @@ export default async function DashboardPage() {
                   <li>
                     <code className="rounded bg-muted px-1">scripts/014_create_dashboard_views.sql</code>
                   </li>
+                  <li>
+                    <code className="rounded bg-muted px-1">scripts/015_create_invoice_workflow_views.sql</code>
+                  </li>
+                  <li>
+                    <code className="rounded bg-muted px-1">scripts/016_create_fx_tables.sql</code>
+                  </li>
+                  <li>
+                    <code className="rounded bg-muted px-1">scripts/017_add_fx_fields_to_payments.sql</code>
+                  </li>
                 </ol>
               </AlertDescription>
             </Alert>
