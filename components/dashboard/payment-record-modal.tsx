@@ -93,7 +93,13 @@ export function PaymentRecordModal({
       if ("error" in result) {
         setError(result.error)
       } else {
-        toast.success("Payment recorded successfully")
+        // Show success message with status and remaining amount
+        const statusText = result.newStatus === 'paid' ? 'fully paid' : 'partially paid'
+        const remainingText = result.remaining > 0 
+          ? ` Remaining: ${formatCurrency(result.remaining, currency)}`
+          : ''
+        toast.success(`Payment recorded! Invoice is now ${statusText}.${remainingText}`)
+        
         onOpenChange(false)
         onSuccess?.()
         // Reset form
