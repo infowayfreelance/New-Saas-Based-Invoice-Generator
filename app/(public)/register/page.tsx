@@ -122,7 +122,7 @@ function RegisterForm() {
                 <div className="grid gap-2">
                   <Label htmlFor="country">Country *</Label>
                   <Select value={selectedCountry} onValueChange={setSelectedCountry} required disabled={isDetectingCountry}>
-                    <SelectTrigger id="country">
+                    <SelectTrigger id="country" className="w-full">
                       <SelectValue placeholder={isDetectingCountry ? "Detecting..." : "Select your country"} />
                     </SelectTrigger>
                     <SelectContent>
