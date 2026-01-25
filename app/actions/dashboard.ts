@@ -117,7 +117,7 @@ export async function getDashboardStats(
       .from("invoices")
       .select("total_amount")
       .eq("user_id", user.id)
-      .eq("status", "PAID")
+      .eq("status", "paid")
       .gte("issue_date", startDate)
       .lte("issue_date", endDate)
 

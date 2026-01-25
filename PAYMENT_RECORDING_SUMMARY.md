@@ -86,7 +86,7 @@ Extended the dashboard invoice workflow to support recording payments via modal 
 9. Invoice status updates via trigger (not implemented here)
 
 ### Server-Side Processing
-```
+\`\`\`
 recordPayment()
   ├─ Authenticate user
   ├─ Fetch invoice (currency, amounts, ownership)
@@ -97,7 +97,7 @@ recordPayment()
   ├─ Calculate converted_amount = amount * fx_rate
   ├─ Insert payment_entries with all FX fields
   └─ Revalidate dashboard paths
-```
+\`\`\`
 
 ## Key Features
 
@@ -121,20 +121,20 @@ recordPayment()
 ## Setup Required
 
 ### 1. Run Migrations (in order)
-```sql
+\`\`\`sql
 -- In Supabase SQL Editor:
 scripts/016_create_fx_tables.sql        -- Creates FX rate tables
 scripts/017_add_fx_fields_to_payments.sql -- Adds FX fields to payments
-```
+\`\`\`
 
 ### 2. Verify Tables
-```sql
+\`\`\`sql
 -- Check FX rates exist
 SELECT * FROM fx_latest_rates;
 
 -- Check payment_entries schema
 \d payment_entries;
-```
+\`\`\`
 
 ### 3. Test Payment Flow
 1. Create invoice with status "SENT"
@@ -142,9 +142,9 @@ SELECT * FROM fx_latest_rates;
 3. Click "Actions" → "Record Partial Payment"
 4. Enter amount and submit
 5. Verify in `payment_entries` table:
-   ```sql
+   \`\`\`sql
    SELECT * FROM payment_entries ORDER BY created_at DESC LIMIT 1;
-   ```
+   \`\`\`
 
 ## FX Rate Management
 
@@ -157,12 +157,12 @@ SELECT * FROM fx_latest_rates;
 - GBP → USD (1.27)
 
 ### Adding/Updating Rates
-```sql
+\`\`\`sql
 INSERT INTO fx_rates (base_currency, target_currency, rate, rate_date, source)
 VALUES ('USD', 'INR', 83.25, CURRENT_DATE, 'manual')
 ON CONFLICT (base_currency, target_currency, rate_date) 
 DO UPDATE SET rate = EXCLUDED.rate, updated_at = NOW();
-```
+\`\`\`
 
 ### Future: API Integration
 Can integrate with currency API services to auto-update rates daily:

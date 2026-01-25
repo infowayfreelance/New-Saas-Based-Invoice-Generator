@@ -56,7 +56,7 @@ Main server action for recording payments.
 6. Revalidate dashboard paths
 
 **Parameters:**
-```typescript
+\`\`\`typescript
 interface RecordPaymentInput {
   invoiceId: string
   amount: number
@@ -65,12 +65,12 @@ interface RecordPaymentInput {
   reference?: string
   dashboardCurrency: string
 }
-```
+\`\`\`
 
 **Response:**
-```typescript
+\`\`\`typescript
 { success: true } | { error: string }
-```
+\`\`\`
 
 #### `getFXRate(fromCurrency, toCurrency)`
 Internal helper that fetches the latest exchange rate.
@@ -85,7 +85,7 @@ Internal helper that fetches the latest exchange rate.
 Fetches invoice details for the payment modal.
 
 **Returns:**
-```typescript
+\`\`\`typescript
 {
   id: string
   invoice_number: string
@@ -96,7 +96,7 @@ Fetches invoice details for the payment modal.
   status: string
   client_name: string
 }
-```
+\`\`\`
 
 ## UI Components
 
@@ -199,12 +199,12 @@ Initial setup includes sample cross-currency rates:
 
 ### Updating Rates
 **Manual Update:**
-```sql
+\`\`\`sql
 INSERT INTO fx_rates (base_currency, target_currency, rate, rate_date, source)
 VALUES ('USD', 'EUR', 0.92, CURRENT_DATE, 'manual')
 ON CONFLICT (base_currency, target_currency, rate_date) 
 DO UPDATE SET rate = EXCLUDED.rate, updated_at = NOW();
-```
+\`\`\`
 
 **Via API (Future):**
 Integration with a currency API service would update rates automatically:
@@ -270,16 +270,16 @@ These triggers should be created separately to maintain data consistency.
 ## Setup Instructions
 
 ### 1. Run FX Rate Migrations
-```bash
+\`\`\`bash
 # In Supabase SQL Editor:
 scripts/016_create_fx_tables.sql
 scripts/017_add_fx_fields_to_payments.sql
-```
+\`\`\`
 
 ### 2. Verify FX Rates Table
-```sql
+\`\`\`sql
 SELECT * FROM fx_latest_rates;
-```
+\`\`\`
 
 ### 3. Test Payment Recording
 1. Create a test invoice with status "SENT"
@@ -315,7 +315,7 @@ Record multiple payments at once from a CSV import.
 
 ## API Integration Example
 
-```typescript
+\`\`\`typescript
 // Future: Fetch FX rates from external API
 async function updateFXRatesFromAPI() {
   const response = await fetch('https://api.exchangerate.com/latest/USD')
@@ -333,7 +333,7 @@ async function updateFXRatesFromAPI() {
     })
   }
 }
-```
+\`\`\`
 
 ## Testing Checklist
 

@@ -19,7 +19,7 @@ Two database views power the workflow feature:
 Location: `scripts/015_create_invoice_workflow_views.sql`
 
 This view joins invoices with client information:
-```sql
+\`\`\`sql
 SELECT
   i.id,
   i.user_id,
@@ -33,13 +33,13 @@ SELECT
   c.name AS client_name
 FROM invoices i
 LEFT JOIN clients c ON i.client_id = c.id
-```
+\`\`\`
 
 #### 2. `invoice_payment_summary`
 Location: `scripts/015_create_invoice_workflow_views.sql`
 
 This view calculates payment amounts:
-```sql
+\`\`\`sql
 SELECT
   i.id AS invoice_id,
   i.user_id,
@@ -48,7 +48,7 @@ SELECT
   i.total_amount - COALESCE(i.amount_paid, 0) AS remaining_amount,
   payment_status
 FROM invoices i
-```
+\`\`\`
 
 ### Server Actions
 
@@ -63,13 +63,13 @@ Fetches invoice data for all three columns with the following features:
 - Includes client names and payment calculations
 
 **Data Returned:**
-```typescript
+\`\`\`typescript
 {
   draft: WorkflowInvoice[],      // status = 'DRAFT'
   pending: WorkflowInvoice[],    // status IN ('SENT', 'PARTIALLY_PAID', 'OVERDUE')
   paid: WorkflowInvoice[]        // status IN ('PAID', 'PARTIALLY_PAID'), limited to 10
 }
-```
+\`\`\`
 
 ### UI Component
 
@@ -133,7 +133,7 @@ All columns respect the date filter from the dashboard:
 
 ## Data Flow
 
-```
+\`\`\`
 User Interaction
     ↓
 Dashboard Client Component
@@ -151,14 +151,14 @@ Group by status
 Return formatted data
     ↓
 Display in 3 columns
-```
+\`\`\`
 
 ## Setup Instructions
 
 1. Run the database migration:
-   ```sql
+   \`\`\`sql
    scripts/015_create_invoice_workflow_views.sql
-   ```
+   \`\`\`
 
 2. The views will be automatically used by the workflow component
 

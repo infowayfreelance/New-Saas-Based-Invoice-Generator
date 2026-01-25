@@ -87,9 +87,9 @@ Created `getDashboardStats` server action that:
 
 To enable dashboard statistics, run this SQL script in Supabase:
 
-```bash
+\`\`\`bash
 scripts/014_create_dashboard_views.sql
-```
+\`\`\`
 
 This creates the necessary database views for the stats queries.
 
