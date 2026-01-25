@@ -3,8 +3,7 @@
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { FileText, DollarSign, Clock, Users, AlertCircle } from "lucide-react"
+import { FileText, DollarSign, Clock, Users } from "lucide-react"
 import { formatCurrency } from "@/lib/utils/invoice"
 import { getDashboardStats, type DashboardStats as Stats } from "@/app/actions/dashboard"
 import type { DateFilter } from "./dashboard-client"
@@ -17,26 +16,23 @@ interface DashboardStatsProps {
 export function DashboardStats({ currency, filter }: DashboardStatsProps) {
   const [stats, setStats] = useState<Stats | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     async function fetchStats() {
       setIsLoading(true)
-      setError(null)
 
       try {
         const result = await getDashboardStats(currency, filter)
-
-        if ("error" in result) {
-          setError(result.error)
-          setStats(null)
-        } else {
-          setStats(result)
-        }
+        setStats(result)
       } catch (err: any) {
         console.error("[v0] Error fetching dashboard stats:", err)
-        setError("Failed to load dashboard statistics")
-        setStats(null)
+        // Set zero values on error instead of showing error UI
+        setStats({
+          totalInvoices: 0,
+          totalClients: 0,
+          totalReceived: 0,
+          totalPending: 0,
+        })
       } finally {
         setIsLoading(false)
       }
@@ -64,22 +60,9 @@ export function DashboardStats({ currency, filter }: DashboardStatsProps) {
     )
   }
 
-  if (error) {
-    return (
-      <Alert variant="destructive">
-        <AlertCircle className="h-4 w-4" />
-        <AlertDescription>{error}</AlertDescription>
-      </Alert>
-    )
-  }
-
+  // Always show stats (with zero values if necessary)
   if (!stats) {
-    return (
-      <Alert>
-        <AlertCircle className="h-4 w-4" />
-        <AlertDescription>No data available</AlertDescription>
-      </Alert>
-    )
+    return null
   }
 
   const cards = [

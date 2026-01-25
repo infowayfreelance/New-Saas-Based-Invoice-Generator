@@ -62,7 +62,7 @@ function getDateRange(filter: DateFilter): { startDate: string; endDate: string 
 export async function getDashboardStats(
   currency: string,
   filter: DateFilter,
-): Promise<DashboardStats | { error: string }> {
+): Promise<DashboardStats> {
   try {
     const supabase = await createClient()
 
@@ -87,7 +87,6 @@ export async function getDashboardStats(
 
     if (invoicesError) {
       console.error("[v0] Error fetching total invoices:", invoicesError)
-      return { error: "Failed to fetch invoice count" }
     }
 
     // Fetch total clients (all clients, not filtered by date)
@@ -98,7 +97,6 @@ export async function getDashboardStats(
 
     if (clientsError) {
       console.error("[v0] Error fetching total clients:", clientsError)
-      return { error: "Failed to fetch client count" }
     }
 
     // Fetch total received from dashboard_totals view (filtered by date)
@@ -114,10 +112,12 @@ export async function getDashboardStats(
 
     if (paidError) {
       console.error("[v0] Error fetching paid invoices:", paidError)
-      return { error: "Failed to fetch total received" }
     }
 
-    const totalReceived = paidInvoices.reduce((sum, inv) => sum + Number(inv.total_amount || 0), 0)
+    const totalReceived = (paidInvoices || []).reduce(
+      (sum, inv) => sum + Number(inv.total_amount || 0),
+      0,
+    )
 
     // Fetch total pending from dashboard_pending_converted view
     // Sum pending amounts for invoices within the date range
@@ -131,10 +131,9 @@ export async function getDashboardStats(
 
     if (pendingError) {
       console.error("[v0] Error fetching pending invoices:", pendingError)
-      return { error: "Failed to fetch total pending" }
     }
 
-    const totalPending = pendingInvoices.reduce((sum, inv) => {
+    const totalPending = (pendingInvoices || []).reduce((sum, inv) => {
       const pending = Number(inv.total_amount || 0) - Number(inv.amount_paid || 0)
       return sum + (pending > 0 ? pending : 0)
     }, 0)
@@ -147,7 +146,13 @@ export async function getDashboardStats(
     }
   } catch (error: any) {
     console.error("[v0] Error in getDashboardStats:", error)
-    return { error: error.message || "An unexpected error occurred" }
+    // Return zero values instead of error object
+    return {
+      totalInvoices: 0,
+      totalClients: 0,
+      totalReceived: 0,
+      totalPending: 0,
+    }
   }
 }
 
@@ -171,7 +176,7 @@ export interface InvoiceWorkflowData {
 
 export async function getInvoiceWorkflowData(
   filter: DateFilter,
-): Promise<InvoiceWorkflowData | { error: string }> {
+): Promise<InvoiceWorkflowData> {
   try {
     const supabase = await createClient()
 
@@ -198,7 +203,6 @@ export async function getInvoiceWorkflowData(
 
     if (draftError) {
       console.error("[v0] Error fetching draft invoices:", draftError)
-      return { error: "Failed to fetch draft invoices" }
     }
 
     // Fetch pending invoices with payment summary
@@ -223,7 +227,6 @@ export async function getInvoiceWorkflowData(
 
     if (pendingError) {
       console.error("[v0] Error fetching pending invoices:", pendingError)
-      return { error: "Failed to fetch pending invoices" }
     }
 
     // Fetch paid invoices with payment summary
@@ -249,10 +252,9 @@ export async function getInvoiceWorkflowData(
 
     if (paidError) {
       console.error("[v0] Error fetching paid invoices:", paidError)
-      return { error: "Failed to fetch paid invoices" }
     }
 
-    // Transform data to workflow format
+    // Transform data to workflow format - use empty arrays if data is null
     const draft: WorkflowInvoice[] =
       draftData?.map((inv) => ({
         id: inv.id,
@@ -296,6 +298,11 @@ export async function getInvoiceWorkflowData(
     }
   } catch (error: any) {
     console.error("[v0] Error in getInvoiceWorkflowData:", error)
-    return { error: error.message || "An unexpected error occurred" }
+    // Return empty arrays instead of error object
+    return {
+      draft: [],
+      pending: [],
+      paid: [],
+    }
   }
 }

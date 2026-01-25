@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Alert, AlertDescription } from "@/components/ui/alert"
 import {
   Dialog,
   DialogContent,
@@ -13,7 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { FileText, Mail, Download, DollarSign, Clock, AlertCircle } from "lucide-react"
+import { FileText, Mail, Download, DollarSign, Clock } from "lucide-react"
 import { formatCurrency } from "@/lib/utils/invoice"
 import {
   getInvoiceWorkflowData,
@@ -31,7 +30,6 @@ interface InvoiceWorkflowProps {
 export function InvoiceWorkflow({ currency, filter }: InvoiceWorkflowProps) {
   const [data, setData] = useState<InvoiceWorkflowData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
   const [selectedInvoice, setSelectedInvoice] = useState<WorkflowInvoice | null>(null)
   const [actionDialogOpen, setActionDialogOpen] = useState(false)
   const [actionType, setActionType] = useState<"draft" | "pending" | null>(null)
@@ -40,21 +38,18 @@ export function InvoiceWorkflow({ currency, filter }: InvoiceWorkflowProps) {
 
   const fetchWorkflowData = async () => {
     setIsLoading(true)
-    setError(null)
 
     try {
       const result = await getInvoiceWorkflowData(filter)
-
-      if ("error" in result) {
-        setError(result.error)
-        setData(null)
-      } else {
-        setData(result)
-      }
+      setData(result)
     } catch (err: any) {
       console.error("[v0] Error fetching workflow data:", err)
-      setError("Failed to load invoice workflow data")
-      setData(null)
+      // Set empty arrays on error instead of showing error UI
+      setData({
+        draft: [],
+        pending: [],
+        paid: [],
+      })
     } finally {
       setIsLoading(false)
     }
@@ -116,22 +111,9 @@ export function InvoiceWorkflow({ currency, filter }: InvoiceWorkflowProps) {
     )
   }
 
-  if (error) {
-    return (
-      <Alert variant="destructive">
-        <AlertCircle className="h-4 w-4" />
-        <AlertDescription>{error}</AlertDescription>
-      </Alert>
-    )
-  }
-
+  // Always show workflow (with empty arrays if necessary)
   if (!data) {
-    return (
-      <Alert>
-        <AlertCircle className="h-4 w-4" />
-        <AlertDescription>No data available</AlertDescription>
-      </Alert>
-    )
+    return null
   }
 
   return (
