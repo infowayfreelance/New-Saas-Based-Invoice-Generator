@@ -214,127 +214,79 @@ export async function getInvoiceWorkflowData(
       redirect("/login")
     }
 
-    const { startDate, endDate } = getDateRange(filter)
-
     console.log("[v0] AUDIT: getInvoiceWorkflowData called")
     console.log("[v0] AUDIT: Auth user ID:", user.id)
-    console.log("[v0] AUDIT: Date filter:", { startDate, endDate })
+
+    // OPERATIONAL WORKFLOW - NO DATE FILTERING
+    // Only select columns that exist in dashboard_invoices_base view:
+    // invoice_id, user_id, client_id, issue_date, status, currency, invoice_total, total_paid, remaining_amount
 
     // Fetch draft invoices from dashboard_invoices_base view
-    // NOTE: View confirmed to have columns: invoice_id, invoice_total, total_paid, remaining_amount
     const { data: draftData, error: draftError } = await supabase
       .from("dashboard_invoices_base")
-      .select("invoice_id, invoice_number, client_name, invoice_total, issue_date, status")
+      .select("invoice_id, issue_date, status, currency, invoice_total, total_paid, remaining_amount")
       .eq("user_id", user.id)
       .eq("status", "draft")
-      .gte("issue_date", startDate)
-      .lte("issue_date", endDate)
       .order("issue_date", { ascending: false })
 
-    console.log("[v0] AUDIT: DRAFT query")
-    console.log("[v0] AUDIT: - Source: dashboard_invoices_base")
-    console.log("[v0] AUDIT: - Filters: user_id =", user.id, ", status = 'draft'")
-    console.log("[v0] AUDIT: - Date range:", startDate, "to", endDate)
-    console.log("[v0] AUDIT: - Rows returned:", draftData?.length || 0)
-    if (draftData && draftData.length > 0) {
-      console.log(
-        "[v0] AUDIT: - First 2 rows:",
-        draftData.slice(0, 2).map((r: any) => ({
-          invoice_id: r.invoice_id,
-          issue_date: r.issue_date,
-          status: r.status,
-          invoice_total: r.invoice_total,
-          user_id: r.user_id,
-        })),
-      )
-    }
+    console.log("[v0] DEBUG: DRAFT query result")
+    console.log("[v0] DEBUG: - Count:", draftData?.length || 0)
+    console.log(
+      "[v0] DEBUG: - First 2 invoice_ids:",
+      draftData?.slice(0, 2).map((r) => r.invoice_id) || [],
+    )
     if (draftError) {
-      console.error("[v0] AUDIT: Draft error:", draftError)
+      console.error("[v0] DEBUG: Draft error:", draftError)
     }
 
     // Fetch pending invoices from dashboard_invoices_base view
     const { data: pendingData, error: pendingError } = await supabase
       .from("dashboard_invoices_base")
-      .select(
-        "invoice_id, invoice_number, client_name, invoice_total, total_paid, issue_date, status",
-      )
+      .select("invoice_id, issue_date, status, currency, invoice_total, total_paid, remaining_amount")
       .eq("user_id", user.id)
       .in("status", ["sent", "partially_paid", "overdue"])
-      .gte("issue_date", startDate)
-      .lte("issue_date", endDate)
       .order("issue_date", { ascending: false })
 
-    console.log("[v0] AUDIT: PENDING query")
-    console.log("[v0] AUDIT: - Source: dashboard_invoices_base")
+    console.log("[v0] DEBUG: PENDING query result")
+    console.log("[v0] DEBUG: - Count:", pendingData?.length || 0)
     console.log(
-      "[v0] AUDIT: - Filters: user_id =",
-      user.id,
-      ", status IN ['sent', 'partially_paid', 'overdue']",
+      "[v0] DEBUG: - First 2 invoice_ids:",
+      pendingData?.slice(0, 2).map((r) => r.invoice_id) || [],
     )
-    console.log("[v0] AUDIT: - Date range:", startDate, "to", endDate)
-    console.log("[v0] AUDIT: - Rows returned:", pendingData?.length || 0)
-    if (pendingData && pendingData.length > 0) {
-      console.log(
-        "[v0] AUDIT: - First 2 rows:",
-        pendingData.slice(0, 2).map((r: any) => ({
-          invoice_id: r.invoice_id,
-          issue_date: r.issue_date,
-          status: r.status,
-          invoice_total: r.invoice_total,
-          total_paid: r.total_paid,
-          remaining_amount: r.remaining_amount,
-        })),
-      )
-    }
     if (pendingError) {
-      console.error("[v0] AUDIT: Pending error:", pendingError)
+      console.error("[v0] DEBUG: Pending error:", pendingError)
     }
 
     // Fetch paid invoices from dashboard_invoices_base view
     const { data: paidData, error: paidError } = await supabase
       .from("dashboard_invoices_base")
-      .select(
-        "invoice_id, invoice_number, client_name, invoice_total, total_paid, issue_date, status",
-      )
+      .select("invoice_id, issue_date, status, currency, invoice_total, total_paid, remaining_amount")
       .eq("user_id", user.id)
       .in("status", ["paid", "partially_paid"])
-      .gte("issue_date", startDate)
-      .lte("issue_date", endDate)
       .order("issue_date", { ascending: false })
       .limit(10) // Limit to recent 10 paid invoices
 
-    console.log("[v0] AUDIT: PAID query")
-    console.log("[v0] AUDIT: - Source: dashboard_invoices_base")
-    console.log("[v0] AUDIT: - Filters: user_id =", user.id, ", status IN ['paid', 'partially_paid']")
-    console.log("[v0] AUDIT: - Date range:", startDate, "to", endDate)
-    console.log("[v0] AUDIT: - Rows returned:", paidData?.length || 0)
-    if (paidData && paidData.length > 0) {
-      console.log(
-        "[v0] AUDIT: - First 2 rows:",
-        paidData.slice(0, 2).map((r: any) => ({
-          invoice_id: r.invoice_id,
-          issue_date: r.issue_date,
-          status: r.status,
-          invoice_total: r.invoice_total,
-          total_paid: r.total_paid,
-        })),
-      )
-    }
+    console.log("[v0] DEBUG: PAID query result")
+    console.log("[v0] DEBUG: - Count:", paidData?.length || 0)
+    console.log(
+      "[v0] DEBUG: - First 2 invoice_ids:",
+      paidData?.slice(0, 2).map((r) => r.invoice_id) || [],
+    )
     if (paidError) {
-      console.error("[v0] AUDIT: Paid error:", paidError)
+      console.error("[v0] DEBUG: Paid error:", paidError)
     }
 
     // Transform data to workflow format - use empty arrays if data is null
-    // Use invoice_id from the view (not id)
-    // Use invoice_total (not total_amount) and total_paid (not amount_paid)
+    // View only has: invoice_id, invoice_total, total_paid, remaining_amount
+    // We use invoice_id as both id and display text (no invoice_number available)
     const draft: WorkflowInvoice[] =
       draftData?.map((inv: any) => ({
         id: inv.invoice_id,
-        invoice_number: inv.invoice_number,
-        client_name: inv.client_name || "Unknown Client",
+        invoice_number: `#${inv.invoice_id.slice(0, 8)}`, // Use first 8 chars of invoice_id
+        client_name: "Client", // View doesn't have client_name
         total_amount: Number(inv.invoice_total || 0),
-        remaining_amount: Number(inv.invoice_total || 0),
-        total_paid: 0,
+        remaining_amount: Number(inv.remaining_amount || inv.invoice_total || 0),
+        total_paid: Number(inv.total_paid || 0),
         status: inv.status,
         issue_date: inv.issue_date,
       })) || []
@@ -342,10 +294,10 @@ export async function getInvoiceWorkflowData(
     const pending: WorkflowInvoice[] =
       pendingData?.map((inv: any) => ({
         id: inv.invoice_id,
-        invoice_number: inv.invoice_number,
-        client_name: inv.client_name || "Unknown Client",
+        invoice_number: `#${inv.invoice_id.slice(0, 8)}`,
+        client_name: "Client",
         total_amount: Number(inv.invoice_total || 0),
-        remaining_amount: Number(inv.invoice_total || 0) - Number(inv.total_paid || 0),
+        remaining_amount: Number(inv.remaining_amount || 0),
         total_paid: Number(inv.total_paid || 0),
         status: inv.status,
         issue_date: inv.issue_date,
@@ -354,10 +306,10 @@ export async function getInvoiceWorkflowData(
     const paid: WorkflowInvoice[] =
       paidData?.map((inv: any) => ({
         id: inv.invoice_id,
-        invoice_number: inv.invoice_number,
-        client_name: inv.client_name || "Unknown Client",
+        invoice_number: `#${inv.invoice_id.slice(0, 8)}`,
+        client_name: "Client",
         total_amount: Number(inv.invoice_total || 0),
-        remaining_amount: Number(inv.invoice_total || 0) - Number(inv.total_paid || 0),
+        remaining_amount: Number(inv.remaining_amount || 0),
         total_paid: Number(inv.total_paid || 0),
         status: inv.status,
         issue_date: inv.issue_date,
