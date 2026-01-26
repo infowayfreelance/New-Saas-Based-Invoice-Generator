@@ -131,10 +131,10 @@ export async function recordPayment(
     const convertedAmount = input.amount * fxRate
 
     // Insert payment entry with explicit user_id for RLS compliance
+    // Note: client_id is resolved via invoice_id → invoices.client_id relationship
     const paymentEntry = {
       user_id: user.id,
       invoice_id: input.invoiceId,
-      client_id: invoice.client_id,
       amount: input.amount,
       payment_date: input.paymentDate,
       payment_method: input.paymentMethod || null,
