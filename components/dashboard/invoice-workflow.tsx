@@ -96,16 +96,35 @@ export function InvoiceWorkflow({ currency, filter }: InvoiceWorkflowProps) {
     }
   }
 
-  const handleDownloadPDF = () => {
+  const handleDownloadPDF = async () => {
     if (!selectedInvoice) return
 
     console.log("[Dashboard] Download clicked for invoice_id=", selectedInvoice.id)
-    setActionDialogOpen(false)
+    setIsProcessing(true)
     
-    // Trigger browser download via API route
-    // Opens in new window which will auto-close after download
-    window.open(`/api/invoices/${selectedInvoice.id}/download`, '_blank')
-    toast.success("Downloading invoice PDF...")
+    try {
+      // USER INTENT: Mark as sent BEFORE downloading
+      const result = await markInvoiceAsSent(selectedInvoice.id)
+      
+      if (!result.success) {
+        console.error("[Dashboard] Failed to mark as sent:", result.error)
+        // Continue anyway - user intent matters, not technical success
+      }
+      
+      setActionDialogOpen(false)
+      
+      // Trigger browser download via API route
+      window.open(`/api/invoices/${selectedInvoice.id}/download`, '_blank')
+      toast.success("Downloading invoice PDF...")
+      
+      // Refresh data to reflect status change
+      await fetchWorkflowData()
+    } catch (error) {
+      console.error("[Dashboard] Error in download handler:", error)
+      toast.error("Failed to process download")
+    } finally {
+      setIsProcessing(false)
+    }
   }
 
   const handleRecordPayment = (type: "partial" | "full") => {

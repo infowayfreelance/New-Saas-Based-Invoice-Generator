@@ -75,6 +75,8 @@ export async function recordPayment(
   input: RecordPaymentInput,
 ): Promise<{ success: true; newStatus: string; totalPaid: number; remaining: number } | { error: string }> {
   try {
+    console.log("[v0] recordPayment called with:", { invoiceId: input.invoiceId, amount: input.amount, date: input.paymentDate })
+    
     const supabase = await createClient()
 
     // Get authenticated user
@@ -97,6 +99,8 @@ export async function recordPayment(
       console.error("[v0] Error fetching invoice:", invoiceError)
       return { error: "Invoice not found" }
     }
+
+    console.log("[v0] Invoice fetched:", { id: invoice.id, total: invoice.total_amount, paid: invoice.amount_paid, status: invoice.status })
 
     // Verify ownership
     if (invoice.user_id !== user.id) {
@@ -123,10 +127,10 @@ export async function recordPayment(
     const convertedAmount = input.amount * fxRate
 
     // Insert payment entry
-    const { error: insertError } = await supabase.from("payment_entries").insert({
+    // NOTE: client_id is NOT included because it doesn't exist in the actual Supabase payment_entries table
+    const paymentEntry = {
       user_id: user.id,
       invoice_id: input.invoiceId,
-      client_id: invoice.client_id,
       amount: input.amount,
       payment_date: input.paymentDate,
       payment_method: input.paymentMethod || null,
@@ -136,12 +140,18 @@ export async function recordPayment(
       fx_date: fxDate,
       converted_amount: convertedAmount,
       converted_currency: input.dashboardCurrency,
-    })
+    }
+    
+    console.log("[v0] Inserting payment entry:", paymentEntry)
+    
+    const { error: insertError } = await supabase.from("payment_entries").insert(paymentEntry)
 
     if (insertError) {
       console.error("[v0] Error inserting payment:", insertError)
       return { error: "Failed to record payment" }
     }
+
+    console.log("[v0] Payment entry inserted successfully")
 
     // STEP 2: Calculate total paid from all payment_entries for this invoice
     const { data: paymentData, error: paymentError } = await supabase
@@ -160,8 +170,12 @@ export async function recordPayment(
       0,
     )
 
+    console.log("[v0] Total paid calculated:", totalPaid, "from", paymentData?.length, "payments")
+
     // STEP 3: Calculate remaining
     const remaining = invoiceTotal - totalPaid
+
+    console.log("[v0] Remaining calculated:", remaining, "(total:", invoiceTotal, "- paid:", totalPaid, ")")
 
     // STEP 4: Update invoice status and amount_paid
     let newStatus: string
@@ -170,6 +184,8 @@ export async function recordPayment(
     } else {
       newStatus = 'partially_paid'
     }
+
+    console.log("[v0] New status:", newStatus)
 
     const { error: updateError } = await supabase
       .from("invoices")
@@ -185,6 +201,8 @@ export async function recordPayment(
       console.error("[v0] Error updating invoice status:", updateError)
       return { error: "Payment recorded but failed to update invoice status" }
     }
+
+    console.log("[v0] Invoice updated successfully - status:", newStatus, "amount_paid:", totalPaid)
 
     // Revalidate dashboard and payment pages
     revalidatePath("/app")
