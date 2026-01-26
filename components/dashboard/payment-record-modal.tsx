@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import {
   Dialog,
   DialogContent,
@@ -48,25 +48,48 @@ export function PaymentRecordModal({
   const [error, setError] = useState<string | null>(null)
   const [showConfirmation, setShowConfirmation] = useState(false)
   const [formData, setFormData] = useState({
-    amount: paymentType === "full" ? remainingAmount.toString() : "",
+    amount: "",
     paymentDate: new Date().toISOString().split("T")[0],
     paymentMethod: "",
     reference: "",
   })
 
+  // Reset form and set amount when modal opens or paymentType changes
+  useEffect(() => {
+    if (open) {
+      console.log("[v0] Payment modal opened - invoiceId:", invoiceId, "paymentType:", paymentType, "remainingAmount:", remainingAmount)
+      setFormData({
+        amount: paymentType === "full" ? remainingAmount.toString() : "",
+        paymentDate: new Date().toISOString().split("T")[0],
+        paymentMethod: "",
+        reference: "",
+      })
+      setError(null)
+      setShowConfirmation(false)
+    }
+  }, [open, paymentType, remainingAmount, invoiceId])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
 
-    // Validation
-    const amount = Number(formData.amount)
+    // Validation - Convert to number and validate
+    const amount = parseFloat(formData.amount)
+    
+    console.log("[v0] Payment submit - amount input:", formData.amount, "parsed:", amount, "remaining:", remainingAmount)
+    
     if (isNaN(amount) || amount <= 0) {
       setError("Please enter a valid amount greater than 0")
       return
     }
 
+    if (amount > remainingAmount) {
+      setError(`Amount cannot exceed remaining balance of ${formatCurrency(remainingAmount, currency)}`)
+      return
+    }
+
     if (paymentType === "partial" && amount >= remainingAmount) {
-      setError("Partial payment must be less than the remaining amount")
+      setError("Partial payment must be less than the remaining amount. Use 'Record Full Payment' instead.")
       return
     }
 
@@ -88,7 +111,11 @@ export function PaymentRecordModal({
         dashboardCurrency,
       }
 
+      console.log("[v0] Submitting payment:", input)
+
       const result = await recordPayment(input)
+
+      console.log("[v0] Payment result:", result)
 
       if ("error" in result) {
         setError(result.error)
@@ -102,14 +129,7 @@ export function PaymentRecordModal({
         
         onOpenChange(false)
         onSuccess?.()
-        // Reset form
-        setFormData({
-          amount: "",
-          paymentDate: new Date().toISOString().split("T")[0],
-          paymentMethod: "",
-          reference: "",
-        })
-        setShowConfirmation(false)
+        // Form will be reset by useEffect when modal reopens
       }
     } catch (err: any) {
       console.error("[v0] Error recording payment:", err)
