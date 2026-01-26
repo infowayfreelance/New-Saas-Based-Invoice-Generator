@@ -79,13 +79,17 @@ export async function recordPayment(
     
     const supabase = await createClient()
 
-    // Get authenticated user
+    // Get authenticated user - CRITICAL: This must return a valid user for RLS to work
     const {
       data: { user },
+      error: authError,
     } = await supabase.auth.getUser()
 
-    if (!user) {
-      redirect("/login")
+    console.log("[v0] Auth check - user:", user?.id, "error:", authError)
+
+    if (!user || authError) {
+      console.error("[v0] UNAUTHORIZED: No user context in server action", { authError })
+      throw new Error("Unauthorized: Authentication required")
     }
 
     // Get invoice details
@@ -126,11 +130,11 @@ export async function recordPayment(
     // Calculate converted amount
     const convertedAmount = input.amount * fxRate
 
-    // Insert payment entry
-    // NOTE: client_id is NOT included because it doesn't exist in the actual Supabase payment_entries table
+    // Insert payment entry with explicit user_id for RLS compliance
     const paymentEntry = {
       user_id: user.id,
       invoice_id: input.invoiceId,
+      client_id: invoice.client_id,
       amount: input.amount,
       payment_date: input.paymentDate,
       payment_method: input.paymentMethod || null,
@@ -143,15 +147,31 @@ export async function recordPayment(
     }
     
     console.log("[v0] Inserting payment entry:", paymentEntry)
+    console.log("[v0] Active user_id for RLS:", user.id)
     
-    const { error: insertError } = await supabase.from("payment_entries").insert(paymentEntry)
+    const { data: insertedPayment, error: insertError } = await supabase
+      .from("payment_entries")
+      .insert(paymentEntry)
+      .select()
+      .single()
 
     if (insertError) {
       console.error("[v0] Error inserting payment:", insertError)
-      return { error: "Failed to record payment" }
+      console.error("[v0] Insert error details:", {
+        message: insertError.message,
+        details: insertError.details,
+        hint: insertError.hint,
+        code: insertError.code
+      })
+      return { error: "Failed to record payment: " + (insertError.message || "Unknown error") }
     }
 
-    console.log("[v0] Payment entry inserted successfully")
+    if (!insertedPayment) {
+      console.error("[v0] No payment data returned after insert")
+      return { error: "Failed to record payment: No data returned" }
+    }
+
+    console.log("[v0] Payment entry inserted successfully:", insertedPayment.id)
 
     // STEP 2: Calculate total paid from all payment_entries for this invoice
     const { data: paymentData, error: paymentError } = await supabase
@@ -172,17 +192,19 @@ export async function recordPayment(
 
     console.log("[v0] Total paid calculated:", totalPaid, "from", paymentData?.length, "payments")
 
-    // STEP 3: Calculate remaining
-    const remaining = invoiceTotal - totalPaid
+    // STEP 3: Calculate remaining amount
+    const remaining = Math.max(0, invoiceTotal - totalPaid)
 
     console.log("[v0] Remaining calculated:", remaining, "(total:", invoiceTotal, "- paid:", totalPaid, ")")
 
-    // STEP 4: Update invoice status and amount_paid
+    // STEP 4: Update invoice status and amount_paid (using lowercase status values)
     let newStatus: string
     if (remaining <= 0) {
       newStatus = 'paid'
-    } else {
+    } else if (totalPaid > 0) {
       newStatus = 'partially_paid'
+    } else {
+      newStatus = invoice.status // Keep existing status if no payment
     }
 
     console.log("[v0] New status:", newStatus)
@@ -231,10 +253,12 @@ export async function getInvoiceForPayment(invoiceId: string) {
     // Get authenticated user
     const {
       data: { user },
+      error: authError,
     } = await supabase.auth.getUser()
 
-    if (!user) {
-      redirect("/login")
+    if (!user || authError) {
+      console.error("[v0] UNAUTHORIZED: No user context in getInvoiceForPayment", { authError })
+      throw new Error("Unauthorized: Authentication required")
     }
 
     const { data: invoice, error } = await supabase
