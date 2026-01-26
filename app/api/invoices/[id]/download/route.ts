@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getInvoiceDataForPDF } from "@/app/actions/invoice-pdf"
+import { markInvoiceAsSent } from "@/app/actions/invoice-status"
 
 export async function GET(
   request: NextRequest,
@@ -23,6 +24,14 @@ export async function GET(
   const invoiceData = result.data
 
   console.log("[v0] PDF Download API: Invoice data fetched, generating HTML for client-side PDF generation")
+
+  // Mark invoice as sent when downloaded (business rule: download = send to client)
+  const statusUpdate = await markInvoiceAsSent(invoiceId)
+  if (statusUpdate.success) {
+    console.log("[v0] PDF Download API: Invoice marked as sent")
+  } else {
+    console.warn("[v0] PDF Download API: Could not mark invoice as sent:", statusUpdate.error)
+  }
 
   // Return HTML that will trigger client-side PDF generation
   // This is a workaround since we can't run html2canvas on the server
