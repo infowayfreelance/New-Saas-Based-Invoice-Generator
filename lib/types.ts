@@ -167,13 +167,16 @@ export interface PaymentEntry {
   id: string
   user_id: string
   invoice_id: string
-  client_id: string | null
   amount: number
   payment_date: string
-  payment_method: string | null
-  note: string | null
+  method: string | null
+  reference: string | null
+  payment_currency: string
+  fx_rate: number
+  fx_date: string
+  converted_amount: number
+  converted_currency: string
   created_at: string
-  updated_at: string
 }
 
 // Extended types with relations

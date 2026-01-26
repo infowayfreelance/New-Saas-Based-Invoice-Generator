@@ -70,22 +70,37 @@ export default function RecordPaymentPage() {
       } = await supabase.auth.getUser()
       if (!user) throw new Error("Not authenticated")
 
-      const { error } = await supabase.from("payment_entries").insert({
-        user_id: user.id,
-        invoice_id: formData.invoice_id,
+      // Get user settings for currency
+      const { data: settings } = await supabase
+        .from("user_settings")
+        .select("currency")
+        .eq("user_id", user.id)
+        .single()
+
+      // Use the recordPayment server action which handles FX rates and status updates
+      const { recordPayment } = await import("@/app/actions/payments")
+      
+      const result = await recordPayment({
+        invoiceId: formData.invoice_id,
         amount: Number.parseFloat(formData.amount),
-        payment_date: formData.payment_date,
-        method: formData.method,
-        reference: formData.reference || null,
-        notes: formData.notes || null,
+        paymentDate: formData.payment_date,
+        paymentMethod: formData.method,
+        reference: formData.reference || undefined,
+        dashboardCurrency: settings?.currency || "USD",
       })
 
-      if (error) throw error
-
-      // Update invoice status to paid if full amount
-      if (selectedInvoice && Number.parseFloat(formData.amount) >= selectedInvoice.total) {
-        await supabase.from("invoices").update({ status: "paid" }).eq("id", formData.invoice_id)
+      if ("error" in result) {
+        throw new Error(result.error)
       }
+
+      router.push("/app/payments")
+    } catch (error) {
+      console.error("Error recording payment:", error)
+      alert("Failed to record payment. Please try again.")
+    } finally {
+      setLoading(false)
+    }
+  }
 
       router.push("/app/payments")
     } catch (error) {
