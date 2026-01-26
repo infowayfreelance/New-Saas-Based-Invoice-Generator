@@ -127,10 +127,10 @@ export async function recordPayment(
     const convertedAmount = input.amount * fxRate
 
     // Insert payment entry
+    // NOTE: client_id is NOT included because it doesn't exist in the actual Supabase payment_entries table
     const paymentEntry = {
       user_id: user.id,
       invoice_id: input.invoiceId,
-      client_id: invoice.client_id,
       amount: input.amount,
       payment_date: input.paymentDate,
       payment_method: input.paymentMethod || null,
