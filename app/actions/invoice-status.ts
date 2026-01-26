@@ -1,6 +1,7 @@
 "use server"
 
 import { createClient } from "@/lib/supabase/server"
+import { revalidatePath } from "next/cache"
 
 /**
  * SINGLE SOURCE OF TRUTH for invoice status updates
@@ -71,6 +72,10 @@ export async function markInvoiceAsSent(invoiceId: string): Promise<{ success: b
   }
 
   console.log("[v0] Invoice marked as sent:", invoiceId, "| draft → sent")
+
+  // Revalidate dashboard to refresh stats and workflow columns
+  revalidatePath("/app", "layout")
+  revalidatePath("/app/invoices")
 
   return {
     success: true,

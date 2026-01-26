@@ -139,35 +139,44 @@ export async function getDashboardStats(
 
     console.log("[v0] AUDIT: - Total received calculated:", totalReceived)
 
-    // Fetch total pending from dashboard_pending_converted view
-    // This view returns multiple rows (one per pending invoice)
-    // We need to sum the pending_converted_amount column
-    const { data: pendingRows, error: pendingError } = await supabase
-      .from("dashboard_pending_converted")
-      .select("pending_converted_amount")
+    // Fetch total pending from invoices table (filtered by date and status)
+    // LOCKED FORMULA: SUM(total_amount - amount_paid)
+    // STEP 1: Defensive NULL handling - treat NULL amount_paid as 0
+    // STEP 2: Exclude fully paid invoices where total_amount <= amount_paid
+    const { data: pendingInvoices, error: pendingError } = await supabase
+      .from("invoices")
+      .select("total_amount, amount_paid, currency")
       .eq("user_id", user.id)
+      .eq("currency", currency)
+      .in("status", ["sent", "partially_paid"])
+      .gte("issue_date", startDate)
+      .lte("issue_date", endDate)
 
     console.log("[v0] AUDIT: TOTAL PENDING query")
-    console.log("[v0] AUDIT: - Source: dashboard_pending_converted view")
+    console.log("[v0] AUDIT: - Source: invoices table")
     console.log("[v0] AUDIT: - Filters: user_id =", user.id)
-    console.log("[v0] AUDIT: - Rows returned:", pendingRows?.length || 0)
-    if (pendingRows && pendingRows.length > 0) {
-      console.log(
-        "[v0] AUDIT: - First 2 rows:",
-        pendingRows.slice(0, 2).map((r: any) => ({
-          pending_converted_amount: r.pending_converted_amount,
-        })),
-      )
-    }
+    console.log("[v0] AUDIT: - Currency filter:", currency)
+    console.log("[v0] AUDIT: - Status filter: sent, partially_paid")
+    console.log("[v0] AUDIT: - Date range:", startDate, "to", endDate)
+    console.log("[v0] AUDIT: - Rows returned:", pendingInvoices?.length || 0)
 
     if (pendingError) {
-      console.error("[v0] AUDIT: Pending amounts error:", pendingError)
+      console.error("[v0] AUDIT: Error fetching pending invoices:", pendingError)
     }
 
-    // Sum all pending_converted_amount values from the array of rows
-    // If no rows exist (empty array), totalPending will be 0
-    const totalPending = (pendingRows || []).reduce((sum, row) => {
-      return sum + Number(row.pending_converted_amount || 0)
+    // Calculate total pending as SUM(total_amount - amount_paid)
+    // STEP 1: Defensive NULL handling - coerce to 0
+    // STEP 2: Filter out invoices with zero or negative balance
+    const totalPending = (pendingInvoices || []).reduce((sum, inv) => {
+      const totalAmount = Number(inv.total_amount || 0)
+      const amountPaid = Number(inv.amount_paid || 0)
+      const outstandingBalance = totalAmount - amountPaid
+      
+      // Only include invoices with positive outstanding balance
+      if (outstandingBalance > 0) {
+        return sum + outstandingBalance
+      }
+      return sum
     }, 0)
 
     console.log("[v0] AUDIT: - Total pending calculated:", totalPending)

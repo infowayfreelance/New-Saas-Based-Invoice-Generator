@@ -93,7 +93,9 @@ export default function RecordPaymentPage() {
         throw new Error(result.error)
       }
 
+      // Force hard navigation to ensure dashboard stats refresh
       router.push("/app/payments")
+      router.refresh()
     } catch (error) {
       console.error("Error recording payment:", error)
       alert("Failed to record payment. Please try again.")

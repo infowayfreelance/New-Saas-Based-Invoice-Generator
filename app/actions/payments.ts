@@ -227,10 +227,13 @@ export async function recordPayment(
 
     console.log("[v0] Invoice updated successfully - status:", newStatus, "amount_paid:", totalPaid)
 
-    // Revalidate dashboard and payment pages
-    revalidatePath("/app")
+    // STEP 3: Force server revalidation to ensure dashboard stats refresh
+    // Revalidate all affected pages with layout revalidation
+    revalidatePath("/app", "layout")
     revalidatePath("/app/payments")
     revalidatePath("/app/invoices")
+    
+    console.log("[v0] Server paths revalidated for fresh data")
 
     return { 
       success: true,
