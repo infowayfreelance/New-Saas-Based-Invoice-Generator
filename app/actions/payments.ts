@@ -131,14 +131,15 @@ export async function recordPayment(
     const convertedAmount = input.amount * fxRate
 
     // Insert payment entry with explicit user_id for RLS compliance
+    // Note: client_id is resolved via invoice_id → invoices.client_id relationship
+    // Field names match Supabase schema exactly: method, reference (not payment_method, payment_reference)
     const paymentEntry = {
       user_id: user.id,
       invoice_id: input.invoiceId,
-      client_id: invoice.client_id,
       amount: input.amount,
       payment_date: input.paymentDate,
-      payment_method: input.paymentMethod || null,
-      payment_reference: input.reference || null,
+      method: input.paymentMethod || null,
+      reference: input.reference || null,
       payment_currency: invoice.currency,
       fx_rate: fxRate,
       fx_date: fxDate,
