@@ -102,14 +102,6 @@ export default function RecordPaymentPage() {
     }
   }
 
-      router.push("/app/payments")
-    } catch (error) {
-      console.error("Error recording payment:", error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
   return (
     <>
       <PageHeader

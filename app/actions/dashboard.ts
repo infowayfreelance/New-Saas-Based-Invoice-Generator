@@ -110,25 +110,34 @@ export async function getDashboardStats(
       console.error("[v0] Error fetching total clients:", clientsError)
     }
 
-    // Fetch total received from dashboard_totals view (filtered by date)
-    // Note: Since the view doesn't support date filtering directly,
-    // we'll query invoices directly for paid amounts
-    const { data: paidInvoices, error: paidError } = await supabase
-      .from("invoices")
-      .select("total_amount")
+    // Fetch total received from payment_entries (filtered by date)
+    // IMPORTANT: payment_entries is the single source of truth for money received
+    // Use converted_amount to respect multi-currency and dashboard currency selection
+    const { data: paymentEntries, error: paidError } = await supabase
+      .from("payment_entries")
+      .select("converted_amount, converted_currency")
       .eq("user_id", user.id)
-      .eq("status", "paid")
-      .gte("issue_date", startDate)
-      .lte("issue_date", endDate)
+      .eq("converted_currency", currency)
+      .gte("payment_date", startDate)
+      .lte("payment_date", endDate)
+
+    console.log("[v0] AUDIT: TOTAL RECEIVED query")
+    console.log("[v0] AUDIT: - Source: payment_entries table")
+    console.log("[v0] AUDIT: - Filters: user_id =", user.id)
+    console.log("[v0] AUDIT: - Currency filter:", currency)
+    console.log("[v0] AUDIT: - Date range:", startDate, "to", endDate)
+    console.log("[v0] AUDIT: - Rows returned:", paymentEntries?.length || 0)
 
     if (paidError) {
-      console.error("[v0] Error fetching paid invoices:", paidError)
+      console.error("[v0] AUDIT: Error fetching payment entries:", paidError)
     }
 
-    const totalReceived = (paidInvoices || []).reduce(
-      (sum, inv) => sum + Number(inv.total_amount || 0),
+    const totalReceived = (paymentEntries || []).reduce(
+      (sum, payment) => sum + Number(payment.converted_amount || 0),
       0,
     )
+
+    console.log("[v0] AUDIT: - Total received calculated:", totalReceived)
 
     // Fetch total pending from dashboard_pending_converted view
     // This view returns multiple rows (one per pending invoice)
