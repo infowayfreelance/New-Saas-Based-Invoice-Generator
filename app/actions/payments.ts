@@ -79,13 +79,17 @@ export async function recordPayment(
     
     const supabase = await createClient()
 
-    // Get authenticated user
+    // Get authenticated user - CRITICAL: This must return a valid user for RLS to work
     const {
       data: { user },
+      error: authError,
     } = await supabase.auth.getUser()
 
-    if (!user) {
-      redirect("/login")
+    console.log("[v0] Auth check - user:", user?.id, "error:", authError)
+
+    if (!user || authError) {
+      console.error("[v0] UNAUTHORIZED: No user context in server action", { authError })
+      throw new Error("Unauthorized: Authentication required")
     }
 
     // Get invoice details
@@ -143,6 +147,7 @@ export async function recordPayment(
     }
     
     console.log("[v0] Inserting payment entry:", paymentEntry)
+    console.log("[v0] Active user_id for RLS:", user.id)
     
     const { data: insertedPayment, error: insertError } = await supabase
       .from("payment_entries")
@@ -152,11 +157,12 @@ export async function recordPayment(
 
     if (insertError) {
       console.error("[v0] Error inserting payment:", insertError)
-      return { error: "Failed to record payment" }
-    }
-
-    if (insertError) {
-      console.error("[v0] Error inserting payment:", insertError)
+      console.error("[v0] Insert error details:", {
+        message: insertError.message,
+        details: insertError.details,
+        hint: insertError.hint,
+        code: insertError.code
+      })
       return { error: "Failed to record payment: " + (insertError.message || "Unknown error") }
     }
 
@@ -247,10 +253,12 @@ export async function getInvoiceForPayment(invoiceId: string) {
     // Get authenticated user
     const {
       data: { user },
+      error: authError,
     } = await supabase.auth.getUser()
 
-    if (!user) {
-      redirect("/login")
+    if (!user || authError) {
+      console.error("[v0] UNAUTHORIZED: No user context in getInvoiceForPayment", { authError })
+      throw new Error("Unauthorized: Authentication required")
     }
 
     const { data: invoice, error } = await supabase
