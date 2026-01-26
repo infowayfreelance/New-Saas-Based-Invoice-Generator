@@ -9,6 +9,7 @@ import { Download, Send } from "lucide-react"
 import { toast } from "sonner"
 import type { InvoiceFormData } from "@/lib/utils/invoice"
 import { sendInvoiceEmail } from "@/app/actions/invoice"
+import { markInvoiceAsSent } from "@/app/actions/invoice-status"
 
 interface InvoiceActionButtonsProps {
   invoiceData: InvoiceFormData
@@ -32,6 +33,13 @@ export function InvoiceActionButtons({ invoiceData, invoiceId, invoiceNumber }: 
     toast.info("Generating PDF...")
 
     try {
+      // USER INTENT: Mark as sent BEFORE generating PDF
+      const statusResult = await markInvoiceAsSent(invoiceId)
+      if (!statusResult.success) {
+        console.error("[v0] Failed to mark as sent:", statusResult.error)
+        // Continue anyway - user intent matters, not technical success
+      }
+
       // Dynamic import for html2canvas and jspdf
       const html2canvas = (await import("html2canvas")).default
       const { jsPDF } = await import("jspdf")
@@ -80,7 +88,7 @@ export function InvoiceActionButtons({ invoiceData, invoiceId, invoiceNumber }: 
     } finally {
       setIsDownloading(false)
     }
-  }, [invoiceNumber])
+  }, [invoiceNumber, invoiceId])
 
   const handleSendEmail = useCallback(async () => {
     if (!invoiceData.clientEmail) {
@@ -92,6 +100,13 @@ export function InvoiceActionButtons({ invoiceData, invoiceId, invoiceNumber }: 
     toast.info("Sending email...")
 
     try {
+      // USER INTENT: Mark as sent BEFORE sending email
+      const statusResult = await markInvoiceAsSent(invoiceId)
+      if (!statusResult.success) {
+        console.error("[v0] Failed to mark as sent:", statusResult.error)
+        // Continue anyway - user intent matters, not technical success
+      }
+
       const result = await sendInvoiceEmail(invoiceId)
 
       if (result.success) {
