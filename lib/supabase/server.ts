@@ -19,10 +19,6 @@ export async function createClient() {
 
   const cookieStore = await cookies()
   
-  // Debug: Check if auth cookies exist
-  const authCookies = cookieStore.getAll().filter(c => c.name.includes('sb-'))
-  console.log("[v0] Auth cookies found:", authCookies.length > 0 ? "YES" : "NO", authCookies.map(c => c.name))
-
   const client = createServerClient(supabaseUrl, supabaseAnonKey, {
     cookies: {
       getAll() {
@@ -34,10 +30,9 @@ export async function createClient() {
           cookiesToSet.forEach(({ name, value, options }) => {
             cookieStore.set(name, value, options)
           })
-        } catch (error) {
+        } catch {
           // The "setAll" method was called from a Server Component.
           // This can be ignored if you have proxy refreshing user sessions.
-          console.log("[v0] Cookie setting skipped in Server Component context")
         }
       },
     },
