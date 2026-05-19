@@ -11,15 +11,35 @@ const _geistMono = Geist_Mono({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
   title: {
-    default: "InvoiceFlow - Professional Invoice Generator",
+    default: "InvoiceFlow – Free Online Invoice Generator",
     template: "%s | InvoiceFlow",
   },
   description:
-    "Create professional invoices in seconds. Manage clients, track payments, and grow your business with our powerful invoicing platform.",
-  keywords: ["invoice generator", "invoicing software", "billing software", "client management", "payment tracking"],
+    "Generate professional invoices, download PDF invoices, manage recurring billing, and track payments with InvoiceFlow invoicing software.",
+  keywords: [
+    "free online invoice generator",
+    "invoice generator",
+    "invoicing software",
+    "PDF invoice",
+    "billing software",
+    "client management",
+    "payment tracking",
+    "freelancer invoicing",
+    "small business invoicing",
+  ],
   authors: [{ name: "InvoiceFlow" }],
   creator: "InvoiceFlow",
-    generator: 'v0.app'
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
 }
 
 export const viewport: Viewport = {
