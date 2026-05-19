@@ -278,10 +278,14 @@ export default function HomePage() {
       {/* ── Hero Section ── */}
       <section className="relative overflow-hidden px-4 py-20 sm:px-6 lg:px-8 lg:py-32">
         <div className="absolute inset-0 -z-10 bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_110%)]" />
+        {/* subtle radial glow behind heading */}
+        <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 flex justify-center">
+          <div className="h-[400px] w-[800px] rounded-full bg-primary/5 blur-3xl" />
+        </div>
         <div className="mx-auto max-w-7xl">
           <div className="mx-auto max-w-3xl text-center">
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-muted px-4 py-1.5 text-sm">
-              <Zap className="h-4 w-4 text-primary" />
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-sm font-medium text-primary">
+              <Zap className="h-4 w-4" />
               <span>Create invoices in under 60 seconds</span>
             </div>
             <h1 className="text-balance text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
@@ -294,7 +298,7 @@ export default function HomePage() {
             </p>
             <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Link href="/free-invoice">
-                <Button size="lg" className="w-full gap-2 sm:w-auto">
+                <Button size="lg" className="w-full gap-2 sm:w-auto shadow-md shadow-primary/20">
                   Create Free Invoice
                   <ArrowRight className="h-4 w-4" />
                 </Button>
