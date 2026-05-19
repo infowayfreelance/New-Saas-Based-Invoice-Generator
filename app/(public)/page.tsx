@@ -68,6 +68,8 @@ export const metadata: Metadata = {
   },
 }
 
+/* ── JSON-LD Schemas ─────────────────────────────────────────────── */
+
 const websiteSchema = {
   "@context": "https://schema.org",
   "@type": "WebSite",
@@ -166,6 +168,8 @@ const faqSchema = {
   ],
 }
 
+/* ── Data ────────────────────────────────────────────────────────── */
+
 const features = [
   {
     icon: FileText,
@@ -206,12 +210,12 @@ const features = [
 ]
 
 const benefits = [
-  { icon: Clock, text: "Save 5+ hours every week with automated invoicing tools" },
-  { icon: Shield, text: "Create secure, bank-level encrypted online invoices" },
-  { icon: Zap, text: "Get paid faster with professional invoice templates" },
-  { icon: Download, text: "Download and send PDF invoices instantly" },
-  { icon: RefreshCw, text: "Manage recurring invoices and client billing easily" },
-  { icon: Smartphone, text: "Access your invoices anytime from desktop or mobile devices" },
+  { icon: Clock,        text: "Save 5+ hours every week with automated invoicing tools" },
+  { icon: Shield,       text: "Create secure, bank-level encrypted online invoices" },
+  { icon: Zap,          text: "Get paid faster with professional invoice templates" },
+  { icon: Download,     text: "Download and send PDF invoices instantly" },
+  { icon: RefreshCw,    text: "Manage recurring invoices and client billing easily" },
+  { icon: Smartphone,   text: "Access your invoices anytime from desktop or mobile devices" },
 ]
 
 const faqs = [
@@ -248,15 +252,17 @@ const faqs = [
 ]
 
 const comparisonRows = [
-  { feature: "Professional PDF invoices", invoiceflow: true, spreadsheet: false, manual: false },
-  { feature: "Automatic tax calculations", invoiceflow: true, spreadsheet: false, manual: false },
-  { feature: "Client management", invoiceflow: true, spreadsheet: false, manual: false },
-  { feature: "Email invoice delivery", invoiceflow: true, spreadsheet: false, manual: false },
-  { feature: "Payment status tracking", invoiceflow: true, spreadsheet: false, manual: false },
-  { feature: "Recurring invoices", invoiceflow: true, spreadsheet: false, manual: false },
-  { feature: "Revenue analytics", invoiceflow: true, spreadsheet: false, manual: false },
-  { feature: "Mobile access", invoiceflow: true, spreadsheet: false, manual: false },
+  { feature: "Professional PDF invoices",   invoiceflow: true,  spreadsheet: false, manual: false },
+  { feature: "Automatic tax calculations",  invoiceflow: true,  spreadsheet: false, manual: false },
+  { feature: "Client management",           invoiceflow: true,  spreadsheet: false, manual: false },
+  { feature: "Email invoice delivery",      invoiceflow: true,  spreadsheet: false, manual: false },
+  { feature: "Payment status tracking",     invoiceflow: true,  spreadsheet: false, manual: false },
+  { feature: "Recurring invoices",          invoiceflow: true,  spreadsheet: false, manual: false },
+  { feature: "Revenue analytics",           invoiceflow: true,  spreadsheet: false, manual: false },
+  { feature: "Mobile access",               invoiceflow: true,  spreadsheet: false, manual: false },
 ]
+
+/* ── Page ────────────────────────────────────────────────────────── */
 
 export default function HomePage() {
   return (
@@ -275,27 +281,32 @@ export default function HomePage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
 
-      {/* ── Hero Section ── */}
+      {/* ── Hero Section ─────────────────────────────────────────── */}
       <section className="relative overflow-hidden px-4 py-20 sm:px-6 lg:px-8 lg:py-32">
         <div className="absolute inset-0 -z-10 bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_110%)]" />
-        {/* subtle radial glow behind heading */}
         <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 flex justify-center">
           <div className="h-[400px] w-[800px] rounded-full bg-primary/5 blur-3xl" />
         </div>
+
         <div className="mx-auto max-w-7xl">
           <div className="mx-auto max-w-3xl text-center">
             <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-sm font-medium text-primary">
               <Zap className="h-4 w-4" />
               <span>Create invoices in under 60 seconds</span>
             </div>
+
+            {/* H1 */}
             <h1 className="text-balance text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
               Free Online Invoice Generator for{" "}
               <span className="text-primary">Freelancers &amp; Small Businesses</span>
             </h1>
+
+            {/* Sub Heading */}
             <p className="mt-6 text-pretty text-lg leading-relaxed text-muted-foreground">
               Create professional PDF invoices in under 60 seconds. Manage clients, send invoices online, track
               payments, and automate recurring billing with one simple invoicing platform.
             </p>
+
             <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Link href="/free-invoice">
                 <Button size="lg" className="w-full gap-2 sm:w-auto shadow-md shadow-primary/20">
@@ -309,6 +320,8 @@ export default function HomePage() {
                 </Button>
               </Link>
             </div>
+
+            {/* Small Text */}
             <p className="mt-4 text-sm text-muted-foreground">
               No credit card required • Free invoice templates included • Instant PDF download
             </p>
@@ -316,7 +329,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── Stats Section ── */}
+      {/* ── Stats Section ────────────────────────────────────────── */}
       <section className="border-y border-border bg-muted/30 px-4 py-12 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
           <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
@@ -335,19 +348,22 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── Features Grid ── */}
+      {/* ── Features Section ─────────────────────────────────────── */}
       <section className="px-4 py-20 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
           <div className="mx-auto max-w-2xl text-center">
             <Badge variant="secondary" className="mb-4">Features</Badge>
+            {/* Section Heading */}
             <h2 className="text-balance text-3xl font-bold tracking-tight sm:text-4xl">
               Everything you need to manage invoicing online
             </h2>
+            {/* Section Sub Heading */}
             <p className="mt-4 text-pretty text-lg text-muted-foreground">
               Create invoices, manage customers, track payments, and grow your business with powerful online invoicing
               tools built for freelancers and small businesses.
             </p>
           </div>
+
           <div className="mt-16 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {features.map((feature) => (
               <Card
@@ -369,15 +385,17 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── Benefits Section ── */}
+      {/* ── Why InvoiceFlow Section ──────────────────────────────── */}
       <section className="border-y border-border bg-muted/30 px-4 py-20 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
           <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
             <div>
               <Badge variant="secondary" className="mb-4">Why InvoiceFlow</Badge>
+              {/* Section Heading */}
               <h2 className="text-balance text-3xl font-bold tracking-tight sm:text-4xl">
                 Why Businesses Choose InvoiceFlow
               </h2>
+              {/* Section Sub Heading */}
               <p className="mt-4 text-pretty text-lg text-muted-foreground">
                 Thousands of freelancers, agencies, consultants, and small businesses use InvoiceFlow to create
                 professional invoices, manage payments, and simplify billing online.
@@ -402,7 +420,7 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Mock invoice preview card */}
+            {/* Mock invoice preview */}
             <div className="relative">
               <div className="rounded-xl border border-border bg-card p-6 shadow-lg">
                 <div className="mb-4 flex items-center justify-between">
@@ -446,7 +464,6 @@ export default function HomePage() {
                   </div>
                 </div>
               </div>
-              {/* decorative floating card */}
               <div className="absolute -right-4 -top-4 hidden rounded-lg border border-border bg-card px-3 py-2 shadow-md lg:block">
                 <div className="flex items-center gap-2 text-xs">
                   <div className="h-2 w-2 rounded-full bg-green-500" />
@@ -458,7 +475,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── Comparison Table ── */}
+      {/* ── Comparison Table ─────────────────────────────────────── */}
       <section className="px-4 py-20 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-5xl">
           <div className="mx-auto max-w-2xl text-center">
@@ -482,31 +499,22 @@ export default function HomePage() {
               </thead>
               <tbody>
                 {comparisonRows.map((row, i) => (
-                  <tr
-                    key={row.feature}
-                    className={i % 2 === 0 ? "bg-background" : "bg-muted/20"}
-                  >
+                  <tr key={row.feature} className={i % 2 === 0 ? "bg-background" : "bg-muted/20"}>
                     <td className="px-6 py-4 font-medium">{row.feature}</td>
                     <td className="px-6 py-4 text-center">
-                      {row.invoiceflow ? (
-                        <Check className="mx-auto h-5 w-5 text-green-500" aria-label="Supported" />
-                      ) : (
-                        <X className="mx-auto h-5 w-5 text-muted-foreground/40" aria-label="Not supported" />
-                      )}
+                      {row.invoiceflow
+                        ? <Check className="mx-auto h-5 w-5 text-green-500" aria-label="Supported" />
+                        : <X className="mx-auto h-5 w-5 text-muted-foreground/40" aria-label="Not supported" />}
                     </td>
                     <td className="px-6 py-4 text-center">
-                      {row.spreadsheet ? (
-                        <Check className="mx-auto h-5 w-5 text-green-500" aria-label="Supported" />
-                      ) : (
-                        <X className="mx-auto h-5 w-5 text-muted-foreground/40" aria-label="Not supported" />
-                      )}
+                      {row.spreadsheet
+                        ? <Check className="mx-auto h-5 w-5 text-green-500" aria-label="Supported" />
+                        : <X className="mx-auto h-5 w-5 text-muted-foreground/40" aria-label="Not supported" />}
                     </td>
                     <td className="px-6 py-4 text-center">
-                      {row.manual ? (
-                        <Check className="mx-auto h-5 w-5 text-green-500" aria-label="Supported" />
-                      ) : (
-                        <X className="mx-auto h-5 w-5 text-muted-foreground/40" aria-label="Not supported" />
-                      )}
+                      {row.manual
+                        ? <Check className="mx-auto h-5 w-5 text-green-500" aria-label="Supported" />
+                        : <X className="mx-auto h-5 w-5 text-muted-foreground/40" aria-label="Not supported" />}
                     </td>
                   </tr>
                 ))}
@@ -516,14 +524,16 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── FAQ Section ── */}
+      {/* ── FAQ Section ──────────────────────────────────────────── */}
       <section className="border-y border-border bg-muted/30 px-4 py-20 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-4xl">
           <div className="mx-auto max-w-2xl text-center">
             <Badge variant="secondary" className="mb-4">FAQ</Badge>
+            {/* Section Heading */}
             <h2 className="text-balance text-3xl font-bold tracking-tight sm:text-4xl">
               Frequently asked questions
             </h2>
+            {/* Section Sub Heading */}
             <p className="mt-4 text-pretty text-lg text-muted-foreground">
               Everything you need to know about using InvoiceFlow for online invoicing and payment management.
             </p>
@@ -551,21 +561,26 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── CTA Section ── */}
+      {/* ── CTA Section ──────────────────────────────────────────── */}
       <section className="px-4 py-20 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-4xl">
           <div className="rounded-2xl border border-primary/20 bg-primary/5 px-8 py-16 text-center">
             <Badge variant="secondary" className="mb-6">Get Started Free</Badge>
+
+            {/* Heading */}
             <h2 className="text-balance text-3xl font-bold tracking-tight sm:text-4xl">
               Start creating professional invoices online for free
             </h2>
+
+            {/* Sub Heading */}
             <p className="mx-auto mt-4 max-w-2xl text-pretty text-lg text-muted-foreground">
               Generate PDF invoices, manage clients, track payments, and automate billing with one easy-to-use online
               invoicing platform.
             </p>
+
             <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Link href="/free-invoice">
-                <Button size="lg" className="w-full gap-2 sm:w-auto">
+                <Button size="lg" className="w-full gap-2 sm:w-auto shadow-md shadow-primary/20">
                   Create Free Invoice Now
                   <ArrowRight className="h-4 w-4" />
                 </Button>
@@ -576,14 +591,17 @@ export default function HomePage() {
                 </Button>
               </Link>
             </div>
+
+            {/* Small Text */}
             <p className="mt-6 text-sm text-muted-foreground">
               No credit card required • Free invoice generator • Trusted by freelancers and small businesses worldwide
             </p>
+
             <div className="mt-8 flex flex-wrap items-center justify-center gap-6 text-sm text-muted-foreground">
               {[
                 { icon: CheckCircle2, text: "Free invoice templates" },
-                { icon: Shield, text: "Bank-level security" },
-                { icon: Download, text: "Instant PDF download" },
+                { icon: Shield,       text: "Bank-level security" },
+                { icon: Download,     text: "Instant PDF download" },
               ].map((item) => (
                 <div key={item.text} className="flex items-center gap-1.5">
                   <item.icon className="h-4 w-4 text-primary" />
