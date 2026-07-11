@@ -82,9 +82,9 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: `${siteUrl}/make-invo-og.webp`,
-        width: 1731,
-        height: 909,
+        url: `${siteUrl}/make-invo-og.png`,
+        width: 1200,
+        height: 630,
         alt: "MakeInvo - Free Online Invoice Generator",
       },
     ],
@@ -95,7 +95,7 @@ export const metadata: Metadata = {
     title: "Free Invoice Generator Online - Create Professional PDF Invoices | MakeInvo",
     description:
       "Create a professional PDF invoice in under 60 seconds with MakeInvo's free online invoice generator.",
-    images: [`${siteUrl}/make-invo-og.webp`],
+    images: [`${siteUrl}/make-invo-og.png`],
   },
 }
 
