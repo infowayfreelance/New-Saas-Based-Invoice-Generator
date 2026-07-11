@@ -9,6 +9,7 @@ import { Download, Send } from "lucide-react"
 import { toast } from "sonner"
 import type { InvoiceFormData } from "@/lib/utils/invoice"
 import { sendInvoiceEmail } from "@/app/actions/invoice"
+import { downloadInvoicePdf } from "@/lib/utils/pdf"
 import { markInvoiceAsSent } from "@/app/actions/invoice-status"
 
 interface InvoiceActionButtonsProps {
@@ -40,46 +41,7 @@ export function InvoiceActionButtons({ invoiceData, invoiceId, invoiceNumber }: 
         // Continue anyway - user intent matters, not technical success
       }
 
-      // Dynamic import for html2canvas and jspdf
-      const html2canvas = (await import("html2canvas")).default
-      const { jsPDF } = await import("jspdf")
-
-      const pdf = new jsPDF("p", "mm", "a4")
-
-      const canvas = await html2canvas(element, {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: "#ffffff",
-        windowWidth: element.scrollWidth,
-      })
-
-      const pageWidth = pdf.internal.pageSize.getWidth()
-      const pageHeight = pdf.internal.pageSize.getHeight()
-      const margin = 10
-
-      const imgData = canvas.toDataURL("image/png")
-      let imgWidth = pageWidth - margin * 2
-      let imgHeight = (canvas.height * imgWidth) / canvas.width
-
-      // Scale to fit page
-      const targetHeight = pageHeight - margin * 2
-      if (imgHeight < targetHeight * 0.9) {
-        const scale = (targetHeight * 0.9) / imgHeight
-        imgWidth = imgWidth * scale
-        imgHeight = imgHeight * scale
-      }
-
-      if (imgWidth > pageWidth - margin * 2) {
-        const fitScale = (pageWidth - margin * 2) / imgWidth
-        imgWidth = imgWidth * fitScale
-        imgHeight = imgHeight * fitScale
-      }
-
-      const x = (pageWidth - imgWidth) / 2
-      const y = margin
-
-      pdf.addImage(imgData, "PNG", x, y, imgWidth, imgHeight)
-      pdf.save(`invoice-${invoiceNumber}.pdf`)
+      await downloadInvoicePdf(element, `invoice-${invoiceNumber}.pdf`)
 
       toast.success("PDF downloaded successfully!")
     } catch (error) {

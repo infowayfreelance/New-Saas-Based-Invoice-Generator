@@ -24,8 +24,8 @@ export default async function AdminDashboard() {
     const { count: invoices } = await supabase.from("invoices").select("*", { count: "exact", head: true })
     invoicesCount = invoices || 0
 
-    const { data: paidInvoices } = await supabase.from("invoices").select("total").eq("status", "PAID")
-    totalRevenue = paidInvoices?.reduce((sum, inv) => sum + Number(inv.total || 0), 0) || 0
+    const { data: paidInvoices } = await supabase.from("invoices").select("total_amount").eq("status", "paid")
+    totalRevenue = paidInvoices?.reduce((sum, inv) => sum + Number(inv.total_amount || 0), 0) || 0
 
     const { count: active } = await supabase
       .from("subscriptions")
@@ -42,7 +42,7 @@ export default async function AdminDashboard() {
 
     const { data: invoices_data } = await supabase
       .from("invoices")
-      .select("id, invoice_number, total, status, created_at")
+      .select("id, invoice_number, total_amount, status, created_at")
       .order("created_at", { ascending: false })
       .limit(5)
     recentInvoices = invoices_data || []
@@ -167,13 +167,13 @@ export default async function AdminDashboard() {
                     {recentInvoices.map((invoice) => (
                       <TableRow key={invoice.id}>
                         <TableCell className="font-medium">{invoice.invoice_number}</TableCell>
-                        <TableCell>${Number(invoice.total).toFixed(2)}</TableCell>
+                        <TableCell>${Number(invoice.total_amount || 0).toFixed(2)}</TableCell>
                         <TableCell>
                           <Badge
                             variant={
-                              invoice.status === "PAID"
+                              invoice.status?.toLowerCase() === "paid"
                                 ? "default"
-                                : invoice.status === "SENT"
+                                : invoice.status?.toLowerCase() === "sent"
                                   ? "secondary"
                                   : "outline"
                             }

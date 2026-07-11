@@ -54,7 +54,10 @@ export async function GET(
     #invoice-preview {
       background: white;
       padding: 3rem;
-      max-width: 800px;
+      /* Fixed A4 width so the PDF looks identical on every device */
+      width: 794px;
+      min-width: 794px;
+      max-width: 794px;
       margin: 0 auto;
       box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     }
@@ -252,13 +255,7 @@ export async function GET(
         let imgWidth = pageWidth - margin * 2;
         let imgHeight = (canvas.height * imgWidth) / canvas.width;
         
-        const targetHeight = pageHeight - margin * 2;
-        if (imgHeight < targetHeight * 0.9) {
-          const scale = (targetHeight * 0.9) / imgHeight;
-          imgWidth = imgWidth * scale;
-          imgHeight = imgHeight * scale;
-        }
-        
+
         if (imgWidth > pageWidth - margin * 2) {
           const fitScale = (pageWidth - margin * 2) / imgWidth;
           imgWidth = imgWidth * fitScale;

@@ -52,9 +52,10 @@ export async function updateInvoice(
   const totals = calculateInvoiceTotals(data.items, data.discountAmount)
 
   // Prepare update payload
+  // NOTE: status is intentionally not touched here — the DB check constraint
+  // requires lowercase values and editing an invoice must not reset its status.
   const updatePayload = {
     invoice_number: data.invoiceNumber,
-    status: "DRAFT",
     issue_date: data.issueDate,
     due_date: data.dueDate,
     currency: data.currency,
@@ -65,6 +66,7 @@ export async function updateInvoice(
     notes: data.notes || null,
     terms: data.terms || null,
     client_id: data.clientId && data.clientId !== "none" ? data.clientId : null,
+    updated_at: new Date().toISOString(),
   }
 
   console.log("[v0] updateInvoice: Final update payload:", {
