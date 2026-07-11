@@ -20,16 +20,20 @@ export function ProfileMenu({ className }: { className?: string }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className={`h-9 w-9 rounded-full ${className || ""}`}>
-          <Avatar className="h-8 w-8">
-            <AvatarFallback className="text-xs">
+        <Button
+          variant="ghost"
+          size="icon"
+          className={`h-9 w-9 rounded-full transition-transform active:scale-95 ${className || ""}`}
+        >
+          <Avatar className="h-8 w-8 ring-2 ring-background">
+            <AvatarFallback className="bg-primary text-xs font-semibold text-primary-foreground">
               {user?.name?.charAt(0)?.toUpperCase() || user?.email?.charAt(0)?.toUpperCase() || "U"}
             </AvatarFallback>
           </Avatar>
           <span className="sr-only">Account menu</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent side="bottom" align="start" className="w-56">
+      <DropdownMenuContent side="bottom" align="end" className="w-56">
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium leading-none">{user?.name || "User"}</p>
