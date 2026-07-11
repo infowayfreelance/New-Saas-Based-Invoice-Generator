@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { useAuth } from "@/components/app/auth-provider"
 import {
@@ -133,11 +134,14 @@ export function AppSidebar() {
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <Link href="/app" className="flex items-center gap-2 px-2 py-1.5">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-                <FileText className="h-5 w-5 text-primary-foreground" />
-              </div>
-              <span className="text-lg font-semibold">Make Invo</span>
+            <Link href="/app" className="flex items-center px-2 py-1.5">
+              <Image
+                src="/Make-invo-logo.webp"
+                alt="MakeInvo"
+                width={821}
+                height={273}
+                className="h-7 w-auto"
+              />
             </Link>
           </SidebarMenuItem>
         </SidebarMenu>

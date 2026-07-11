@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { FileText } from "lucide-react"
+import Image from "next/image"
 
 export function MarketingFooter() {
   return (
@@ -7,11 +7,14 @@ export function MarketingFooter() {
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="grid gap-8 md:grid-cols-5">
           <div className="space-y-4 md:col-span-2">
-            <Link href="/" className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-                <FileText className="h-5 w-5 text-primary-foreground" />
-              </div>
-              <span className="text-xl font-semibold">MakeInvo</span>
+            <Link href="/" className="flex items-center">
+              <Image
+                src="/Make-invo-logo.webp"
+                alt="MakeInvo"
+                width={821}
+                height={273}
+                className="h-8 w-auto"
+              />
             </Link>
             <p className="max-w-xs text-sm text-muted-foreground">
               The free online invoice generator for freelancers, agencies, contractors, and small businesses.

@@ -4,18 +4,22 @@ import { Geist, Geist_Mono } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { Toaster } from "@/components/ui/sonner"
 import { CurrencyProvider } from "@/components/app/currency-provider"
+import { getSiteUrl } from "@/lib/utils/site-url"
 import "./globals.css"
 
 const _geist = Geist({ subsets: ["latin"] })
 const _geistMono = Geist_Mono({ subsets: ["latin"] })
 
+const siteUrl = getSiteUrl()
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: {
-    default: "InvoiceFlow – Free Online Invoice Generator",
-    template: "%s | InvoiceFlow",
+    default: "MakeInvo – Free Online Invoice Generator",
+    template: "%s | MakeInvo",
   },
   description:
-    "Generate professional invoices, download PDF invoices, manage recurring billing, and track payments with InvoiceFlow invoicing software.",
+    "Generate professional invoices, download PDF invoices, manage recurring billing, and track payments with MakeInvo invoicing software.",
   keywords: [
     "free online invoice generator",
     "invoice generator",
@@ -27,8 +31,29 @@ export const metadata: Metadata = {
     "freelancer invoicing",
     "small business invoicing",
   ],
-  authors: [{ name: "InvoiceFlow" }],
-  creator: "InvoiceFlow",
+  authors: [{ name: "MakeInvo" }],
+  creator: "MakeInvo",
+  icons: {
+    icon: "/make-invo-site-icon.webp",
+    shortcut: "/make-invo-site-icon.webp",
+    apple: "/make-invo-site-icon.webp",
+  },
+  openGraph: {
+    siteName: "MakeInvo",
+    type: "website",
+    images: [
+      {
+        url: "/make-invo-og.webp",
+        width: 1731,
+        height: 909,
+        alt: "MakeInvo - Create, send, and get paid",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: ["/make-invo-og.webp"],
+  },
   robots: {
     index: true,
     follow: true,
