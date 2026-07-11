@@ -38,7 +38,6 @@ import {
   LogOut,
   ChevronUp,
   Mail,
-  DollarSign,
 } from "lucide-react"
 
 export function AppSidebar() {
@@ -110,12 +109,6 @@ export function AppSidebar() {
       active: pathname.startsWith("/app/templates"),
     },
     {
-      title: "Setup Currencies",
-      href: "/app/setup-currencies",
-      icon: DollarSign,
-      active: pathname.startsWith("/app/setup-currencies"),
-    },
-    {
       title: "Subscription",
       href: "/app/subscription",
       icon: CreditCard,
@@ -144,7 +137,7 @@ export function AppSidebar() {
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
                 <FileText className="h-5 w-5 text-primary-foreground" />
               </div>
-              <span className="text-lg font-semibold">InvoiceFlow</span>
+              <span className="text-lg font-semibold">Make Invo</span>
             </Link>
           </SidebarMenuItem>
         </SidebarMenu>
