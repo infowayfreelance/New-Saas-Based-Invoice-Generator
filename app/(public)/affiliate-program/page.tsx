@@ -9,9 +9,25 @@ export const metadata: Metadata = {
   description: "Earn commissions by referring customers to InvoiceFlow",
 }
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://makeinvo.com"
+
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "Home", item: siteUrl },
+    { "@type": "ListItem", position: 2, name: "Affiliate Program", item: `${siteUrl}/affiliate-program` },
+  ],
+}
+
 export default function AffiliateProgramPage() {
   return (
-    <div className="px-4 py-20 sm:px-6 lg:px-8">
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      <div className="px-4 py-20 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-4xl">
         <div className="text-center">
           <h1 className="text-balance text-4xl font-bold tracking-tight sm:text-5xl">Affiliate Program</h1>
@@ -87,5 +103,6 @@ export default function AffiliateProgramPage() {
         </div>
       </div>
     </div>
+    </>
   )
 }

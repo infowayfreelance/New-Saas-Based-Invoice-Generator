@@ -5,9 +5,25 @@ export const metadata: Metadata = {
   description: "InvoiceFlow Privacy Policy",
 }
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://makeinvo.com"
+
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "Home", item: siteUrl },
+    { "@type": "ListItem", position: 2, name: "Privacy Policy", item: `${siteUrl}/privacy` },
+  ],
+}
+
 export default function PrivacyPage() {
   return (
-    <div className="px-4 py-20 sm:px-6 lg:px-8">
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      <div className="px-4 py-20 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-3xl">
         <h1 className="text-4xl font-bold">Privacy Policy</h1>
         <p className="mt-4 text-muted-foreground">Last updated: December 10, 2025</p>
@@ -45,5 +61,6 @@ export default function PrivacyPage() {
         </div>
       </div>
     </div>
+    </>
   )
 }
