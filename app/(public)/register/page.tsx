@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label"
 import { FileText } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { COUNTRIES, getDefaultCurrencyForCountry } from "@/lib/utils/currency"
+import { GoogleSignInButton } from "@/components/auth/google-signin-button"
 
 function RegisterForm() {
   const [error, setError] = useState<string | null>(null)
@@ -162,6 +163,15 @@ function RegisterForm() {
                 </Link>
               </div>
             </form>
+            <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
+              </div>
+            </div>
+            <GoogleSignInButton />
           </CardContent>
         </Card>
         <p className="mt-4 text-center text-xs text-muted-foreground">
