@@ -1,9 +1,8 @@
 "use client"
 
 import Link from "next/link"
-import { usePathname, useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
-import { createClient } from "@/lib/supabase/client"
+import { usePathname } from "next/navigation"
+import { useAuth } from "@/components/app/auth-provider"
 import {
   Sidebar,
   SidebarContent,
@@ -26,7 +25,6 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import type { UserWithPlan } from "@/lib/types"
 import {
   LayoutDashboard,
   FileText,
@@ -45,106 +43,13 @@ import {
 
 export function AppSidebar() {
   const pathname = usePathname()
-  const router = useRouter()
-  const [user, setUser] = useState<UserWithPlan | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-
-  useEffect(() => {
-    let mounted = true
-
-    async function loadUserData() {
-      try {
-        console.log("[v0] Loading sidebar user data...")
-        const supabase = createClient()
-
-        const timeoutPromise = new Promise((_, reject) =>
-          setTimeout(() => reject(new Error("Connection timeout")), 3000),
-        )
-
-        const authPromise = supabase.auth.getUser()
-        const result = (await Promise.race([authPromise, timeoutPromise])) as any
-
-        if (!mounted) return
-
-        const {
-          data: { user: authUser },
-        } = result
-
-        if (!authUser) {
-          console.log("[v0] No auth user in sidebar")
-          setIsLoading(false)
-          return
-        }
-
-        const userDataPromise = supabase
-          .from("users")
-          .select(`
-            *,
-            plan:plans(*)
-          `)
-          .eq("id", authUser.id)
-          .maybeSingle()
-
-        const userResult = (await Promise.race([
-          userDataPromise,
-          new Promise((_, reject) => setTimeout(() => reject(new Error("User data timeout")), 3000)),
-        ])) as any
-
-        if (!mounted) return
-
-        if (userResult.data) {
-          console.log("[v0] Sidebar user data loaded:", userResult.data.email)
-          setUser(userResult.data)
-        } else {
-          console.log("[v0] No user data, using demo mode")
-          setUser({
-            id: authUser.id,
-            email: authUser.email || "demo@example.com",
-            name: "Demo User",
-            plan: { code: "BASIC", name: "Basic" },
-          } as any)
-        }
-      } catch (error) {
-        console.error("[v0] Error loading sidebar data:", error)
-        if (mounted) {
-          console.log("[v0] Using demo user due to error")
-          setUser({
-            id: "demo",
-            email: "demo@example.com",
-            name: "Demo User",
-            plan: { code: "BASIC", name: "Basic" },
-          } as any)
-        }
-      } finally {
-        if (mounted) {
-          setIsLoading(false)
-        }
-      }
-    }
-
-    loadUserData()
-
-    return () => {
-      mounted = false
-    }
-  }, [])
+  const { profile: user, signOut } = useAuth()
 
   const planCode = user?.plan?.code || "BASIC"
   const canAccessClients = planCode === "STANDARD" || planCode === "PRO"
   const canAccessAccounts = planCode === "PRO"
   const canAccessRecurring = planCode === "PRO"
   const canAccessAnalytics = planCode === "STANDARD" || planCode === "PRO"
-
-  const handleSignOut = async () => {
-    try {
-      const supabase = createClient()
-      await supabase.auth.signOut()
-      router.push("/login")
-    } catch (error) {
-      console.error("[v0] Error signing out:", error)
-      router.push("/login")
-    }
-  }
 
   const mainNav = [
     {
@@ -340,7 +245,7 @@ export function AppSidebar() {
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleSignOut}>
+                <DropdownMenuItem onClick={signOut}>
                   <LogOut className="mr-2 h-4 w-4" />
                   Sign Out
                 </DropdownMenuItem>
