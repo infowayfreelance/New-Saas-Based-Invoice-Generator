@@ -12,7 +12,7 @@ import { sendInvoiceEmail } from "@/app/actions/invoice"
 import { downloadInvoicePdf } from "@/lib/utils/pdf"
 import { markInvoiceAsSent } from "@/app/actions/invoice-status"
 import { SendWhatsAppMenu } from "@/components/invoice/send-whatsapp-menu"
-import { buildInvoiceWhatsAppMessage } from "@/lib/utils/whatsapp"
+import { buildInvoiceWhatsAppMessage, buildInvoiceViewUrl } from "@/lib/utils/whatsapp"
 
 interface InvoiceActionButtonsProps {
   invoiceData: InvoiceFormData
@@ -104,6 +104,7 @@ export function InvoiceActionButtons({
     total: formatCurrency(toNumber(totalAmount), invoiceData.currency),
     dueDate: dueDate ? formatDate(dueDate) : "-",
     clientName: invoiceData.clientName,
+    viewUrl: buildInvoiceViewUrl(invoiceId),
   })
 
   return (

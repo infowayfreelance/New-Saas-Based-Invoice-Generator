@@ -22,6 +22,7 @@ export function buildInvoiceWhatsAppMessage(params: {
   total: string
   dueDate: string
   clientName?: string
+  viewUrl?: string
 }): string {
   const greeting = params.clientName ? `Hi ${params.clientName},` : "Hi,"
   return [
@@ -31,6 +32,13 @@ export function buildInvoiceWhatsAppMessage(params: {
     `Amount due: ${params.total}`,
     `Due date: ${params.dueDate}`,
     "",
-    "Please find the PDF attached. Let us know if you have any questions - thank you!",
+    params.viewUrl
+      ? `View and download the PDF here: ${params.viewUrl}`
+      : "Please find the PDF attached. Let us know if you have any questions - thank you!",
   ].join("\n")
+}
+
+/** Public, unauthenticated invoice page - safe to share with anyone. */
+export function buildInvoiceViewUrl(invoiceId: string): string {
+  return `https://makeinvo.com/invoice/${invoiceId}`
 }
