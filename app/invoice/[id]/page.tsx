@@ -9,12 +9,19 @@ function isValidUUID(id: string): boolean {
   return uuidRegex.test(id)
 }
 
+const noindexRobots = {
+  index: false,
+  follow: false,
+  nocache: true,
+  googleBot: { index: false, follow: false },
+} as const
+
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params
-  if (!isValidUUID(id)) return { title: "Invoice not found" }
+  if (!isValidUUID(id)) return { title: "Invoice not found", robots: noindexRobots }
 
   const summary = await getPublicInvoiceSummary(id).catch(() => null)
-  if (!summary) return { title: "Invoice not found" }
+  if (!summary) return { title: "Invoice not found", robots: noindexRobots }
 
   const title = `Invoice ${summary.invoiceNumber} from ${summary.businessName}`
   const description = `${formatCurrency(toNumber(summary.totalAmount), summary.currency)} due ${formatDate(summary.dueDate)}${
@@ -24,6 +31,10 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   return {
     title,
     description,
+    // This page exposes one specific client's real financial data - never
+    // index it or let search engines follow/cache it, even though the OG
+    // preview above is meant for chat apps like WhatsApp to render.
+    robots: noindexRobots,
     openGraph: { title, description, type: "website" },
     twitter: { card: "summary_large_image", title, description },
   }
