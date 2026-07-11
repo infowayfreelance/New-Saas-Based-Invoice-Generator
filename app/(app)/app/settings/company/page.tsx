@@ -18,6 +18,7 @@ export default function CompanySettingsPage() {
   const [businessName, setBusinessName] = useState("")
   const [email, setEmail] = useState("")
   const [phone, setPhone] = useState("")
+  const [whatsappNumber, setWhatsappNumber] = useState("")
   const [addressLine1, setAddressLine1] = useState("")
   const [addressLine2, setAddressLine2] = useState("")
   const [city, setCity] = useState("")
@@ -41,6 +42,7 @@ export default function CompanySettingsPage() {
           setBusinessName(data.business_name || "")
           setEmail(data.email || "")
           setPhone(data.phone || "")
+          setWhatsappNumber(data.whatsapp_number || "")
           setAddressLine1(data.address_line1 || "")
           setAddressLine2(data.address_line2 || "")
           setCity(data.city || "")
@@ -75,6 +77,7 @@ export default function CompanySettingsPage() {
         business_name: businessName || null,
         email: email || null,
         phone: phone || null,
+        whatsapp_number: whatsappNumber || null,
         address_line1: addressLine1 || null,
         address_line2: addressLine2 || null,
         city: city || null,
@@ -162,6 +165,18 @@ export default function CompanySettingsPage() {
                     placeholder="+1 234 567 8900"
                   />
                 </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="whatsappNumber">WhatsApp Number</Label>
+                <Input
+                  id="whatsappNumber"
+                  value={whatsappNumber}
+                  onChange={(e) => setWhatsappNumber(e.target.value)}
+                  placeholder="+1 234 567 8900"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Include the country code. Used to send invoices to your own WhatsApp.
+                </p>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="addressLine1">Address Line 1</Label>

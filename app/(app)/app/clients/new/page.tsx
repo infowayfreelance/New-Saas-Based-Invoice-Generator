@@ -21,6 +21,7 @@ export default function NewClientPage() {
     email: "",
     companyName: "",
     phone: "",
+    whatsappNumber: "",
     addressLine1: "",
     addressLine2: "",
     city: "",
@@ -59,6 +60,7 @@ export default function NewClientPage() {
       // Only include optional fields if they have values
       if (formData.email.trim()) insertPayload.email = formData.email.trim()
       if (formData.phone.trim()) insertPayload.phone = formData.phone.trim()
+      if (formData.whatsappNumber.trim()) insertPayload.whatsapp_number = formData.whatsappNumber.trim()
       if (formData.companyName.trim()) insertPayload.company_name = formData.companyName.trim()
       if (formData.addressLine1.trim()) insertPayload.address_line1 = formData.addressLine1.trim()
       if (formData.addressLine2.trim()) insertPayload.address_line2 = formData.addressLine2.trim()
@@ -147,6 +149,18 @@ export default function NewClientPage() {
                     placeholder="+1 234 567 8900"
                   />
                 </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="whatsappNumber">WhatsApp Number</Label>
+                <Input
+                  id="whatsappNumber"
+                  value={formData.whatsappNumber}
+                  onChange={(e) => updateField("whatsappNumber", e.target.value)}
+                  placeholder="+1 234 567 8900"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Include the country code, e.g. +1 234 567 8900. Used to send invoices directly to this client.
+                </p>
               </div>
             </CardContent>
           </Card>
