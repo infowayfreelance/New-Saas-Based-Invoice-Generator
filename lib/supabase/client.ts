@@ -1,4 +1,5 @@
 import { createBrowserClient } from '@supabase/ssr'
+import { normalizeSupabaseUrl } from './env'
 
 export function createClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -12,5 +13,5 @@ export function createClient() {
     return createBrowserClient('https://placeholder.supabase.co', 'placeholder-anon-key')
   }
 
-  return createBrowserClient(url!, key!)
+  return createBrowserClient(normalizeSupabaseUrl(url!), key!)
 }
