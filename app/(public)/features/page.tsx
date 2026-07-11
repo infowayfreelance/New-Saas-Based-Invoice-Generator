@@ -21,6 +21,17 @@ export const metadata: Metadata = {
   description: "Discover all the powerful features InvoiceFlow offers to streamline your invoicing workflow.",
 }
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://makeinvo.com"
+
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "Home", item: siteUrl },
+    { "@type": "ListItem", position: 2, name: "Features", item: `${siteUrl}/features` },
+  ],
+}
+
 const featureCategories = [
   {
     title: "Invoicing",
@@ -121,7 +132,12 @@ const featureCategories = [
 
 export default function FeaturesPage() {
   return (
-    <div className="px-4 py-20 sm:px-6 lg:px-8">
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      <div className="px-4 py-20 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
         <div className="mx-auto max-w-2xl text-center">
           <h1 className="text-balance text-4xl font-bold tracking-tight sm:text-5xl">
@@ -177,5 +193,6 @@ export default function FeaturesPage() {
         </div>
       </div>
     </div>
+    </>
   )
 }

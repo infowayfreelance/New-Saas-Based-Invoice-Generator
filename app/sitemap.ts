@@ -5,7 +5,17 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://makeinvo.com"
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date()
 
-  const routes = ["", "/features", "/pricing", "/free-invoice", "/login", "/register", "/terms", "/privacy"]
+  const routes = [
+    "",
+    "/features",
+    "/pricing",
+    "/free-invoice",
+    "/login",
+    "/register",
+    "/terms",
+    "/privacy",
+    "/affiliate-program",
+  ]
 
   return routes.map((route) => ({
     url: `${siteUrl}${route}`,
