@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js"
+import { normalizeSupabaseUrl } from "./env"
 
 export function createServiceClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -14,5 +15,5 @@ export function createServiceClient() {
     )
   }
 
-  return createClient(url, key, { auth: { persistSession: false } })
+  return createClient(normalizeSupabaseUrl(url), key, { auth: { persistSession: false } })
 }
