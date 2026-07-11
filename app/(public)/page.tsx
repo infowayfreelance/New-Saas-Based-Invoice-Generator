@@ -437,86 +437,119 @@ const faqs = [
 
 /* ── JSON-LD Schemas ─────────────────────────────────────────────── */
 
-const websiteSchema = {
-  "@context": "https://schema.org",
-  "@type": "WebSite",
-  name: "MakeInvo",
-  url: siteUrl,
-  description:
-    "Free online invoice generator for freelancers, contractors, agencies, and small businesses. Create professional PDF invoices, manage clients, and track payments.",
-  potentialAction: {
-    "@type": "SearchAction",
-    target: `${siteUrl}/search?q={search_term_string}`,
-    "query-input": "required name=search_term_string",
-  },
-}
+const homepageTitle = "Free Invoice Generator Online - Create Professional PDF Invoices | MakeInvo"
+const homepageDescription =
+  "MakeInvo is a free online invoice generator and invoice maker for freelancers, contractors, and small businesses. Create a professional PDF invoice in under 60 seconds - no signup, no watermark."
 
-const organizationSchema = {
-  "@context": "https://schema.org",
-  "@type": "Organization",
-  name: "MakeInvo",
-  url: siteUrl,
-  logo: `${siteUrl}/logo.png`,
-  description:
-    "MakeInvo builds free, easy-to-use invoicing software for freelancers, contractors, agencies, and small businesses.",
-  // TODO: add sameAs social profile URLs once available, e.g.
-  // sameAs: ["https://twitter.com/makeinvo", "https://www.linkedin.com/company/makeinvo"],
-}
+// Real, publicly accessible brand image (180x180 apple touch icon). There is
+// no dedicated marketing logo/OG asset on disk yet - do not reference
+// /logo.png or /og-image.png here since neither file exists.
+const brandImageUrl = `${siteUrl}/apple-icon.png`
 
-const softwareSchema = {
+// All entities share one @graph so they reference each other by @id instead
+// of duplicating the Organization/WebSite as separate, disconnected nodes.
+const homepageSchema = {
   "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  name: "MakeInvo",
-  applicationCategory: "BusinessApplication",
-  operatingSystem: "Web, iOS, Android",
-  url: siteUrl,
-  description:
-    "Free online invoice generator. Create professional PDF invoices, manage clients, track payments, and automate recurring billing.",
-  offers: {
-    "@type": "Offer",
-    price: "0",
-    priceCurrency: "USD",
-  },
-  aggregateRating: {
-    "@type": "AggregateRating",
-    ratingValue: "4.8",
-    reviewCount: "1200",
-  },
-  featureList: [
-    "Free Invoice Generator",
-    "PDF Invoice Download",
-    "Client Management",
-    "Email & WhatsApp Delivery",
-    "Payment Tracking",
-    "Recurring Invoices",
-    "Analytics Dashboard",
-  ],
-}
-
-const breadcrumbSchema = {
-  "@context": "https://schema.org",
-  "@type": "BreadcrumbList",
-  itemListElement: [
+  "@graph": [
     {
-      "@type": "ListItem",
-      position: 1,
-      name: "Home",
-      item: siteUrl,
+      "@type": "Organization",
+      "@id": `${siteUrl}/#organization`,
+      name: "MakeInvo",
+      url: siteUrl,
+      logo: brandImageUrl,
+      description:
+        "MakeInvo builds a free online invoice generator and invoicing platform for freelancers, contractors, agencies, and small businesses.",
+      // Visibly displayed in the homepage Contact & Support section.
+      email: "support@makeinvo.com",
+      contactPoint: {
+        "@type": "ContactPoint",
+        contactType: "customer support",
+        email: "support@makeinvo.com",
+      },
+      // No verified social profile URLs, founding date, or legal entity name
+      // are available yet - omitted rather than invented.
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${siteUrl}/#website`,
+      url: siteUrl,
+      name: "MakeInvo",
+      alternateName: "MakeInvo Invoice Generator",
+      publisher: { "@id": `${siteUrl}/#organization` },
+      inLanguage: "en",
+      // No internal site search exists (no /search route), so no
+      // potentialAction/SearchAction is included.
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": `${siteUrl}/#software`,
+      name: "MakeInvo",
+      url: siteUrl,
+      applicationCategory: "BusinessApplication",
+      applicationSubCategory: "Invoice Generator",
+      operatingSystem: "Any",
+      browserRequirements: "Works in any modern web browser, no installation required.",
+      description: homepageDescription,
+      isAccessibleForFree: true,
+      offers: {
+        "@type": "Offer",
+        price: "0",
+        priceCurrency: "USD",
+      },
+      image: brandImageUrl,
+      provider: { "@id": `${siteUrl}/#organization` },
+      // Only features verified to exist in the current product.
+      featureList: [
+        "Create professional invoices online",
+        "Add business and client information",
+        "Add invoice line items with quantity and price",
+        "Automatic subtotal and total calculations",
+        "Per-item tax rate calculation",
+        "Discounts",
+        "Automatic invoice numbering",
+        "Issue date and due date",
+        "Payment terms and notes",
+        "PDF invoice download",
+        "Multiple currencies",
+        "Client management and invoice history",
+        "Recurring invoices",
+        "Payment tracking and reminders",
+        "Logo upload and branding",
+        "Send invoices via email and WhatsApp",
+      ],
+      // No genuine ratings, review counts, download counts, or awards are
+      // available - aggregateRating/review intentionally omitted.
+    },
+    {
+      "@type": "WebPage",
+      "@id": `${siteUrl}/#webpage`,
+      url: siteUrl,
+      name: homepageTitle,
+      description: homepageDescription,
+      isPartOf: { "@id": `${siteUrl}/#website` },
+      about: { "@id": `${siteUrl}/#software` },
+      mainEntity: { "@id": `${siteUrl}/#software` },
+      publisher: { "@id": `${siteUrl}/#organization` },
+      inLanguage: "en",
+      primaryImageOfPage: brandImageUrl,
+      // No reliable last-modified timestamp is tracked for this page yet,
+      // so dateModified is intentionally omitted rather than guessed.
+    },
+    // FAQPage schema mirrors the visible FAQ section rendered further down
+    // this page (see the "FAQ Section" below) - same questions, same answers.
+    {
+      "@type": "FAQPage",
+      "@id": `${siteUrl}/#faq`,
+      mainEntity: faqs.map((faq) => ({
+        "@type": "Question",
+        name: faq.question,
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: faq.answer,
+        },
+      })),
     },
   ],
-}
-
-const faqSchema = {
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  mainEntity: faqs.map((faq) => ({
-    "@type": "Question",
-    name: faq.question,
-    acceptedAnswer: {
-      "@type": "Answer",
-      text: faq.answer,
-    },
-  })),
 }
 
 /* ── Page ────────────────────────────────────────────────────────── */
@@ -524,12 +557,11 @@ const faqSchema = {
 export default function HomePage() {
   return (
     <>
-      {/* JSON-LD Schemas */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareSchema) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
+      {/* JSON-LD: single connected graph (Organization, WebSite, SoftwareApplication, WebPage, FAQPage) */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(homepageSchema).replace(/</g, "\\u003c") }}
+      />
 
       {/* ── Hero + Embedded Generator ────────────────────────────── */}
       <section className="relative overflow-hidden px-4 pb-16 pt-12 sm:px-6 lg:px-8">
