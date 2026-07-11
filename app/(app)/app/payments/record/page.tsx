@@ -56,7 +56,7 @@ export default function RecordPaymentPage() {
     setFormData((prev) => ({
       ...prev,
       invoice_id: invoiceId,
-      amount: invoice?.total?.toString() || "",
+      amount: invoice?.total_amount?.toString() || "",
     }))
   }
 
@@ -140,7 +140,7 @@ export default function RecordPaymentPage() {
                     <SelectContent>
                       {invoices.map((invoice) => (
                         <SelectItem key={invoice.id} value={invoice.id}>
-                          {invoice.invoice_number} - {invoice.client_name} ({formatCurrency(invoice.total)})
+                          {invoice.invoice_number} - {invoice.client_name} ({formatCurrency(Number(invoice.total_amount || 0))})
                         </SelectItem>
                       ))}
                     </SelectContent>

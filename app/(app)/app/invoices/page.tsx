@@ -39,7 +39,7 @@ export default async function InvoicesPage({
     .order("created_at", { ascending: false })
 
   if (params.status && params.status !== "all") {
-    query = query.eq("status", params.status.toUpperCase())
+    query = query.eq("status", params.status.toLowerCase())
   }
 
   if (params.search) {
@@ -51,14 +51,16 @@ export default async function InvoicesPage({
   const { data: invoices } = await query.limit(50)
 
   const getStatusBadge = (status: string) => {
+    const normalized = (status || "").toLowerCase()
     const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-      PAID: "default",
-      SENT: "secondary",
-      DRAFT: "outline",
-      OVERDUE: "destructive",
-      PARTIALLY_PAID: "secondary",
+      paid: "default",
+      sent: "secondary",
+      draft: "outline",
+      overdue: "destructive",
+      partially_paid: "secondary",
+      cancelled: "outline",
     }
-    return <Badge variant={variants[status] || "outline"}>{status}</Badge>
+    return <Badge variant={variants[normalized] || "outline"}>{normalized.replace(/_/g, " ").toUpperCase()}</Badge>
   }
 
   return (
@@ -141,7 +143,7 @@ export default async function InvoicesPage({
                           <TableCell>{clientName}</TableCell>
                           <TableCell>{formatDate(invoice.issue_date)}</TableCell>
                           <TableCell>{formatDate(invoice.due_date)}</TableCell>
-                          <TableCell>{formatCurrency(Number(invoice.total), invoice.currency)}</TableCell>
+                          <TableCell>{formatCurrency(Number(invoice.total_amount), invoice.currency)}</TableCell>
                           <TableCell>{getStatusBadge(invoice.status)}</TableCell>
                           <TableCell>
                             <InvoiceListActions invoiceId={invoice.id} invoiceNumber={invoice.invoice_number} />

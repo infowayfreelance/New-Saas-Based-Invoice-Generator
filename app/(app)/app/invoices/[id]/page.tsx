@@ -213,22 +213,25 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
     discountAmount: toNumber(invoice.discount_amount),
   }
 
+  const invoiceStatus = (invoice.status || "").toLowerCase()
+
   const getStatusBadge = (status: string) => {
+    const normalized = (status || "").toLowerCase()
     const config: Record<
       string,
       { variant: "default" | "secondary" | "destructive" | "outline"; icon: React.ElementType }
     > = {
-      PAID: { variant: "default", icon: CheckCircle2 },
-      SENT: { variant: "secondary", icon: Send },
-      DRAFT: { variant: "outline", icon: Edit },
-      OVERDUE: { variant: "destructive", icon: Clock },
-      PARTIALLY_PAID: { variant: "secondary", icon: Clock },
+      paid: { variant: "default", icon: CheckCircle2 },
+      sent: { variant: "secondary", icon: Send },
+      draft: { variant: "outline", icon: Edit },
+      overdue: { variant: "destructive", icon: Clock },
+      partially_paid: { variant: "secondary", icon: Clock },
     }
-    const { variant, icon: Icon } = config[status] || { variant: "outline", icon: Clock }
+    const { variant, icon: Icon } = config[normalized] || { variant: "outline", icon: Clock }
     return (
       <Badge variant={variant} className="gap-1">
         <Icon className="h-3 w-3" />
-        {status}
+        {normalized.replace(/_/g, " ").toUpperCase()}
       </Badge>
     )
   }
@@ -257,13 +260,13 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
               </div>
             </div>
             <div className="flex gap-2">
-              {invoice.status === "DRAFT" && (
+              {invoiceStatus === "draft" && (
                 <Button variant="outline" size="sm" className="bg-transparent">
                   <Send className="mr-2 h-4 w-4" />
                   Mark as Sent
                 </Button>
               )}
-              {(invoice.status === "SENT" || invoice.status === "PARTIALLY_PAID") && (
+              {(invoiceStatus === "sent" || invoiceStatus === "partially_paid") && (
                 <Button variant="outline" size="sm" className="bg-transparent">
                   <CheckCircle2 className="mr-2 h-4 w-4" />
                   Mark as Paid
@@ -286,7 +289,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
             <TabsTrigger value="activity">Activity</TabsTrigger>
           </TabsList>
           <TabsContent value="preview" className="mt-6">
-            <div className="rounded-lg border border-border shadow-sm" id="invoice-preview">
+            <div className="rounded-lg border border-border shadow-sm">
               <InvoicePreview data={formData} />
             </div>
           </TabsContent>

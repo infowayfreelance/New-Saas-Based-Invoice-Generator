@@ -309,9 +309,10 @@ export async function updateInvoice(
 
   // Build update payload matching exact schema columns
   console.log("[v0] STEP 7: Building update payload...")
+  // NOTE: status is intentionally not touched here — editing an invoice
+  // must not reset its status (paid/sent invoices stay as they are).
   const updateData: any = {
     invoice_number: data.invoiceNumber,
-    status: "draft", // Lowercase to match DB schema
     issue_date: data.issueDate,
     due_date: data.dueDate,
     currency: data.currency,

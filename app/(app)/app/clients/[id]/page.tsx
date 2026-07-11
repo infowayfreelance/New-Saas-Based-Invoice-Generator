@@ -46,9 +46,11 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
     .limit(10)
 
   // Calculate totals
-  const totalInvoiced = invoices?.reduce((sum, inv) => sum + Number(inv.total), 0) || 0
+  const totalInvoiced = invoices?.reduce((sum, inv) => sum + Number(inv.total_amount || 0), 0) || 0
   const totalPaid =
-    invoices?.filter((inv) => inv.status === "PAID").reduce((sum, inv) => sum + Number(inv.total), 0) || 0
+    invoices
+      ?.filter((inv) => (inv.status || "").toLowerCase() === "paid")
+      .reduce((sum, inv) => sum + Number(inv.total_amount || 0), 0) || 0
 
   const formatAddress = () => {
     const parts = [
@@ -207,7 +209,7 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
                       </TableCell>
                       <TableCell>{formatDate(invoice.issue_date)}</TableCell>
                       <TableCell>{formatDate(invoice.due_date)}</TableCell>
-                      <TableCell>{formatCurrency(Number(invoice.total), invoice.currency)}</TableCell>
+                      <TableCell>{formatCurrency(Number(invoice.total_amount || 0), invoice.currency)}</TableCell>
                       <TableCell>{getStatusBadge(invoice.status)}</TableCell>
                     </TableRow>
                   ))}

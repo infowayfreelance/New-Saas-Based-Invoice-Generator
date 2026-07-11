@@ -18,6 +18,7 @@ import { InvoicePreview } from "@/components/invoice/invoice-preview"
 import { UsageMeter } from "@/components/invoice/usage-meter"
 import { type InvoiceFormData, getDefaultInvoiceData, calculateInvoiceTotals } from "@/lib/utils/invoice"
 import { generateGuestInvoice, checkInvoiceUsage } from "@/app/actions/invoice"
+import { downloadInvoicePdf } from "@/lib/utils/pdf"
 import { Download, Send, AlertCircle, ArrowRight, FilePlus } from "lucide-react"
 import { toast } from "sonner"
 import { useEffect } from "react"
@@ -88,48 +89,7 @@ export default function FreeInvoicePage() {
     toast.info("Generating PDF...")
 
     try {
-      // Dynamic import for html2canvas and jspdf
-      const html2canvas = (await import("html2canvas")).default
-      const { jsPDF } = await import("jspdf")
-
-      const pdf = new jsPDF("p", "mm", "a4")
-
-      const canvas = await html2canvas(element, {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: "#ffffff",
-        windowWidth: element.scrollWidth,
-      })
-
-      const pageWidth = pdf.internal.pageSize.getWidth()
-      const pageHeight = pdf.internal.pageSize.getHeight()
-      const margin = 10 // small margins
-
-      const imgData = canvas.toDataURL("image/png")
-      let imgWidth = pageWidth - margin * 2
-      let imgHeight = (canvas.height * imgWidth) / canvas.width
-
-      // If the image is still too short, scale it to ~90% of page height
-      const targetHeight = pageHeight - margin * 2
-      if (imgHeight < targetHeight * 0.9) {
-        const scale = (targetHeight * 0.9) / imgHeight
-        imgWidth = imgWidth * scale
-        imgHeight = imgHeight * scale
-      }
-
-      // If scaled width exceeds page, scale back to fit
-      if (imgWidth > pageWidth - margin * 2) {
-        const fitScale = (pageWidth - margin * 2) / imgWidth
-        imgWidth = imgWidth * fitScale
-        imgHeight = imgHeight * fitScale
-      }
-
-      // Center horizontally, top margin vertically
-      const x = (pageWidth - imgWidth) / 2
-      const y = margin
-
-      pdf.addImage(imgData, "PNG", x, y, imgWidth, imgHeight)
-      pdf.save(`invoice-${formData.invoiceNumber}.pdf`)
+      await downloadInvoicePdf(element, `invoice-${formData.invoiceNumber}.pdf`)
 
       toast.success("PDF downloaded successfully!")
     } catch (error) {
@@ -203,7 +163,7 @@ export default function FreeInvoicePage() {
                 <TabsTrigger value="details">Details</TabsTrigger>
               </TabsList>
               <TabsContent value="preview" className="mt-6">
-                <div ref={previewRef} className="rounded-lg border border-border shadow-sm" id="invoice-preview">
+                <div ref={previewRef} className="rounded-lg border border-border shadow-sm">
                   <InvoicePreview data={formData} />
                 </div>
               </TabsContent>

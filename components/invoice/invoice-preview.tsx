@@ -3,6 +3,7 @@
 import { Card } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { type InvoiceFormData, calculateInvoiceTotals, formatCurrency, formatDate, toNumber } from "@/lib/utils/invoice"
+import { PDF_RENDER_WIDTH } from "@/lib/utils/pdf"
 
 interface InvoicePreviewProps {
   data: InvoiceFormData
@@ -13,14 +14,20 @@ export function InvoicePreview({ data, className }: InvoicePreviewProps) {
   const totals = calculateInvoiceTotals(data.items, data.discountAmount)
 
   return (
-    <Card
-      className={`pdf-safe-wrapper p-8 ${className}`}
-      id="invoice-preview"
-      style={{
-        backgroundColor: "#ffffff",
-        color: "#171717",
-      }}
-    >
+    // Fixed A4 width so the preview looks identical on every device;
+    // small screens scroll horizontally instead of breaking the layout.
+    <div className={`overflow-x-auto ${className || ""}`}>
+      <Card
+        className="pdf-safe-wrapper mx-auto p-8"
+        id="invoice-preview"
+        style={{
+          backgroundColor: "#ffffff",
+          color: "#171717",
+          width: `${PDF_RENDER_WIDTH}px`,
+          minWidth: `${PDF_RENDER_WIDTH}px`,
+          maxWidth: `${PDF_RENDER_WIDTH}px`,
+        }}
+      >
       {/* Header */}
       <div className="flex flex-col justify-between gap-6 sm:flex-row">
         <div>
@@ -197,6 +204,7 @@ export function InvoicePreview({ data, className }: InvoicePreviewProps) {
           </div>
         </>
       )}
-    </Card>
+      </Card>
+    </div>
   )
 }

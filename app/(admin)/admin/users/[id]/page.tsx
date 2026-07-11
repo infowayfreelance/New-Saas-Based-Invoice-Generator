@@ -185,10 +185,10 @@ export default async function AdminUserDetailPage({ params }: { params: Promise<
                     <TableCell className="font-medium">{invoice.invoice_number}</TableCell>
                     <TableCell>{invoice.client?.name || invoice.client_name || "-"}</TableCell>
                     <TableCell>
-                      <Badge variant={invoice.status === "PAID" ? "default" : "outline"}>{invoice.status}</Badge>
+                      <Badge variant={invoice.status?.toLowerCase() === "paid" ? "default" : "outline"}>{invoice.status}</Badge>
                     </TableCell>
                     <TableCell>
-                      {invoice.currency} {invoice.total}
+                      {invoice.currency} {Number(invoice.total_amount || 0).toFixed(2)}
                     </TableCell>
                     <TableCell className="text-muted-foreground">
                       {new Date(invoice.issue_date).toLocaleDateString()}

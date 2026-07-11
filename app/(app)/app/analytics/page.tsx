@@ -57,14 +57,14 @@ export default async function AnalyticsPage() {
   // This month's invoices
   const { data: thisMonthInvoices } = await supabase
     .from("invoices")
-    .select("total, status")
+    .select("total_amount, status")
     .eq("user_id", user.id)
     .gte("created_at", thisMonth.toISOString())
 
   // Last month's invoices
   const { data: lastMonthInvoices } = await supabase
     .from("invoices")
-    .select("total, status")
+    .select("total_amount, status")
     .eq("user_id", user.id)
     .gte("created_at", lastMonth.toISOString())
     .lte("created_at", lastMonthEnd.toISOString())
@@ -72,7 +72,7 @@ export default async function AnalyticsPage() {
   // All invoices for overall stats
   const { data: allInvoices } = await supabase
     .from("invoices")
-    .select("total, status, created_at")
+    .select("total_amount, status, created_at")
     .eq("user_id", user.id)
 
   // Clients count
@@ -83,9 +83,9 @@ export default async function AnalyticsPage() {
 
   // Calculate metrics
   const thisMonthRevenue =
-    thisMonthInvoices?.reduce((sum, inv) => (inv.status === "paid" ? sum + (inv.total || 0) : sum), 0) || 0
+    thisMonthInvoices?.reduce((sum, inv) => (inv.status === "paid" ? sum + Number(inv.total_amount || 0) : sum), 0) || 0
   const lastMonthRevenue =
-    lastMonthInvoices?.reduce((sum, inv) => (inv.status === "paid" ? sum + (inv.total || 0) : sum), 0) || 0
+    lastMonthInvoices?.reduce((sum, inv) => (inv.status === "paid" ? sum + Number(inv.total_amount || 0) : sum), 0) || 0
   const revenueChange = lastMonthRevenue > 0 ? ((thisMonthRevenue - lastMonthRevenue) / lastMonthRevenue) * 100 : 0
 
   const thisMonthInvoiceCount = thisMonthInvoices?.length || 0
@@ -93,14 +93,14 @@ export default async function AnalyticsPage() {
   const invoiceCountChange =
     lastMonthInvoiceCount > 0 ? ((thisMonthInvoiceCount - lastMonthInvoiceCount) / lastMonthInvoiceCount) * 100 : 0
 
-  const totalRevenue = allInvoices?.reduce((sum, inv) => (inv.status === "paid" ? sum + (inv.total || 0) : sum), 0) || 0
+  const totalRevenue = allInvoices?.reduce((sum, inv) => (inv.status === "paid" ? sum + Number(inv.total_amount || 0) : sum), 0) || 0
   const totalPending =
     allInvoices?.reduce(
-      (sum, inv) => (inv.status === "pending" || inv.status === "sent" ? sum + (inv.total || 0) : sum),
+      (sum, inv) => (inv.status === "pending" || inv.status === "sent" ? sum + Number(inv.total_amount || 0) : sum),
       0,
     ) || 0
   const totalOverdue =
-    allInvoices?.reduce((sum, inv) => (inv.status === "overdue" ? sum + (inv.total || 0) : sum), 0) || 0
+    allInvoices?.reduce((sum, inv) => (inv.status === "overdue" ? sum + Number(inv.total_amount || 0) : sum), 0) || 0
 
   // Monthly breakdown (last 6 months)
   const monthlyData = Array.from({ length: 6 }, (_, i) => {
@@ -111,7 +111,7 @@ export default async function AnalyticsPage() {
         const invDate = new Date(inv.created_at)
         return invDate >= date && invDate <= monthEnd
       }) || []
-    const revenue = monthInvoices.reduce((sum, inv) => (inv.status === "paid" ? sum + (inv.total || 0) : sum), 0)
+    const revenue = monthInvoices.reduce((sum, inv) => (inv.status === "paid" ? sum + Number(inv.total_amount || 0) : sum), 0)
     return {
       month: date.toLocaleDateString("en-US", { month: "short" }),
       revenue,

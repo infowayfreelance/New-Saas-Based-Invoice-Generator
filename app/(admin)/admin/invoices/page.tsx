@@ -32,7 +32,7 @@ export default async function AdminInvoicesPage({
   )
 
   if (params.status && params.status !== "all") {
-    query = query.eq("status", params.status)
+    query = query.eq("status", params.status.toLowerCase())
   }
 
   if (params.user) {
@@ -59,11 +59,11 @@ export default async function AdminInvoicesPage({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="DRAFT">Draft</SelectItem>
-                  <SelectItem value="SENT">Sent</SelectItem>
-                  <SelectItem value="PAID">Paid</SelectItem>
-                  <SelectItem value="PARTIALLY_PAID">Partially Paid</SelectItem>
-                  <SelectItem value="OVERDUE">Overdue</SelectItem>
+                  <SelectItem value="draft">Draft</SelectItem>
+                  <SelectItem value="sent">Sent</SelectItem>
+                  <SelectItem value="paid">Paid</SelectItem>
+                  <SelectItem value="partially_paid">Partially Paid</SelectItem>
+                  <SelectItem value="overdue">Overdue</SelectItem>
                 </SelectContent>
               </Select>
               <Select name="user" defaultValue={params.user}>
@@ -112,9 +112,9 @@ export default async function AdminInvoicesPage({
                     <TableCell>
                       <Badge
                         variant={
-                          invoice.status === "PAID"
+                          invoice.status?.toLowerCase() === "paid"
                             ? "default"
-                            : invoice.status === "OVERDUE"
+                            : invoice.status?.toLowerCase() === "overdue"
                               ? "destructive"
                               : "outline"
                         }
@@ -123,7 +123,7 @@ export default async function AdminInvoicesPage({
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      {invoice.currency} {invoice.total?.toFixed(2)}
+                      {invoice.currency} {Number(invoice.total_amount || 0).toFixed(2)}
                     </TableCell>
                     <TableCell className="text-muted-foreground">
                       {new Date(invoice.issue_date).toLocaleDateString()}
