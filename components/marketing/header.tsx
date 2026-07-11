@@ -20,7 +20,7 @@ export function MarketingHeader() {
               width={821}
               height={273}
               priority
-              className="h-8 w-auto"
+              className="h-11 w-auto"
             />
           </Link>
           <div className="hidden items-center gap-6 md:flex">

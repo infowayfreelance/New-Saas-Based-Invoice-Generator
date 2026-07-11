@@ -13,7 +13,7 @@ export function MarketingFooter() {
                 alt="MakeInvo"
                 width={821}
                 height={273}
-                className="h-8 w-auto"
+                className="h-10 w-auto"
               />
             </Link>
             <p className="max-w-xs text-sm text-muted-foreground">

@@ -140,7 +140,7 @@ export function AppSidebar() {
                 alt="MakeInvo"
                 width={821}
                 height={273}
-                className="h-7 w-auto"
+                className="h-9 w-auto"
               />
             </Link>
           </SidebarMenuItem>
