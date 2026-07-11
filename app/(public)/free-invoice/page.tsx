@@ -14,7 +14,7 @@ export default function FreeInvoicePage() {
   return (
     <div className="px-4 py-12 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
-        <EmbeddedInvoiceGenerator showHeading />
+        <EmbeddedInvoiceGenerator showHeading useBackend />
       </div>
     </div>
   )

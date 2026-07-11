@@ -26,14 +26,22 @@ import { FloatingDownloadButton } from "@/components/floating-download-button"
 interface EmbeddedInvoiceGeneratorProps {
   /** Show the "Free Invoice Generator" page heading. Off when embedded in the homepage hero. */
   showHeading?: boolean
+  /**
+   * Track usage against the database and enforce guest limits, like the
+   * standalone /free-invoice page does. Off (the default) for the homepage
+   * hero, which is a purely client-side demo: fill it in, preview it,
+   * download it - nothing is sent to or stored in the database.
+   */
+  useBackend?: boolean
 }
 
 /**
- * The actual, fully-working invoice generator - no signup required. Shared
- * between the homepage hero (embedded above the fold) and the standalone
- * /free-invoice page, so both stay in sync.
+ * The invoice generator UI - shared between the homepage hero (a pure,
+ * client-side demo with no database involved) and the standalone
+ * /free-invoice page (which tracks guest usage against the database), so
+ * both stay visually in sync.
  */
-export function EmbeddedInvoiceGenerator({ showHeading = false }: EmbeddedInvoiceGeneratorProps) {
+export function EmbeddedInvoiceGenerator({ showHeading = false, useBackend = false }: EmbeddedInvoiceGeneratorProps) {
   const [formData, setFormData] = useState<InvoiceFormData>(getDefaultInvoiceData())
   const [isLoading, setIsLoading] = useState(false)
   const [showPreview, setShowPreview] = useState(false)
@@ -50,6 +58,8 @@ export function EmbeddedInvoiceGenerator({ showHeading = false }: EmbeddedInvoic
   const previewRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    if (!useBackend) return
+
     const loadUsage = async () => {
       const result = await checkInvoiceUsage(null)
       if (result) {
@@ -57,10 +67,19 @@ export function EmbeddedInvoiceGenerator({ showHeading = false }: EmbeddedInvoic
       }
     }
     loadUsage()
-  }, [])
+  }, [useBackend])
 
   const handleFormSubmit = async (data: InvoiceFormData) => {
     setFormData(data)
+
+    // Homepage demo: no server call, no usage tracking, no database - just
+    // show the preview immediately from the values entered manually.
+    if (!useBackend) {
+      setShowPreview(true)
+      toast.success("Invoice generated successfully!")
+      return
+    }
+
     setIsLoading(true)
 
     try {

@@ -11,6 +11,12 @@ type FromMode = "settings" | "manual"
 
 interface InvoiceFromSectionProps {
   isPaid: boolean
+  /**
+   * No account to lock these fields to (e.g. the homepage demo generator) -
+   * skip the Settings/Manual toggle entirely and just show plain, always-
+   * editable fields.
+   */
+  alwaysManual?: boolean
   fromName: string
   fromEmail: string
   fromAddress: string
@@ -21,10 +27,13 @@ interface InvoiceFromSectionProps {
 /**
  * Paid plans can toggle between the business details saved in Settings
  * (locked, auto-filled) and typing different details manually for a single
- * invoice. Free/guest users only ever see the auto-filled Settings values.
+ * invoice. Free/guest users only ever see the auto-filled Settings values,
+ * unless there's no account at all (alwaysManual), in which case every
+ * field is simply editable.
  */
 export function InvoiceFromSection({
   isPaid,
+  alwaysManual = false,
   fromName,
   fromEmail,
   fromAddress,
@@ -42,7 +51,7 @@ export function InvoiceFromSection({
     setMode(nextMode)
   }
 
-  const isManual = isPaid && mode === "manual"
+  const isManual = alwaysManual || (isPaid && mode === "manual")
 
   return (
     <Card>
