@@ -7,18 +7,32 @@ import { useState, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Download, Send } from "lucide-react"
 import { toast } from "sonner"
-import type { InvoiceFormData } from "@/lib/utils/invoice"
+import { type InvoiceFormData, formatCurrency, formatDate, toNumber } from "@/lib/utils/invoice"
 import { sendInvoiceEmail } from "@/app/actions/invoice"
 import { downloadInvoicePdf } from "@/lib/utils/pdf"
 import { markInvoiceAsSent } from "@/app/actions/invoice-status"
+import { SendWhatsAppMenu } from "@/components/invoice/send-whatsapp-menu"
+import { buildInvoiceWhatsAppMessage } from "@/lib/utils/whatsapp"
 
 interface InvoiceActionButtonsProps {
   invoiceData: InvoiceFormData
   invoiceId: string
   invoiceNumber: string
+  totalAmount?: number
+  dueDate?: string
+  senderWhatsapp?: string | null
+  clientWhatsapp?: string | null
 }
 
-export function InvoiceActionButtons({ invoiceData, invoiceId, invoiceNumber }: InvoiceActionButtonsProps) {
+export function InvoiceActionButtons({
+  invoiceData,
+  invoiceId,
+  invoiceNumber,
+  totalAmount,
+  dueDate,
+  senderWhatsapp,
+  clientWhatsapp,
+}: InvoiceActionButtonsProps) {
   const [isDownloading, setIsDownloading] = useState(false)
   const [isSending, setIsSending] = useState(false)
   const searchParams = useSearchParams()
@@ -84,12 +98,27 @@ export function InvoiceActionButtons({ invoiceData, invoiceId, invoiceNumber }: 
     }
   }, [invoiceId, invoiceData.clientEmail])
 
+  const whatsAppMessage = buildInvoiceWhatsAppMessage({
+    businessName: invoiceData.fromName || "Your Business",
+    invoiceNumber,
+    total: formatCurrency(toNumber(totalAmount), invoiceData.currency),
+    dueDate: dueDate ? formatDate(dueDate) : "-",
+    clientName: invoiceData.clientName,
+  })
+
   return (
     <>
       <Button variant="outline" className="bg-transparent" onClick={handleDownloadPDF} disabled={isDownloading}>
         <Download className="mr-2 h-4 w-4" />
         {isDownloading ? "Generating..." : "Download PDF"}
       </Button>
+      <SendWhatsAppMenu
+        invoiceId={invoiceId}
+        message={whatsAppMessage}
+        senderWhatsapp={senderWhatsapp}
+        clientWhatsapp={clientWhatsapp}
+        clientName={invoiceData.clientName}
+      />
       <Button onClick={handleSendEmail} disabled={isSending}>
         <Send className="mr-2 h-4 w-4" />
         {isSending ? "Sending..." : "Send Email"}

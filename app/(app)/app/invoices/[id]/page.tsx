@@ -97,6 +97,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
             company_name,
             email,
             phone,
+            whatsapp_number,
             address_line1,
             address_line2,
             city,
@@ -246,7 +247,15 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
           { label: invoice.invoice_number },
         ]}
       >
-        <InvoiceActionButtons invoiceData={formData} invoiceId={id} invoiceNumber={invoice.invoice_number} />
+        <InvoiceActionButtons
+          invoiceData={formData}
+          invoiceId={id}
+          invoiceNumber={invoice.invoice_number}
+          totalAmount={toNumber(invoice.total_amount)}
+          dueDate={invoice.due_date}
+          senderWhatsapp={userSettings?.whatsapp_number}
+          clientWhatsapp={client?.whatsapp_number}
+        />
       </PageHeader>
       <div className="flex-1 space-y-6 p-4 md:p-6">
         {/* Status Banner */}
