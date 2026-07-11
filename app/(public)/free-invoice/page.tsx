@@ -1,7 +1,8 @@
 import type { Metadata } from "next"
+import { getSiteUrl } from "@/lib/utils/site-url"
 import { EmbeddedInvoiceGenerator } from "@/components/marketing/embedded-invoice-generator"
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://makeinvo.com"
+const siteUrl = getSiteUrl()
 
 export const metadata: Metadata = {
   title: "Free Invoice Generator - Create & Download PDF Invoices Instantly",

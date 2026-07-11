@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { getSiteUrl } from "@/lib/utils/site-url"
 import Link from "next/link"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Check, X } from "lucide-react"
@@ -11,7 +12,7 @@ export const metadata: Metadata = {
   description: "Simple, transparent pricing for everyone. Choose the plan that fits your needs with country-specific pricing.",
 }
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://makeinvo.com"
+const siteUrl = getSiteUrl()
 
 const breadcrumbSchema = {
   "@context": "https://schema.org",

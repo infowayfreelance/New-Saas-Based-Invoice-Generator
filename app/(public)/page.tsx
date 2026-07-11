@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { getSiteUrl } from "@/lib/utils/site-url"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -43,7 +44,7 @@ import {
   StickyNote,
 } from "lucide-react"
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://makeinvo.com"
+const siteUrl = getSiteUrl()
 
 /* ── Metadata ────────────────────────────────────────────────────── */
 

@@ -1,11 +1,12 @@
 import type { Metadata } from "next"
+import { getSiteUrl } from "@/lib/utils/site-url"
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
   description: "InvoiceFlow Privacy Policy",
 }
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://makeinvo.com"
+const siteUrl = getSiteUrl()
 
 const breadcrumbSchema = {
   "@context": "https://schema.org",
