@@ -5,8 +5,7 @@ import { PageHeader } from "@/components/app/page-header"
 import { DashboardFilters } from "@/components/dashboard/dashboard-filters"
 import { DashboardStats } from "@/components/dashboard/dashboard-stats"
 import { InvoiceWorkflow } from "@/components/dashboard/invoice-workflow"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { ALL_CURRENCIES } from "@/lib/utils/currency"
+import { useCurrencyOrDefault } from "@/components/app/currency-provider"
 
 interface DashboardClientProps {
   userData: any
@@ -19,40 +18,24 @@ export type DateFilter = {
 }
 
 export function DashboardClient({ userData }: DashboardClientProps) {
-  const [selectedCurrency, setSelectedCurrency] = useState("USD")
+  const { defaultCurrency } = useCurrencyOrDefault()
   const [dateFilter, setDateFilter] = useState<DateFilter>({
     preset: "this-month",
   })
 
   return (
     <>
-      <PageHeader
-        title="Dashboard"
-        description="Business overview"
-      >
-        <Select value={selectedCurrency} onValueChange={setSelectedCurrency}>
-          <SelectTrigger className="w-[140px]">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {ALL_CURRENCIES.map((currency) => (
-              <SelectItem key={currency.code} value={currency.code}>
-                {currency.symbol} {currency.code}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </PageHeader>
+      <PageHeader title="Dashboard" />
 
-      <div className="flex-1 space-y-6 p-6">
+      <div className="flex-1 space-y-6 p-4 md:p-6">
         {/* Filter Bar */}
         <DashboardFilters filter={dateFilter} onFilterChange={setDateFilter} />
 
         {/* Stats Cards */}
-        <DashboardStats currency={selectedCurrency} filter={dateFilter} />
+        <DashboardStats currency={defaultCurrency} filter={dateFilter} />
 
         {/* Invoice Workflow Section */}
-        <InvoiceWorkflow currency={selectedCurrency} filter={dateFilter} />
+        <InvoiceWorkflow currency={defaultCurrency} filter={dateFilter} />
       </div>
     </>
   )

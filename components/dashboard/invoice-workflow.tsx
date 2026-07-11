@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   Dialog,
   DialogContent,
@@ -166,143 +167,148 @@ export function InvoiceWorkflow({ currency, filter }: InvoiceWorkflowProps) {
     return null
   }
 
+  const draftContent =
+    data.draft && data.draft.length > 0 ? (
+      <div className="space-y-3">
+        {data.draft.map((invoice) => (
+          <div
+            key={invoice.id}
+            className="flex flex-col gap-2 rounded-lg border border-border p-3 transition-colors hover:bg-muted/50"
+          >
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <p className="font-medium">{invoice.client_name}</p>
+                <p className="text-sm text-muted-foreground">{invoice.invoice_number}</p>
+              </div>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-semibold">{formatCurrency(invoice.total_amount, currency)}</span>
+            </div>
+            <Button
+              size="sm"
+              variant="outline"
+              className="w-full"
+              onClick={() => handleInvoiceClick(invoice, "draft")}
+            >
+              Actions
+            </Button>
+          </div>
+        ))}
+      </div>
+    ) : (
+      <div className="flex flex-col items-center justify-center py-8 text-center">
+        <FileText className="mb-2 h-8 w-8 text-muted-foreground/50" />
+        <p className="text-sm text-muted-foreground">No draft invoices</p>
+      </div>
+    )
+
+  const pendingContent =
+    data.pending && data.pending.length > 0 ? (
+      <div className="space-y-3">
+        {data.pending.map((invoice) => (
+          <div
+            key={invoice.id}
+            className="flex flex-col gap-2 rounded-lg border border-border p-3 transition-colors hover:bg-muted/50"
+          >
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <p className="font-medium">{invoice.client_name}</p>
+                <p className="text-sm text-muted-foreground">{invoice.invoice_number}</p>
+              </div>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-semibold">{formatCurrency(invoice.remaining_amount, currency)}</span>
+            </div>
+            <Button
+              size="sm"
+              variant="outline"
+              className="w-full"
+              onClick={() => handleInvoiceClick(invoice, "pending")}
+            >
+              Actions
+            </Button>
+          </div>
+        ))}
+      </div>
+    ) : (
+      <div className="flex flex-col items-center justify-center py-8 text-center">
+        <Clock className="mb-2 h-8 w-8 text-muted-foreground/50" />
+        <p className="text-sm text-muted-foreground">No pending payments</p>
+      </div>
+    )
+
+  const paidContent =
+    data.paid && data.paid.length > 0 ? (
+      <div className="space-y-3">
+        {data.paid.map((invoice) => (
+          <div key={invoice.id} className="flex flex-col gap-2 rounded-lg border border-border p-3">
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <p className="font-medium">{invoice.client_name}</p>
+                <p className="text-sm text-muted-foreground">{invoice.invoice_number}</p>
+              </div>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-semibold">{formatCurrency(invoice.total_paid, currency)}</span>
+              <Badge
+                variant={invoice.status === "PARTIALLY_PAID" || invoice.remaining_amount > 0 ? "secondary" : "default"}
+                className="text-xs"
+              >
+                {invoice.status === "PARTIALLY_PAID" || invoice.remaining_amount > 0 ? "Partial" : "Paid"}
+              </Badge>
+            </div>
+          </div>
+        ))}
+      </div>
+    ) : (
+      <div className="flex flex-col items-center justify-center py-8 text-center">
+        <DollarSign className="mb-2 h-8 w-8 text-muted-foreground/50" />
+        <p className="text-sm text-muted-foreground">No paid invoices</p>
+      </div>
+    )
+
   return (
     <>
-      <div className="grid gap-4 md:grid-cols-3">
-        {/* Draft Invoices Column */}
+      {/* Mobile: one column at a time via tabs, so the page doesn't turn into
+          three long stacked lists */}
+      <Tabs defaultValue="draft" className="md:hidden">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="draft">Draft ({data.draft?.length || 0})</TabsTrigger>
+          <TabsTrigger value="pending">Pending ({data.pending?.length || 0})</TabsTrigger>
+          <TabsTrigger value="paid">Paid ({data.paid?.length || 0})</TabsTrigger>
+        </TabsList>
+        <TabsContent value="draft" className="mt-4">
+          {draftContent}
+        </TabsContent>
+        <TabsContent value="pending" className="mt-4">
+          {pendingContent}
+        </TabsContent>
+        <TabsContent value="paid" className="mt-4">
+          {paidContent}
+        </TabsContent>
+      </Tabs>
+
+      {/* Desktop/tablet: all three columns side by side */}
+      <div className="hidden gap-4 md:grid md:grid-cols-3">
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Draft Invoices</CardTitle>
           </CardHeader>
-          <CardContent>
-            {data.draft && data.draft.length > 0 ? (
-              <div className="space-y-3">
-                {data.draft.map((invoice) => (
-                  <div
-                    key={invoice.id}
-                    className="flex flex-col gap-2 rounded-lg border border-border p-3 transition-colors hover:bg-muted/50"
-                  >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <p className="font-medium">{invoice.client_name}</p>
-                        <p className="text-sm text-muted-foreground">{invoice.invoice_number}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-semibold">
-                        {formatCurrency(invoice.total_amount, currency)}
-                      </span>
-                    </div>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="w-full"
-                      onClick={() => handleInvoiceClick(invoice, "draft")}
-                    >
-                      Actions
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center py-8 text-center">
-                <FileText className="mb-2 h-8 w-8 text-muted-foreground/50" />
-                <p className="text-sm text-muted-foreground">No draft invoices</p>
-              </div>
-            )}
-          </CardContent>
+          <CardContent>{draftContent}</CardContent>
         </Card>
 
-        {/* Pending Payments Column */}
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Pending Payments</CardTitle>
           </CardHeader>
-          <CardContent>
-            {data.pending && data.pending.length > 0 ? (
-              <div className="space-y-3">
-                {data.pending.map((invoice) => (
-                  <div
-                    key={invoice.id}
-                    className="flex flex-col gap-2 rounded-lg border border-border p-3 transition-colors hover:bg-muted/50"
-                  >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <p className="font-medium">{invoice.client_name}</p>
-                        <p className="text-sm text-muted-foreground">{invoice.invoice_number}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-semibold">
-                        {formatCurrency(invoice.remaining_amount, currency)}
-                      </span>
-                    </div>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="w-full"
-                      onClick={() => handleInvoiceClick(invoice, "pending")}
-                    >
-                      Actions
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center py-8 text-center">
-                <Clock className="mb-2 h-8 w-8 text-muted-foreground/50" />
-                <p className="text-sm text-muted-foreground">No pending payments</p>
-              </div>
-            )}
-          </CardContent>
+          <CardContent>{pendingContent}</CardContent>
         </Card>
 
-        {/* Paid Invoices Column */}
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Paid Invoices</CardTitle>
           </CardHeader>
-          <CardContent>
-            {data.paid && data.paid.length > 0 ? (
-              <div className="space-y-3">
-                {data.paid.map((invoice) => (
-                  <div
-                    key={invoice.id}
-                    className="flex flex-col gap-2 rounded-lg border border-border p-3"
-                  >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <p className="font-medium">{invoice.client_name}</p>
-                        <p className="text-sm text-muted-foreground">{invoice.invoice_number}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-semibold">
-                        {formatCurrency(invoice.total_paid, currency)}
-                      </span>
-                      <Badge
-                        variant={
-                          invoice.status === "PARTIALLY_PAID" || invoice.remaining_amount > 0
-                            ? "secondary"
-                            : "default"
-                        }
-                        className="text-xs"
-                      >
-                        {invoice.status === "PARTIALLY_PAID" || invoice.remaining_amount > 0
-                          ? "Partial"
-                          : "Paid"}
-                      </Badge>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center py-8 text-center">
-                <DollarSign className="mb-2 h-8 w-8 text-muted-foreground/50" />
-                <p className="text-sm text-muted-foreground">No paid invoices</p>
-              </div>
-            )}
-          </CardContent>
+          <CardContent>{paidContent}</CardContent>
         </Card>
       </div>
 

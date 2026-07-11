@@ -291,7 +291,12 @@ export function InvoiceForm({
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="currency">Currency</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="currency">Currency</Label>
+                <Link href="/app/setup-currencies" className="text-xs text-primary hover:underline">
+                  Manage currencies
+                </Link>
+              </div>
               <Select value={formData.currency} onValueChange={(value) => updateField("currency", value)}>
                 <SelectTrigger id="currency">
                   <SelectValue />
