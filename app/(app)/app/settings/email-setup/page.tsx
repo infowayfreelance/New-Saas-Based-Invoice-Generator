@@ -23,7 +23,7 @@ export default async function EmailSetupPage() {
           { label: "Email Setup" },
         ]}
       />
-      <div className="flex-1 space-y-6 p-6">
+      <div className="flex-1 space-y-6 p-4 md:p-6">
         <EmailSetupWizard userEmail={user.email || ""} />
       </div>
     </>

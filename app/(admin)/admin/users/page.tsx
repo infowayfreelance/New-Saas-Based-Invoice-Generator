@@ -44,7 +44,7 @@ export default async function AdminUsersPage({
   return (
     <div className="flex flex-1 flex-col overflow-auto">
       <AdminHeader title="Users" description="Manage all platform users" />
-      <main className="flex-1 space-y-6 p-6">
+      <main className="flex-1 space-y-6 p-4 md:p-6">
         <Card>
           <CardHeader>
             <CardTitle>Filters</CardTitle>

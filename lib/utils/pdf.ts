@@ -29,6 +29,7 @@ export async function downloadInvoicePdf(element: HTMLElement, fileName: string)
   clone.style.minWidth = `${PDF_RENDER_WIDTH}px`
   clone.style.maxWidth = `${PDF_RENDER_WIDTH}px`
   clone.style.margin = "0"
+  clone.style.transform = "none"
   clone.style.boxShadow = "none"
   clone.style.border = "none"
   clone.style.borderRadius = "0"

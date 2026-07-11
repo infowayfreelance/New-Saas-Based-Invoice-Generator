@@ -73,7 +73,7 @@ export default async function InvoicesPage({
           </Link>
         </Button>
       </PageHeader>
-      <div className="flex-1 space-y-6 p-6">
+      <div className="flex-1 space-y-6 p-4 md:p-6">
         {/* Filters */}
         <Card>
           <CardContent className="pt-6">

@@ -61,7 +61,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
               { label: "Error" },
             ]}
           />
-          <div className="flex-1 space-y-6 p-6">
+          <div className="flex-1 space-y-6 p-4 md:p-6">
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
               <AlertTitle>Invoice Not Found</AlertTitle>
@@ -135,7 +135,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
             { label: "Error" },
           ]}
         />
-        <div className="flex-1 space-y-6 p-6">
+        <div className="flex-1 space-y-6 p-4 md:p-6">
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>Error Loading Invoice</AlertTitle>
@@ -248,7 +248,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
       >
         <InvoiceActionButtons invoiceData={formData} invoiceId={id} invoiceNumber={invoice.invoice_number} />
       </PageHeader>
-      <div className="flex-1 space-y-6 p-6">
+      <div className="flex-1 space-y-6 p-4 md:p-6">
         {/* Status Banner */}
         <Card>
           <CardContent className="flex flex-col gap-4 pt-6 sm:flex-row sm:items-center sm:justify-between">

@@ -124,7 +124,7 @@ export default async function AnalyticsPage() {
   return (
     <>
       <PageHeader title="Analytics" breadcrumbs={[{ label: "Dashboard", href: "/app" }, { label: "Analytics" }]} />
-      <div className="flex-1 space-y-6 p-6">
+      <div className="flex-1 space-y-6 p-4 md:p-6">
         {/* Key Metrics */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <Card>

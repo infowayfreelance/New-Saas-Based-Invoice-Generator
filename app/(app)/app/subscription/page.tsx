@@ -82,7 +82,7 @@ export default async function SubscriptionPage({
         title="Subscription"
         breadcrumbs={[{ label: "Dashboard", href: "/app" }, { label: "Subscription" }]}
       />
-      <div className="flex-1 space-y-6 p-6">
+      <div className="flex-1 space-y-6 p-4 md:p-6">
         {params.success && (
           <Alert className="border-green-500 bg-green-50 dark:bg-green-950">
             <CheckCircle className="h-4 w-4 text-green-600" />

@@ -98,7 +98,7 @@ export default function NewClientPage() {
           { label: "Add Client" },
         ]}
       />
-      <div className="flex-1 space-y-6 p-6">
+      <div className="flex-1 space-y-6 p-4 md:p-6">
         <form onSubmit={handleSubmit} className="space-y-6">
           <Card>
             <CardHeader>

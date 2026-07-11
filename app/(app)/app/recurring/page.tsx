@@ -89,7 +89,7 @@ export default async function RecurringPage() {
           </Button>
         </Link>
       </PageHeader>
-      <div className="flex-1 space-y-6 p-6">
+      <div className="flex-1 space-y-6 p-4 md:p-6">
         <Card>
           <CardHeader>
             <CardTitle>Recurring Rules</CardTitle>

@@ -40,7 +40,7 @@ export default async function AdminClientsPage({
   return (
     <div className="flex flex-1 flex-col overflow-auto">
       <AdminHeader title="Clients" description="View all client records" />
-      <main className="flex-1 space-y-6 p-6">
+      <main className="flex-1 space-y-6 p-4 md:p-6">
         <Card>
           <CardHeader>
             <CardTitle>Filters</CardTitle>
