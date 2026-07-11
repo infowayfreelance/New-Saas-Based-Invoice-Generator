@@ -43,16 +43,16 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "/make-invo-og.webp",
-        width: 1731,
-        height: 909,
+        url: "/make-invo-og.png",
+        width: 1200,
+        height: 630,
         alt: "MakeInvo - Create, send, and get paid",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    images: ["/make-invo-og.webp"],
+    images: ["/make-invo-og.png"],
   },
   robots: {
     index: true,
