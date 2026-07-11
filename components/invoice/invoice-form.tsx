@@ -20,7 +20,10 @@ import {
 import { createClient } from "@/lib/supabase/client"
 import Link from "next/link"
 import { useCurrencyOrDefault } from "@/components/app/currency-provider"
+import { useAuth } from "@/components/app/auth-provider"
 import { ALL_CURRENCIES } from "@/lib/utils/currency"
+import { InvoiceFromSection } from "@/components/invoice/invoice-from-section"
+import { InvoiceClientSection } from "@/components/invoice/invoice-client-section"
 
 interface InvoiceFormProps {
   mode?: "create" | "edit"
@@ -46,7 +49,15 @@ export function InvoiceForm({
   const [selectedClientId, setSelectedClientId] = useState<string | null>(initialData.clientId || null)
   const [isLoadingClients, setIsLoadingClients] = useState(true)
   const { enabledCurrencies } = useCurrencyOrDefault()
-  
+  const { profile } = useAuth()
+  const planCode = profile?.plan?.code || "BASIC"
+  const isPaid = planCode === "STANDARD" || planCode === "PRO"
+  const [settingsSnapshot] = useState({
+    name: initialData.fromName,
+    email: initialData.fromEmail,
+    address: initialData.fromAddress,
+  })
+
   // Filter currencies to only show enabled ones
   // If no currencies are enabled (public pages), show all currencies
   const availableCurrencies = enabledCurrencies && enabledCurrencies.length > 0
@@ -156,6 +167,8 @@ export function InvoiceForm({
   }
 
   const totals = calculateInvoiceTotals(formData.items, formData.discountAmount)
+  const hasClientInfo =
+    (!!selectedClientId && selectedClientId !== "none") || formData.clientName.trim().length > 0
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -167,91 +180,27 @@ export function InvoiceForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="grid gap-6 lg:grid-cols-2">
-        {/* From Section */}
-        <Card>
-          <CardHeader className="pb-4">
-            <CardTitle className="text-base">From (Your Business)</CardTitle>
-            <CardDescription className="text-xs">Update these details in Settings</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="fromName">Business Name</Label>
-              <Input id="fromName" value={formData.fromName} disabled className="bg-muted" />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="fromEmail">Email</Label>
-              <Input id="fromEmail" type="email" value={formData.fromEmail} disabled className="bg-muted" />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="fromAddress">Address</Label>
-              <Textarea id="fromAddress" value={formData.fromAddress} disabled className="bg-muted" rows={3} />
-            </div>
-          </CardContent>
-        </Card>
+        <InvoiceFromSection
+          isPaid={isPaid}
+          fromName={formData.fromName}
+          fromEmail={formData.fromEmail}
+          fromAddress={formData.fromAddress}
+          settingsSnapshot={settingsSnapshot}
+          onChange={updateField}
+        />
 
-        {/* To Section */}
-        <Card>
-          <CardHeader className="pb-4">
-            <CardTitle className="text-base">To (Client)</CardTitle>
-            <CardDescription className="text-xs">
-              Select an existing client or{" "}
-              <Link href="/app/clients/new" className="text-primary hover:underline">
-                create a new one
-              </Link>
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="clientSelect">Select Client</Label>
-              <Select 
-                value={selectedClientId ?? "none"} 
-                onValueChange={handleClientSelect} 
-                disabled={isLoadingClients}
-              >
-                <SelectTrigger id="clientSelect">
-                  <SelectValue placeholder={isLoadingClients ? "Loading clients..." : "Select a client"} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">No client selected</SelectItem>
-                  {clients.map((client) => (
-                    <SelectItem key={client.id} value={client.id}>
-                      {client.name || client.company_name} {client.email && `(${client.email})`}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {selectedClientId && selectedClientId !== "none" && (
-              <>
-                <div className="space-y-2">
-                  <Label>Client Name</Label>
-                  <div className="rounded-md border border-input bg-muted px-3 py-2 text-sm">
-                    {formData.clientName || "—"}
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label>Email</Label>
-                  <div className="rounded-md border border-input bg-muted px-3 py-2 text-sm">
-                    {formData.clientEmail || "—"}
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label>Address</Label>
-                  <div className="rounded-md border border-input bg-muted px-3 py-2 text-sm whitespace-pre-line">
-                    {formData.clientAddress || "—"}
-                  </div>
-                </div>
-              </>
-            )}
-
-            {(!selectedClientId || selectedClientId === "none") && (
-              <div className="rounded-md border border-dashed p-4 text-center text-sm text-muted-foreground">
-                Please select a client to continue
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        <InvoiceClientSection
+          isPaid={isPaid}
+          clients={clients}
+          isLoadingClients={isLoadingClients}
+          selectedClientId={selectedClientId}
+          clientName={formData.clientName}
+          clientEmail={formData.clientEmail}
+          clientAddress={formData.clientAddress}
+          onSelectClient={handleClientSelect}
+          onChange={updateField}
+          onClearSelectedClient={() => setSelectedClientId(null)}
+        />
       </div>
 
       {/* Invoice Details */}
@@ -462,7 +411,7 @@ export function InvoiceForm({
 
       {/* Submit */}
       <div className="flex justify-end">
-        <Button type="submit" size="lg" disabled={isLoading || !selectedClientId || selectedClientId === "none"}>
+        <Button type="submit" size="lg" disabled={isLoading || !hasClientInfo}>
           {isLoading ? "Generating..." : submitLabel}
         </Button>
       </div>
