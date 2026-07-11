@@ -63,14 +63,15 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
   }
 
   const getStatusBadge = (status: string) => {
+    const normalized = (status || "").toLowerCase()
     const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-      PAID: "default",
-      SENT: "secondary",
-      DRAFT: "outline",
-      OVERDUE: "destructive",
-      PARTIALLY_PAID: "secondary",
+      paid: "default",
+      sent: "secondary",
+      draft: "outline",
+      overdue: "destructive",
+      partially_paid: "secondary",
     }
-    return <Badge variant={variants[status] || "outline"}>{status}</Badge>
+    return <Badge variant={variants[normalized] || "outline"}>{normalized.replace(/_/g, " ").toUpperCase()}</Badge>
   }
 
   return (
@@ -96,7 +97,7 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
           </Button>
         </Link>
       </PageHeader>
-      <div className="flex-1 space-y-6 p-6">
+      <div className="flex-1 space-y-6 p-4 md:p-6">
         <div className="grid gap-6 md:grid-cols-3">
           {/* Client Info */}
           <Card className="md:col-span-2">

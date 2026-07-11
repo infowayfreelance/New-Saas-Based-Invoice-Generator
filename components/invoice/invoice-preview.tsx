@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect, useRef, useState } from "react"
 import { Card } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { type InvoiceFormData, calculateInvoiceTotals, formatCurrency, formatDate, toNumber } from "@/lib/utils/invoice"
@@ -13,12 +14,51 @@ interface InvoicePreviewProps {
 export function InvoicePreview({ data, className }: InvoicePreviewProps) {
   const totals = calculateInvoiceTotals(data.items, data.discountAmount)
 
+  // The invoice is always laid out at a fixed A4 width so it looks identical
+  // on every device. On screens narrower than that, scale the whole invoice
+  // down to fit the available width (like a PDF viewer) instead of forcing
+  // horizontal scrolling.
+  const containerRef = useRef<HTMLDivElement>(null)
+  const contentRef = useRef<HTMLDivElement>(null)
+  const [scale, setScale] = useState(1)
+  const [scaledHeight, setScaledHeight] = useState<number | undefined>(undefined)
+
+  useEffect(() => {
+    const update = () => {
+      const containerWidth = containerRef.current?.clientWidth ?? PDF_RENDER_WIDTH
+      const nextScale = Math.min(1, containerWidth / PDF_RENDER_WIDTH)
+      setScale(nextScale)
+
+      const contentHeight = contentRef.current?.offsetHeight
+      setScaledHeight(contentHeight ? contentHeight * nextScale : undefined)
+    }
+
+    update()
+
+    const observer = new ResizeObserver(update)
+    if (containerRef.current) observer.observe(containerRef.current)
+    if (contentRef.current) observer.observe(contentRef.current)
+    window.addEventListener("resize", update)
+
+    return () => {
+      observer.disconnect()
+      window.removeEventListener("resize", update)
+    }
+  }, [])
+
   return (
-    // Fixed A4 width so the preview looks identical on every device;
-    // small screens scroll horizontally instead of breaking the layout.
-    <div className={`overflow-x-auto ${className || ""}`}>
+    <div ref={containerRef} className={className} style={{ height: scaledHeight, overflow: "hidden" }}>
+      <div
+        ref={contentRef}
+        style={{
+          width: `${PDF_RENDER_WIDTH}px`,
+          transform: scale < 1 ? `scale(${scale})` : undefined,
+          transformOrigin: "top left",
+          margin: scale >= 1 ? "0 auto" : undefined,
+        }}
+      >
       <Card
-        className="pdf-safe-wrapper mx-auto p-8"
+        className="pdf-safe-wrapper p-8"
         id="invoice-preview"
         style={{
           backgroundColor: "#ffffff",
@@ -205,6 +245,7 @@ export function InvoicePreview({ data, className }: InvoicePreviewProps) {
         </>
       )}
       </Card>
+      </div>
     </div>
   )
 }

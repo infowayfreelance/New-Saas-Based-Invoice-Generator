@@ -106,7 +106,7 @@ export default async function ClientsPage({ searchParams }: { searchParams: Prom
           </Button>
         </Link>
       </PageHeader>
-      <div className="flex-1 space-y-6 p-6">
+      <div className="flex-1 space-y-6 p-4 md:p-6">
         {/* Search */}
         <Card>
           <CardContent className="pt-6">

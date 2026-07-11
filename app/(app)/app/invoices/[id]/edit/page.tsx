@@ -26,7 +26,7 @@ export default async function InvoiceEditPage({ params }: { params: Promise<{ id
             { label: "Error" },
           ]}
         />
-        <div className="flex-1 space-y-6 p-6">
+        <div className="flex-1 space-y-6 p-4 md:p-6">
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>Invalid Invoice ID</AlertTitle>
@@ -56,7 +56,7 @@ export default async function InvoiceEditPage({ params }: { params: Promise<{ id
             { label: "Error" },
           ]}
         />
-        <div className="flex-1 space-y-6 p-6">
+        <div className="flex-1 space-y-6 p-4 md:p-6">
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>Not Authenticated</AlertTitle>
@@ -84,7 +84,7 @@ export default async function InvoiceEditPage({ params }: { params: Promise<{ id
             { label: "Error" },
           ]}
         />
-        <div className="flex-1 space-y-6 p-6">
+        <div className="flex-1 space-y-6 p-4 md:p-6">
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>Invoice Not Found</AlertTitle>
@@ -203,7 +203,7 @@ export default async function InvoiceEditPage({ params }: { params: Promise<{ id
           { label: "Edit" },
         ]}
       />
-      <div className="flex-1 space-y-6 p-6">
+      <div className="flex-1 space-y-6 p-4 md:p-6">
         <EditInvoiceForm invoiceId={id} initialData={initialData} />
       </div>
     </>

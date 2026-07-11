@@ -48,7 +48,7 @@ export default async function TemplatesPage() {
   return (
     <>
       <PageHeader title="Templates" breadcrumbs={[{ label: "Dashboard", href: "/app" }, { label: "Templates" }]} />
-      <div className="flex-1 space-y-6 p-6">
+      <div className="flex-1 space-y-6 p-4 md:p-6">
         <Card>
           <CardHeader>
             <CardTitle>Invoice Templates</CardTitle>

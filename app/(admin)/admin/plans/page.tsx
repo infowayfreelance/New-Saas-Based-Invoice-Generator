@@ -37,7 +37,7 @@ export default async function AdminPlansPage() {
   return (
     <div className="flex flex-1 flex-col overflow-auto">
       <AdminHeader title="Plans" description="Manage subscription plans" />
-      <main className="flex-1 space-y-6 p-6">
+      <main className="flex-1 space-y-6 p-4 md:p-6">
         <div className="grid gap-6">
           {plans?.map((plan) => (
             <Card key={plan.id}>

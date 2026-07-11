@@ -46,7 +46,7 @@ export default async function AdminInvoicesPage({
   return (
     <div className="flex flex-1 flex-col overflow-auto">
       <AdminHeader title="Invoices" description="View all invoices in the system" />
-      <main className="flex-1 space-y-6 p-6">
+      <main className="flex-1 space-y-6 p-4 md:p-6">
         <Card>
           <CardHeader>
             <CardTitle>Filters</CardTitle>

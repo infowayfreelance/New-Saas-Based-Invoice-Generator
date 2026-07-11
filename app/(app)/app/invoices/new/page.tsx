@@ -101,7 +101,7 @@ export default function NewInvoicePage() {
               fromName: settings.business_name || settings.full_name || user.email || "",
               fromEmail: settings.email || user.email || "",
               fromAddress: senderAddressBlock,
-              currency: settings.currency || "USD",
+              currency: settings.default_currency || settings.currency || "USD",
             }))
           }
         } catch (settingsErr) {
@@ -201,7 +201,7 @@ export default function NewInvoicePage() {
           { label: "New Invoice" },
         ]}
       />
-      <div className="flex-1 space-y-6 p-6">
+      <div className="flex-1 space-y-6 p-4 md:p-6">
         {loadError && (
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
