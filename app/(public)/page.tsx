@@ -82,9 +82,9 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: `${siteUrl}/og-image.png`,
-        width: 1200,
-        height: 630,
+        url: `${siteUrl}/make-invo-og.webp`,
+        width: 1731,
+        height: 909,
         alt: "MakeInvo - Free Online Invoice Generator",
       },
     ],
@@ -95,7 +95,7 @@ export const metadata: Metadata = {
     title: "Free Invoice Generator Online - Create Professional PDF Invoices | MakeInvo",
     description:
       "Create a professional PDF invoice in under 60 seconds with MakeInvo's free online invoice generator.",
-    images: [`${siteUrl}/og-image.png`],
+    images: [`${siteUrl}/make-invo-og.webp`],
   },
 }
 
@@ -441,10 +441,9 @@ const homepageTitle = "Free Invoice Generator Online - Create Professional PDF I
 const homepageDescription =
   "MakeInvo is a free online invoice generator and invoice maker for freelancers, contractors, and small businesses. Create a professional PDF invoice in under 60 seconds - no signup, no watermark."
 
-// Real, publicly accessible brand image (180x180 apple touch icon). There is
-// no dedicated marketing logo/OG asset on disk yet - do not reference
-// /logo.png or /og-image.png here since neither file exists.
-const brandImageUrl = `${siteUrl}/apple-icon.png`
+// Square mark for schema.org Organization.logo / primaryImageOfPage (Google
+// recommends a roughly square logo, not the wide wordmark used in the header).
+const brandImageUrl = `${siteUrl}/make-invo-site-icon.webp`
 
 // All entities share one @graph so they reference each other by @id instead
 // of duplicating the Organization/WebSite as separate, disconnected nodes.

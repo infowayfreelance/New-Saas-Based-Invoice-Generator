@@ -1,9 +1,10 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { FileText, Menu, X } from "lucide-react"
+import { Menu, X } from "lucide-react"
 
 export function MarketingHeader() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -12,11 +13,15 @@ export function MarketingHeader() {
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-8">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-              <FileText className="h-5 w-5 text-primary-foreground" />
-            </div>
-            <span className="text-xl font-semibold">MakeInvo</span>
+          <Link href="/" className="flex items-center">
+            <Image
+              src="/Make-invo-logo.webp"
+              alt="MakeInvo"
+              width={821}
+              height={273}
+              priority
+              className="h-8 w-auto"
+            />
           </Link>
           <div className="hidden items-center gap-6 md:flex">
             <Link
