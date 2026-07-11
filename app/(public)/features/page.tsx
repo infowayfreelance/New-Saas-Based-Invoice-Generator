@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { getSiteUrl } from "@/lib/utils/site-url"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -21,7 +22,7 @@ export const metadata: Metadata = {
   description: "Discover all the powerful features InvoiceFlow offers to streamline your invoicing workflow.",
 }
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://makeinvo.com"
+const siteUrl = getSiteUrl()
 
 const breadcrumbSchema = {
   "@context": "https://schema.org",
