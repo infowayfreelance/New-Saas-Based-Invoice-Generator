@@ -1,10 +1,32 @@
+import type { Metadata } from "next"
 import { createServiceClient } from "@/lib/supabase/service"
-import { toNumber, type InvoiceFormData } from "@/lib/utils/invoice"
+import { toNumber, formatCurrency, formatDate, type InvoiceFormData } from "@/lib/utils/invoice"
 import { PublicInvoiceView } from "@/components/invoice/public-invoice-view"
+import { getPublicInvoiceSummary } from "@/lib/data/public-invoice"
 
 function isValidUUID(id: string): boolean {
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
   return uuidRegex.test(id)
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params
+  if (!isValidUUID(id)) return { title: "Invoice not found" }
+
+  const summary = await getPublicInvoiceSummary(id).catch(() => null)
+  if (!summary) return { title: "Invoice not found" }
+
+  const title = `Invoice ${summary.invoiceNumber} from ${summary.businessName}`
+  const description = `${formatCurrency(toNumber(summary.totalAmount), summary.currency)} due ${formatDate(summary.dueDate)}${
+    summary.clientName ? ` · Billed to ${summary.clientName}` : ""
+  }`
+
+  return {
+    title,
+    description,
+    openGraph: { title, description, type: "website" },
+    twitter: { card: "summary_large_image", title, description },
+  }
 }
 
 /**
