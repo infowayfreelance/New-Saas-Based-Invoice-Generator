@@ -52,6 +52,9 @@ export function InvoiceForm({
   const { profile } = useAuth()
   const planCode = profile?.plan?.code || "BASIC"
   const isPaid = planCode === "STANDARD" || planCode === "PRO"
+  // No account at all (e.g. the homepage demo generator) - there's no
+  // Settings to lock the From fields to, so just make them editable.
+  const isGuest = !profile
   const [settingsSnapshot] = useState({
     name: initialData.fromName,
     email: initialData.fromEmail,
@@ -182,6 +185,7 @@ export function InvoiceForm({
       <div className="grid gap-6 lg:grid-cols-2">
         <InvoiceFromSection
           isPaid={isPaid}
+          alwaysManual={isGuest}
           fromName={formData.fromName}
           fromEmail={formData.fromEmail}
           fromAddress={formData.fromAddress}
