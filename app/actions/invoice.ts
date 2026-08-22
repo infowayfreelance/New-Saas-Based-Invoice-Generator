@@ -142,6 +142,7 @@ export async function generateAuthenticatedInvoice(
       total_amount: totals.totalAmount, // Correct column name
       notes: data.notes || null,
       terms: data.terms || null,
+      bank_details: data.bankDetails || null,
     })
     .select()
     .single()
@@ -322,6 +323,7 @@ export async function updateInvoice(
     total_amount: totals.totalAmount, // Correct column name
     notes: data.notes || null,
     terms: data.terms || null,
+    bank_details: data.bankDetails || null,
     client_id: data.clientId && data.clientId !== "none" ? data.clientId : null,
   }
   console.log("[v0] STEP 7 COMPLETE: Update payload built:", updateData)

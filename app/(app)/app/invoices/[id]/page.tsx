@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Edit, Clock, CheckCircle2, Send } from "lucide-react"
-import { formatCurrency, formatDate, toNumber, type InvoiceFormData } from "@/lib/utils/invoice"
+import { formatCurrency, formatDate, toNumber, formatBankDetails, type InvoiceFormData } from "@/lib/utils/invoice"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { AlertCircle } from "lucide-react"
 
@@ -39,6 +39,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
   let items: any[] | null = null
   let client: any = null
   let userSettings: any = null
+  let bankAccount: any = null
 
   try {
     // Fetch invoice first to check if it exists
@@ -85,7 +86,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
     invoice = invoiceResult.data
 
     // Now fetch related data in parallel - using separate queries to avoid LEFT JOIN issues
-    const [itemsResult, clientResult, settingsResult] = await Promise.all([
+    const [itemsResult, clientResult, settingsResult, bankAccountResult] = await Promise.all([
       supabase.from("invoice_items").select("*").eq("invoice_id", id).order("created_at", { ascending: true }),
       invoice.client_id
         ? supabase
@@ -114,11 +115,19 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
         .select("*")
         .eq("user_id", user.id)
         .maybeSingle(),
+      supabase
+        .from("bank_accounts")
+        .select("account_name, bank_name, account_number, routing_number, swift_code")
+        .eq("user_id", user.id)
+        .order("is_default", { ascending: false })
+        .limit(1)
+        .maybeSingle(),
     ])
 
     items = itemsResult.data
     client = clientResult.data
     userSettings = settingsResult.data
+    bankAccount = bankAccountResult.data
 
     console.log("[v0] User settings data:", userSettings)
     console.log("[v0] Client data:", client)
@@ -212,6 +221,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
     terms: invoice.terms || "",
     taxRate: 0,
     discountAmount: toNumber(invoice.discount_amount),
+    bankDetails: invoice.bank_details || formatBankDetails(bankAccount),
   }
 
   const invoiceStatus = (invoice.status || "").toLowerCase()

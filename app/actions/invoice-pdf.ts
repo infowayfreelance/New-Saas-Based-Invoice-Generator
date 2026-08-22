@@ -2,7 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
-import type { InvoiceFormData } from "@/lib/utils/invoice"
+import { formatBankDetails, type InvoiceFormData } from "@/lib/utils/invoice"
 
 export async function getInvoiceDataForPDF(invoiceId: string): Promise<{ 
   success: boolean
@@ -58,6 +58,14 @@ export async function getInvoiceDataForPDF(invoiceId: string): Promise<{
     console.error("[v0] PDF: Error fetching user data:", userError)
   }
 
+  const { data: bankAccount } = await supabase
+    .from("bank_accounts")
+    .select("account_name, bank_name, account_number, routing_number, swift_code")
+    .eq("user_id", user.id)
+    .order("is_default", { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
   // Transform to InvoiceFormData format
   const invoiceData: InvoiceFormData = {
     invoiceNumber: invoice.invoice_number,
@@ -91,6 +99,7 @@ export async function getInvoiceDataForPDF(invoiceId: string): Promise<{
     // Notes
     notes: invoice.notes || "",
     terms: invoice.terms || "",
+    bankDetails: invoice.bank_details || formatBankDetails(bankAccount),
   }
 
   return { success: true, data: invoiceData }

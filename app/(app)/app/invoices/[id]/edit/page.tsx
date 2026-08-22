@@ -4,7 +4,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { AlertCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { type InvoiceFormData, toNumber } from "@/lib/utils/invoice"
+import { type InvoiceFormData, toNumber, formatBankDetails } from "@/lib/utils/invoice"
 import { EditInvoiceForm } from "@/components/invoice/edit-invoice-form"
 
 function isValidUUID(id: string): boolean {
@@ -103,7 +103,7 @@ export default async function InvoiceEditPage({ params }: { params: Promise<{ id
   const invoice = invoiceResult.data
 
   // Fetch related data
-  const [itemsResult, clientResult, settingsResult] = await Promise.all([
+  const [itemsResult, clientResult, settingsResult, bankAccountResult] = await Promise.all([
     supabase.from("invoice_items").select("*").eq("invoice_id", id).order("created_at", { ascending: true }),
     invoice.client_id
       ? supabase
@@ -127,11 +127,19 @@ export default async function InvoiceEditPage({ params }: { params: Promise<{ id
           .maybeSingle()
       : Promise.resolve({ data: null, error: null }),
     supabase.from("user_settings").select("*").eq("user_id", user.id).maybeSingle(),
+    supabase
+      .from("bank_accounts")
+      .select("account_name, bank_name, account_number, routing_number, swift_code")
+      .eq("user_id", user.id)
+      .order("is_default", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
   ])
 
   const items = itemsResult.data || []
   const client = clientResult.data
   const userSettings = settingsResult.data
+  const bankAccount = bankAccountResult.data
 
   // Prepare form data
   const clientAddress = client
@@ -190,6 +198,7 @@ export default async function InvoiceEditPage({ params }: { params: Promise<{ id
     terms: invoice.terms || "",
     taxRate: 0,
     discountAmount: toNumber(invoice.discount_amount),
+    bankDetails: invoice.bank_details || formatBankDetails(bankAccount),
   }
 
   return (

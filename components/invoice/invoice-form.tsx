@@ -411,6 +411,19 @@ export function InvoiceForm({
             />
           </CardContent>
         </Card>
+        <Card>
+          <CardHeader className="pb-4">
+            <CardTitle className="text-base">Bank Details</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Textarea
+              placeholder="Bank name, account name, account number..."
+              value={formData.bankDetails || ""}
+              onChange={(e) => updateField("bankDetails", e.target.value)}
+              rows={4}
+            />
+          </CardContent>
+        </Card>
       </div>
 
       {/* Submit */}

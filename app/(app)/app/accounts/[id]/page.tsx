@@ -44,7 +44,7 @@ export default async function EditAccountPage({ params }: { params: { id: string
         title="Edit Bank Account"
         breadcrumbs={[
           { label: "Dashboard", href: "/app" },
-          { label: "Accounts", href: "/app/accounts" },
+          { label: "Bank Details", href: "/app/accounts" },
           { label: "Edit" },
         ]}
       />
