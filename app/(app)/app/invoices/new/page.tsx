@@ -101,7 +101,7 @@ export default function NewInvoicePage() {
               fromName: settings.business_name || settings.full_name || user.email || "",
               fromEmail: settings.email || user.email || "",
               fromAddress: senderAddressBlock,
-              currency: settings.default_currency || settings.currency || "USD",
+              currency: settings.currency || "USD",
             }))
           }
         } catch (settingsErr) {

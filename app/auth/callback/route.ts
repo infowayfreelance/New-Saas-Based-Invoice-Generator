@@ -18,8 +18,13 @@ export async function GET(request: NextRequest) {
         )
       }
 
-      // Successful authentication - redirect to app dashboard
-      return NextResponse.redirect(`${requestUrl.origin}/app`)
+      // Successful authentication - redirect to the requested destination
+      // (e.g. /reset-password for a password recovery link) or the app
+      // dashboard by default. Only allow same-origin relative paths here
+      // to avoid this becoming an open redirect.
+      const next = requestUrl.searchParams.get("next")
+      const safeNext = next && next.startsWith("/") && !next.startsWith("//") ? next : "/app"
+      return NextResponse.redirect(`${requestUrl.origin}${safeNext}`)
     } catch (err) {
       console.error("Auth callback exception:", err)
       return NextResponse.redirect(`${requestUrl.origin}/login?error=auth_callback_failed`)
