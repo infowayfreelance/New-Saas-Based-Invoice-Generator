@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react"
 import { Card } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { type InvoiceFormData, calculateInvoiceTotals, formatCurrency, formatDate, toNumber } from "@/lib/utils/invoice"
-import { PDF_RENDER_WIDTH } from "@/lib/utils/pdf"
+import { PDF_RENDER_WIDTH, PDF_RENDER_HEIGHT } from "@/lib/utils/pdf"
 
 interface InvoicePreviewProps {
   data: InvoiceFormData
@@ -35,8 +35,8 @@ export function InvoicePreview({ data, className }: InvoicePreviewProps) {
       const nextScale = Math.min(1, containerWidth / PDF_RENDER_WIDTH)
       setScale(nextScale)
 
-      const contentHeight = contentRef.current?.offsetHeight
-      setScaledHeight(contentHeight ? contentHeight * nextScale : undefined)
+      const contentHeight = Math.max(contentRef.current?.offsetHeight ?? 0, PDF_RENDER_HEIGHT)
+      setScaledHeight(contentHeight * nextScale)
     }
 
     update()
@@ -72,6 +72,7 @@ export function InvoicePreview({ data, className }: InvoicePreviewProps) {
             width: `${PDF_RENDER_WIDTH}px`,
             minWidth: `${PDF_RENDER_WIDTH}px`,
             maxWidth: `${PDF_RENDER_WIDTH}px`,
+            minHeight: `${PDF_RENDER_HEIGHT}px`,
             position: "relative",
             overflow: "hidden",
             padding: data.layoutStyle === "banner" ? 0 : undefined,

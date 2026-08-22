@@ -1,8 +1,10 @@
 "use client"
 
-// A4 width at 96dpi — the invoice is always rendered at this width for PDF
-// export, so the downloaded file looks identical on mobile, tablet and desktop.
+// A4 dimensions at 96dpi — the invoice is always rendered at this fixed size
+// for both the on-screen preview and PDF export, so it looks identical on
+// mobile, tablet, and desktop instead of shrinking to fit its content.
 export const PDF_RENDER_WIDTH = 794
+export const PDF_RENDER_HEIGHT = 1123
 
 /**
  * Generates and downloads an A4 PDF from an invoice preview element.
