@@ -281,79 +281,102 @@ export function EditInvoiceForm({ invoiceId, initialData }: EditInvoiceFormProps
             </Button>
           </div>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-3">
           {/* Header - Desktop */}
-          <div className="hidden grid-cols-12 gap-4 text-sm font-medium text-muted-foreground md:grid">
-            <div className="col-span-5">Description</div>
+          <div className="hidden grid-cols-12 gap-4 px-4 text-sm font-medium text-muted-foreground md:grid">
+            <div className="col-span-1"></div>
+            <div className="col-span-4">Description</div>
             <div className="col-span-2">Quantity</div>
             <div className="col-span-2">Unit Price</div>
-            <div className="col-span-2">Tax %</div>
+            <div className="col-span-1">Tax %</div>
+            <div className="col-span-1 text-right">Amount</div>
             <div className="col-span-1"></div>
           </div>
-          {formData.items.map((item, index) => (
-            <div key={item.id} className="space-y-4 md:space-y-0">
-              <div className="grid gap-4 md:grid-cols-12 md:items-end">
-                <div className="space-y-2 md:col-span-5 md:space-y-0">
-                  <Label className="md:hidden">Description</Label>
-                  <Input
-                    placeholder="Service or product description"
-                    value={item.description}
-                    onChange={(e) => updateItem(item.id, "description", e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="grid grid-cols-3 gap-4 md:col-span-6 md:grid-cols-3">
-                  <div className="space-y-2 md:space-y-0">
-                    <Label className="md:hidden">Qty</Label>
+          {formData.items.map((item, index) => {
+            const quantity = Number(item.quantity) || 0
+            const unitPrice = Number(item.unitPrice) || 0
+            const taxRate = Number(item.taxRate) || 0
+            const lineSubtotal = quantity * unitPrice
+            const lineTotal = lineSubtotal + lineSubtotal * (taxRate / 100)
+
+            return (
+              <div
+                key={item.id}
+                className="rounded-lg border bg-muted/30 p-4 transition-colors hover:bg-muted/50"
+              >
+                <div className="grid gap-4 md:grid-cols-12 md:items-end">
+                  <div className="hidden md:col-span-1 md:flex md:items-end md:justify-center md:pb-2">
+                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-foreground text-xs font-semibold text-background">
+                      {index + 1}
+                    </span>
+                  </div>
+                  <div className="space-y-2 md:col-span-4 md:space-y-0">
+                    <Label className="md:hidden">Description</Label>
                     <Input
-                      type="number"
-                      min="0.01"
-                      step="0.01"
-                      value={item.quantity}
-                      onChange={(e) => updateItem(item.id, "quantity", Number.parseFloat(e.target.value) || 0)}
+                      placeholder="Service or product description"
+                      value={item.description}
+                      onChange={(e) => updateItem(item.id, "description", e.target.value)}
+                      className="bg-background"
                       required
                     />
                   </div>
-                  <div className="space-y-2 md:space-y-0">
-                    <Label className="md:hidden">Price</Label>
-                    <Input
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      value={item.unitPrice}
-                      onChange={(e) => updateItem(item.id, "unitPrice", Number.parseFloat(e.target.value) || 0)}
-                      required
-                    />
+                  <div className="grid grid-cols-3 gap-4 md:col-span-5 md:grid-cols-3">
+                    <div className="space-y-2 md:space-y-0">
+                      <Label className="md:hidden">Qty</Label>
+                      <Input
+                        type="number"
+                        min="0.01"
+                        step="0.01"
+                        value={item.quantity}
+                        onChange={(e) => updateItem(item.id, "quantity", Number.parseFloat(e.target.value) || 0)}
+                        className="bg-background"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2 md:space-y-0">
+                      <Label className="md:hidden">Price</Label>
+                      <Input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={item.unitPrice}
+                        onChange={(e) => updateItem(item.id, "unitPrice", Number.parseFloat(e.target.value) || 0)}
+                        className="bg-background"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2 md:space-y-0">
+                      <Label className="md:hidden">Tax %</Label>
+                      <Input
+                        type="number"
+                        min="0"
+                        max="100"
+                        step="0.1"
+                        value={item.taxRate}
+                        onChange={(e) => updateItem(item.id, "taxRate", Number.parseFloat(e.target.value) || 0)}
+                        className="bg-background"
+                      />
+                    </div>
                   </div>
-                  <div className="space-y-2 md:space-y-0">
-                    <Label className="md:hidden">Tax %</Label>
-                    <Input
-                      type="number"
-                      min="0"
-                      max="100"
-                      step="0.1"
-                      value={item.taxRate}
-                      onChange={(e) => updateItem(item.id, "taxRate", Number.parseFloat(e.target.value) || 0)}
-                    />
+                  <div className="flex items-end justify-between gap-2 md:col-span-2 md:justify-end">
+                    <span className="text-sm font-medium text-muted-foreground md:hidden">Amount</span>
+                    <span className="text-sm font-semibold">{formatCurrency(lineTotal, formData.currency)}</span>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => removeItem(item.id)}
+                      disabled={formData.items.length === 1}
+                      className="text-muted-foreground hover:text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      <span className="sr-only">Remove item</span>
+                    </Button>
                   </div>
-                </div>
-                <div className="flex justify-end md:col-span-1">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => removeItem(item.id)}
-                    disabled={formData.items.length === 1}
-                    className="text-muted-foreground hover:text-destructive"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                    <span className="sr-only">Remove item</span>
-                  </Button>
                 </div>
               </div>
-              {index < formData.items.length - 1 && <Separator className="mt-4 md:hidden" />}
-            </div>
-          ))}
+            )
+          })}
 
           {/* Totals */}
           <Separator className="my-4" />
