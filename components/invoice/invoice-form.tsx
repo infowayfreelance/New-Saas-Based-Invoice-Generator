@@ -24,6 +24,7 @@ import { useAuth } from "@/components/app/auth-provider"
 import { ALL_CURRENCIES } from "@/lib/utils/currency"
 import { InvoiceFromSection } from "@/components/invoice/invoice-from-section"
 import { InvoiceClientSection } from "@/components/invoice/invoice-client-section"
+import { DesignSlider } from "@/components/invoice/design-slider"
 
 interface InvoiceFormProps {
   mode?: "create" | "edit"
@@ -184,6 +185,21 @@ export function InvoiceForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      <Card>
+        <CardHeader className="pb-4">
+          <CardTitle className="text-base">Invoice Design</CardTitle>
+          <CardDescription>Choose how this invoice looks. More designs will be added over time.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <DesignSlider
+            value={formData.layoutStyle || "classic"}
+            primaryColor={formData.primaryColor}
+            accentColor={formData.accentColor}
+            onChange={(value) => updateField("layoutStyle", value)}
+          />
+        </CardContent>
+      </Card>
+
       <div className="grid gap-6 lg:grid-cols-2">
         <InvoiceFromSection
           isPaid={isPaid}
