@@ -52,7 +52,7 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
 
         const [{ data: currencies }, { data: settings }] = await Promise.all([
           supabase.from("user_currencies").select("currency_code, is_default").eq("user_id", user.id),
-          supabase.from("user_settings").select("default_currency").eq("user_id", user.id).maybeSingle(),
+          supabase.from("user_settings").select("currency").eq("user_id", user.id).maybeSingle(),
         ])
 
         if (!mounted) return
@@ -60,14 +60,14 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
         if (currencies && currencies.length > 0) {
           const enabled = currencies.map((c) => c.currency_code)
           const dbDefault =
-            currencies.find((c) => c.is_default)?.currency_code || settings?.default_currency || enabled[0]
+            currencies.find((c) => c.is_default)?.currency_code || settings?.currency || enabled[0]
 
           setEnabledCurrenciesState(enabled)
           setDefaultCurrency(dbDefault)
           localStorage.setItem("enabledCurrencies", JSON.stringify(enabled))
           localStorage.setItem("defaultCurrency", dbDefault)
-        } else if (settings?.default_currency) {
-          const dbDefault = settings.default_currency
+        } else if (settings?.currency) {
+          const dbDefault = settings.currency
           const defaults = getDefaultEnabledCurrencies(dbDefault)
 
           setDefaultCurrency(dbDefault)
@@ -105,7 +105,7 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
     if (userId) {
       const supabase = createClient()
       Promise.all([
-        supabase.from("user_settings").update({ default_currency: currency }).eq("user_id", userId),
+        supabase.from("user_settings").update({ currency }).eq("user_id", userId),
         supabase.from("user_currencies").update({ is_default: false }).eq("user_id", userId),
       ])
         .then(() =>
