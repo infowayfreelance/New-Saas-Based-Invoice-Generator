@@ -3,7 +3,7 @@ import { redirect } from "next/navigation"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/server"
 import { PageHeader } from "@/components/app/page-header"
-import { InvoicePreview } from "@/components/invoice/invoice-preview"
+import { InvoiceDesignPreview } from "@/components/invoice/invoice-design-preview"
 import { InvoiceActionButtons } from "@/components/invoice/invoice-action-buttons"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -240,7 +240,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
     accentColor: template?.accent_color || undefined,
     watermarkText: template?.watermark_text || undefined,
     signatureUrl: template?.signature_url || undefined,
-    layoutStyle: (template?.layout_config as { style?: string } | null)?.style || undefined,
+    layoutStyle: invoice.layout_style || (template?.layout_config as { style?: string } | null)?.style || undefined,
     status: invoice.status || undefined,
     amountPaid: toNumber(invoice.amount_paid),
   }
@@ -329,9 +329,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
             <TabsTrigger value="activity">Activity</TabsTrigger>
           </TabsList>
           <TabsContent value="preview" className="mt-6">
-            <div className="rounded-lg border border-border shadow-sm">
-              <InvoicePreview data={formData} />
-            </div>
+            <InvoiceDesignPreview invoiceId={id} data={formData} />
           </TabsContent>
           <TabsContent value="details" className="mt-6">
             <div className="grid gap-6 md:grid-cols-2">

@@ -216,7 +216,7 @@ export default async function InvoiceEditPage({ params }: { params: Promise<{ id
     accentColor: template?.accent_color || undefined,
     watermarkText: template?.watermark_text || undefined,
     signatureUrl: template?.signature_url || undefined,
-    layoutStyle: (template?.layout_config as { style?: string } | null)?.style || undefined,
+    layoutStyle: invoice.layout_style || (template?.layout_config as { style?: string } | null)?.style || undefined,
     status: invoice.status || undefined,
     amountPaid: toNumber(invoice.amount_paid),
   }

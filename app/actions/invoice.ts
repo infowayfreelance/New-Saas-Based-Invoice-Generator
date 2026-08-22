@@ -1,6 +1,7 @@
 "use server"
 
 import { redirect } from "next/navigation"
+import { revalidatePath } from "next/cache"
 import { getClientIp } from "@/lib/utils/ip"
 import { createClient } from "@/lib/supabase/server"
 import { checkUsageLimits, incrementUsage } from "@/lib/utils/usage"
@@ -144,6 +145,7 @@ export async function generateAuthenticatedInvoice(
       terms: data.terms || null,
       bank_details: data.bankDetails || null,
       po_number: data.poNumber || null,
+      layout_style: data.layoutStyle || null,
     })
     .select()
     .single()
@@ -326,6 +328,7 @@ export async function updateInvoice(
     terms: data.terms || null,
     bank_details: data.bankDetails || null,
     po_number: data.poNumber || null,
+    layout_style: data.layoutStyle || null,
     client_id: data.clientId && data.clientId !== "none" ? data.clientId : null,
   }
   console.log("[v0] STEP 7 COMPLETE: Update payload built:", updateData)
@@ -444,6 +447,35 @@ export async function updateInvoiceAction(
     redirect(`/app/invoices/${invoiceId}`)
   }
   return result
+}
+
+export async function updateInvoiceLayoutStyle(
+  invoiceId: string,
+  layoutStyle: string,
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { success: false, error: "Not authenticated" }
+  }
+
+  const { error } = await supabase
+    .from("invoices")
+    .update({ layout_style: layoutStyle })
+    .eq("id", invoiceId)
+    .eq("user_id", user.id)
+
+  if (error) {
+    console.error("[v0] Error updating invoice layout style:", error)
+    return { success: false, error: error.message }
+  }
+
+  revalidatePath(`/app/invoices/${invoiceId}`)
+  return { success: true }
 }
 
 export async function sendInvoiceEmail(invoiceId: string): Promise<{ success: boolean; error?: string }> {
