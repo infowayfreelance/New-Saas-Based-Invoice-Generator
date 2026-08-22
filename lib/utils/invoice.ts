@@ -147,7 +147,7 @@ export const CURRENCIES = [
 export function getDefaultInvoiceData(): InvoiceFormData {
   const today = new Date()
   const dueDate = new Date(today)
-  dueDate.setDate(dueDate.getDate() + 30)
+  dueDate.setDate(dueDate.getDate() + 3)
 
   return {
     fromName: "",
@@ -170,7 +170,7 @@ export function getDefaultInvoiceData(): InvoiceFormData {
       },
     ],
     notes: "",
-    terms: "Payment is due within 30 days of invoice date.",
+    terms: "Payment is due within 3 days of invoice date.",
     taxRate: 0,
     discountAmount: 0,
     bankDetails: "",

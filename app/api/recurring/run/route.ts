@@ -72,7 +72,7 @@ export async function POST(req: Request) {
 
     // Build invoice data
     const issueDate = new Date().toISOString().slice(0, 10)
-    const dueDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
+    const dueDate = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
 
     const invoiceData = {
       user_id: r.user_id,
