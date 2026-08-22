@@ -27,6 +27,7 @@ export default function CompanySettingsPage() {
   const [country, setCountry] = useState("")
   const [currency, setCurrency] = useState("USD")
   const [timezone, setTimezone] = useState("UTC")
+  const [taxId, setTaxId] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const supabase = createClient()
 
@@ -51,6 +52,7 @@ export default function CompanySettingsPage() {
           setCountry(data.country || "")
           setCurrency(data.currency || "USD")
           setTimezone(data.timezone || "UTC")
+          setTaxId(data.tax_id || "")
         }
       }
     }
@@ -86,6 +88,7 @@ export default function CompanySettingsPage() {
         country: country || null,
         currency: currency || "USD",
         timezone: timezone || "UTC",
+        tax_id: taxId || null,
       }
 
       const { error } = await supabase
@@ -259,6 +262,16 @@ export default function CompanySettingsPage() {
                     placeholder="UTC"
                   />
                 </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="taxId">Tax ID / VAT Number</Label>
+                <Input
+                  id="taxId"
+                  value={taxId}
+                  onChange={(e) => setTaxId(e.target.value)}
+                  placeholder="e.g. 12-3456789"
+                />
+                <p className="text-xs text-muted-foreground">Shown on your invoices under your business details.</p>
               </div>
               <Button type="submit" disabled={isLoading}>
                 {isLoading ? "Saving..." : "Save Changes"}

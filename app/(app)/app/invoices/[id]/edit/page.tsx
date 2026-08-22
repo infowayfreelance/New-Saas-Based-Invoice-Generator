@@ -103,7 +103,7 @@ export default async function InvoiceEditPage({ params }: { params: Promise<{ id
   const invoice = invoiceResult.data
 
   // Fetch related data
-  const [itemsResult, clientResult, settingsResult, bankAccountResult] = await Promise.all([
+  const [itemsResult, clientResult, settingsResult, bankAccountResult, templateResult] = await Promise.all([
     supabase.from("invoice_items").select("*").eq("invoice_id", id).order("created_at", { ascending: true }),
     invoice.client_id
       ? supabase
@@ -120,7 +120,8 @@ export default async function InvoiceEditPage({ params }: { params: Promise<{ id
         city,
         state,
         postal_code,
-        country
+        country,
+        tax_number
       `
           )
           .eq("id", invoice.client_id)
@@ -134,12 +135,20 @@ export default async function InvoiceEditPage({ params }: { params: Promise<{ id
       .order("is_default", { ascending: false })
       .limit(1)
       .maybeSingle(),
+    supabase
+      .from("invoice_templates")
+      .select("logo_url, primary_color, accent_color, watermark_text, signature_url")
+      .eq("user_id", user.id)
+      .order("is_default", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
   ])
 
   const items = itemsResult.data || []
   const client = clientResult.data
   const userSettings = settingsResult.data
   const bankAccount = bankAccountResult.data
+  const template = templateResult.data
 
   // Prepare form data
   const clientAddress = client
@@ -199,6 +208,16 @@ export default async function InvoiceEditPage({ params }: { params: Promise<{ id
     taxRate: 0,
     discountAmount: toNumber(invoice.discount_amount),
     bankDetails: invoice.bank_details || formatBankDetails(bankAccount),
+    poNumber: invoice.po_number || "",
+    fromTaxId: userSettings?.tax_id || "",
+    clientTaxId: client?.tax_number || "",
+    logoUrl: template?.logo_url || undefined,
+    primaryColor: template?.primary_color || undefined,
+    accentColor: template?.accent_color || undefined,
+    watermarkText: template?.watermark_text || undefined,
+    signatureUrl: template?.signature_url || undefined,
+    status: invoice.status || undefined,
+    amountPaid: toNumber(invoice.amount_paid),
   }
 
   return (

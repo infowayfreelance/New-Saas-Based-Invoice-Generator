@@ -62,20 +62,28 @@ export default async function PublicInvoicePage({ params }: { params: Promise<{ 
       return <NotFound />
     }
 
-    const [{ data: items }, { data: client }, { data: userSettings }, { data: bankAccount }] = await Promise.all([
-      supabase.from("invoice_items").select("*").eq("invoice_id", id).order("created_at", { ascending: true }),
-      invoice.client_id
-        ? supabase.from("clients").select("*").eq("id", invoice.client_id).maybeSingle()
-        : Promise.resolve({ data: null }),
-      supabase.from("user_settings").select("*").eq("user_id", invoice.user_id).maybeSingle(),
-      supabase
-        .from("bank_accounts")
-        .select("account_name, bank_name, account_number, routing_number, swift_code")
-        .eq("user_id", invoice.user_id)
-        .order("is_default", { ascending: false })
-        .limit(1)
-        .maybeSingle(),
-    ])
+    const [{ data: items }, { data: client }, { data: userSettings }, { data: bankAccount }, { data: template }] =
+      await Promise.all([
+        supabase.from("invoice_items").select("*").eq("invoice_id", id).order("created_at", { ascending: true }),
+        invoice.client_id
+          ? supabase.from("clients").select("*").eq("id", invoice.client_id).maybeSingle()
+          : Promise.resolve({ data: null }),
+        supabase.from("user_settings").select("*").eq("user_id", invoice.user_id).maybeSingle(),
+        supabase
+          .from("bank_accounts")
+          .select("account_name, bank_name, account_number, routing_number, swift_code")
+          .eq("user_id", invoice.user_id)
+          .order("is_default", { ascending: false })
+          .limit(1)
+          .maybeSingle(),
+        supabase
+          .from("invoice_templates")
+          .select("logo_url, primary_color, accent_color, watermark_text, signature_url")
+          .eq("user_id", invoice.user_id)
+          .order("is_default", { ascending: false })
+          .limit(1)
+          .maybeSingle(),
+      ])
 
     const clientAddress = client
       ? [
@@ -133,6 +141,16 @@ export default async function PublicInvoicePage({ params }: { params: Promise<{ 
       taxRate: 0,
       discountAmount: toNumber(invoice.discount_amount),
       bankDetails: invoice.bank_details || formatBankDetails(bankAccount),
+      poNumber: invoice.po_number || "",
+      fromTaxId: userSettings?.tax_id || "",
+      clientTaxId: client?.tax_number || "",
+      logoUrl: template?.logo_url || undefined,
+      primaryColor: template?.primary_color || undefined,
+      accentColor: template?.accent_color || undefined,
+      watermarkText: template?.watermark_text || undefined,
+      signatureUrl: template?.signature_url || undefined,
+      status: invoice.status || undefined,
+      amountPaid: toNumber(invoice.amount_paid),
     }
 
     return <PublicInvoiceView data={formData} invoiceNumber={invoice.invoice_number} />

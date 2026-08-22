@@ -11,8 +11,20 @@ interface InvoicePreviewProps {
   className?: string
 }
 
+function getStatusStamp(status?: string): { label: string; color: string } | null {
+  const normalized = (status || "").toLowerCase()
+  if (normalized === "paid") return { label: "PAID", color: "#16a34a" }
+  if (normalized === "overdue") return { label: "OVERDUE", color: "#dc2626" }
+  if (normalized === "draft") return { label: "DRAFT", color: "#737373" }
+  return null
+}
+
 export function InvoicePreview({ data, className }: InvoicePreviewProps) {
   const totals = calculateInvoiceTotals(data.items, data.discountAmount)
+  const accentColor = data.accentColor || "#171717"
+  const amountPaid = toNumber(data.amountPaid)
+  const balanceDue = Math.max(totals.totalAmount - amountPaid, 0)
+  const stamp = getStatusStamp(data.status)
 
   // The invoice is always laid out at a fixed A4 width so it looks identical
   // on every device. On screens narrower than that, scale the whole invoice
@@ -66,17 +78,72 @@ export function InvoicePreview({ data, className }: InvoicePreviewProps) {
           width: `${PDF_RENDER_WIDTH}px`,
           minWidth: `${PDF_RENDER_WIDTH}px`,
           maxWidth: `${PDF_RENDER_WIDTH}px`,
+          position: "relative",
+          overflow: "hidden",
         }}
       >
+      {/* Watermark */}
+      {data.watermarkText && (
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            pointerEvents: "none",
+            zIndex: 0,
+          }}
+        >
+          <span
+            style={{
+              fontSize: "96px",
+              fontWeight: 800,
+              color: "#171717",
+              opacity: 0.06,
+              transform: "rotate(-30deg)",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {data.watermarkText}
+          </span>
+        </div>
+      )}
+
+      <div style={{ position: "relative", zIndex: 1 }}>
       {/* Header */}
       <div className="flex flex-col justify-between gap-6 sm:flex-row">
         <div>
-          <h1 className="text-3xl font-bold" style={{ color: "#171717" }}>
-            INVOICE
-          </h1>
+          <div className="flex items-center gap-3">
+            {data.logoUrl && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={data.logoUrl}
+                alt="Business logo"
+                crossOrigin="anonymous"
+                style={{ height: "48px", width: "auto", objectFit: "contain" }}
+              />
+            )}
+            <h1 className="text-3xl font-bold" style={{ color: accentColor }}>
+              INVOICE
+            </h1>
+            {stamp && (
+              <span
+                className="rounded border px-2 py-1 text-sm font-bold tracking-wider"
+                style={{ color: stamp.color, borderColor: stamp.color }}
+              >
+                {stamp.label}
+              </span>
+            )}
+          </div>
           <p className="mt-1 text-base" style={{ color: "#737373" }}>
             #{data.invoiceNumber}
           </p>
+          {data.poNumber && (
+            <p className="text-base" style={{ color: "#737373" }}>
+              PO #: {data.poNumber}
+            </p>
+          )}
         </div>
         <div className="text-right">
           <div className="text-base">
@@ -87,6 +154,9 @@ export function InvoicePreview({ data, className }: InvoicePreviewProps) {
             <p className="whitespace-pre-line" style={{ color: "#737373" }}>
               {data.fromAddress}
             </p>
+            {data.fromTaxId && (
+              <p style={{ color: "#737373" }}>Tax ID: {data.fromTaxId}</p>
+            )}
           </div>
         </div>
       </div>
@@ -108,6 +178,11 @@ export function InvoicePreview({ data, className }: InvoicePreviewProps) {
           <p className="whitespace-pre-line text-base" style={{ color: "#737373" }}>
             {data.clientAddress}
           </p>
+          {data.clientTaxId && (
+            <p className="text-base" style={{ color: "#737373" }}>
+              Tax ID: {data.clientTaxId}
+            </p>
+          )}
         </div>
         <div className="space-y-2 sm:text-right">
           <div>
@@ -135,7 +210,7 @@ export function InvoicePreview({ data, className }: InvoicePreviewProps) {
       <div className="overflow-x-auto">
         <table className="w-full text-base">
           <thead>
-            <tr style={{ borderBottomWidth: "1px", borderBottomColor: "#e5e5e5" }}>
+            <tr style={{ borderBottomWidth: "2px", borderBottomColor: accentColor }}>
               <th className="pb-3 text-left font-semibold" style={{ color: "#171717" }}>
                 Description
               </th>
@@ -209,10 +284,25 @@ export function InvoicePreview({ data, className }: InvoicePreviewProps) {
           <Separator style={{ backgroundColor: "#e5e5e5" }} />
           <div className="mt-4 flex justify-between py-3 text-2xl font-extrabold">
             <span style={{ color: "#171717" }}>Total</span>
-            <span className="text-3xl font-extrabold tracking-wide" style={{ color: "#171717" }}>
+            <span className="text-3xl font-extrabold tracking-wide" style={{ color: accentColor }}>
               {formatCurrency(totals.totalAmount, data.currency)}
             </span>
           </div>
+          {amountPaid > 0 && (
+            <>
+              <div className="flex justify-between text-base">
+                <span style={{ color: "#737373" }}>Amount Paid</span>
+                <span style={{ color: "#16a34a" }}>-{formatCurrency(amountPaid, data.currency)}</span>
+              </div>
+              <Separator style={{ backgroundColor: "#e5e5e5" }} />
+              <div className="flex justify-between py-1 text-xl font-bold">
+                <span style={{ color: "#171717" }}>Balance Due</span>
+                <span style={{ color: balanceDue > 0 ? "#dc2626" : "#16a34a" }}>
+                  {formatCurrency(balanceDue, data.currency)}
+                </span>
+              </div>
+            </>
+          )}
         </div>
       </div>
 
@@ -259,6 +349,28 @@ export function InvoicePreview({ data, className }: InvoicePreviewProps) {
           </div>
         </>
       )}
+
+      {/* Signature */}
+      {data.signatureUrl && (
+        <>
+          <Separator className="my-6" style={{ backgroundColor: "#e5e5e5" }} />
+          <div className="flex justify-end">
+            <div className="text-center">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={data.signatureUrl}
+                alt="Authorized signature"
+                crossOrigin="anonymous"
+                style={{ height: "64px", width: "auto", objectFit: "contain" }}
+              />
+              <p className="mt-1 border-t pt-1 text-sm" style={{ color: "#737373", borderColor: "#e5e5e5" }}>
+                Authorized Signature
+              </p>
+            </div>
+          </div>
+        </>
+      )}
+      </div>
       </Card>
       </div>
     </div>
