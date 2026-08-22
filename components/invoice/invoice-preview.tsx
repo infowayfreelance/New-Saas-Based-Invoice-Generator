@@ -11,6 +11,20 @@ interface InvoicePreviewProps {
   className?: string
 }
 
+function getReadableDarkColor(hex?: string): string {
+  if (!hex) return "#171717"
+  const match = /^#?([0-9a-f]{6})$/i.exec(hex)
+  if (!match) return "#171717"
+  const value = match[1]
+  const r = Number.parseInt(value.slice(0, 2), 16)
+  const g = Number.parseInt(value.slice(2, 4), 16)
+  const b = Number.parseInt(value.slice(4, 6), 16)
+  // Relative luminance — bright brand colors (e.g. neon green) make poor
+  // backgrounds for large blocks of white text, so fall back to near-black.
+  const luminance = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255
+  return luminance > 0.55 ? "#171717" : hex
+}
+
 function getStatusStamp(status?: string): { label: string; color: string } | null {
   const normalized = (status || "").toLowerCase()
   if (normalized === "paid") return { label: "PAID", color: "#16a34a" }
@@ -76,6 +90,8 @@ export function InvoicePreview({ data, className }: InvoicePreviewProps) {
             position: "relative",
             overflow: "hidden",
             padding: data.layoutStyle === "banner" ? 0 : undefined,
+            border: "1px solid #e5e5e5",
+            boxShadow: "none",
           }}
         >
           {data.layoutStyle === "banner" ? <BannerInvoiceBody data={data} /> : <ClassicInvoiceBody data={data} />}
@@ -388,14 +404,17 @@ function ClassicInvoiceBody({ data }: { data: InvoiceFormData }) {
 function BannerInvoiceBody({ data }: { data: InvoiceFormData }) {
   const totals = calculateInvoiceTotals(data.items, data.discountAmount)
   const accentColor = data.accentColor || "#f5c518"
-  const darkColor = data.primaryColor || "#171717"
+  const darkColor = getReadableDarkColor(data.primaryColor)
   const amountPaid = toNumber(data.amountPaid)
   const balanceDue = Math.max(totals.totalAmount - amountPaid, 0)
   const stamp = getStatusStamp(data.status)
   const footerContact = [data.fromEmail, data.fromAddress?.split("\n")[0]].filter(Boolean).join("   |   ")
 
   return (
-    <div className="p-8" style={{ position: "relative" }}>
+    <div
+      className="flex flex-col p-10"
+      style={{ position: "relative", minHeight: `${PDF_RENDER_HEIGHT}px` }}
+    >
       {/* Watermark */}
       {data.watermarkText && (
         <div
@@ -424,7 +443,7 @@ function BannerInvoiceBody({ data }: { data: InvoiceFormData }) {
         </div>
       )}
 
-      <div style={{ position: "relative", zIndex: 1 }}>
+      <div className="flex flex-1 flex-col" style={{ position: "relative", zIndex: 1 }}>
         {/* Logo row */}
         <div className="flex items-center gap-3">
           {data.logoUrl ? (
@@ -571,7 +590,7 @@ function BannerInvoiceBody({ data }: { data: InvoiceFormData }) {
         </div>
 
         {/* Footer: notes/terms/bank on the left, totals on the right */}
-        <div className="mt-6 grid grid-cols-2 gap-8">
+        <div className="mt-auto grid grid-cols-2 gap-8 pt-10">
           <div className="space-y-4 text-sm">
             <p className="font-bold" style={{ color: darkColor }}>
               Thank you for your business
