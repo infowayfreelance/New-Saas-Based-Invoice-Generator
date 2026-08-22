@@ -13,7 +13,9 @@ export async function GET(request: NextRequest) {
 
       if (error) {
         console.error("Auth callback error:", error)
-        return NextResponse.redirect(`${requestUrl.origin}/login?error=auth_callback_failed`)
+        return NextResponse.redirect(
+          `${requestUrl.origin}/login?error=auth_callback_failed&error_description=${encodeURIComponent(error.message)}`,
+        )
       }
 
       // Successful authentication - redirect to app dashboard
@@ -24,6 +26,19 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // No code present - redirect to login with error
+  // No code present - Supabase/the OAuth provider returned an error instead of a
+  // code (e.g. redirect URI mismatch, expired PKCE state, denied consent).
+  // Surface the real reason instead of a generic "no code" message.
+  const providerError = requestUrl.searchParams.get("error")
+  const providerErrorDescription = requestUrl.searchParams.get("error_description")
+  if (providerError) {
+    console.error("Auth callback provider error:", providerError, providerErrorDescription)
+    return NextResponse.redirect(
+      `${requestUrl.origin}/login?error=provider_error&error_description=${encodeURIComponent(
+        providerErrorDescription || providerError,
+      )}`,
+    )
+  }
+
   return NextResponse.redirect(`${requestUrl.origin}/login?error=no_code`)
 }
