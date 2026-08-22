@@ -22,8 +22,11 @@ export default function LoginPage() {
 
   useEffect(() => {
     const urlError = searchParams.get("error")
+    const description = searchParams.get("error_description")
     if (urlError === "auth_callback_failed") {
-      setError("Authentication failed. Please try signing in again.")
+      setError(description ? `Authentication failed: ${description}` : "Authentication failed. Please try signing in again.")
+    } else if (urlError === "provider_error") {
+      setError(description ? `Sign-in failed: ${description}` : "Sign-in failed. Please try again.")
     } else if (urlError === "no_code") {
       setError("Invalid authentication link. Please try signing in again.")
     }
