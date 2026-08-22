@@ -78,7 +78,7 @@ export default async function PublicInvoicePage({ params }: { params: Promise<{ 
           .maybeSingle(),
         supabase
           .from("invoice_templates")
-          .select("logo_url, primary_color, accent_color, watermark_text, signature_url")
+          .select("logo_url, primary_color, accent_color, watermark_text, signature_url, layout_config")
           .eq("user_id", invoice.user_id)
           .order("is_default", { ascending: false })
           .limit(1)
@@ -149,6 +149,7 @@ export default async function PublicInvoicePage({ params }: { params: Promise<{ 
       accentColor: template?.accent_color || undefined,
       watermarkText: template?.watermark_text || undefined,
       signatureUrl: template?.signature_url || undefined,
+      layoutStyle: (template?.layout_config as { style?: string } | null)?.style || undefined,
       status: invoice.status || undefined,
       amountPaid: toNumber(invoice.amount_paid),
     }
