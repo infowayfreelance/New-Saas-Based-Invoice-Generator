@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { PageHeader } from "@/components/app/page-header"
 import { InvoiceForm } from "@/components/invoice/invoice-form"
 import { UsageMeter } from "@/components/invoice/usage-meter"
-import { type InvoiceFormData, getDefaultInvoiceData } from "@/lib/utils/invoice"
+import { type InvoiceFormData, getDefaultInvoiceData, formatBankDetails } from "@/lib/utils/invoice"
 import { generateAuthenticatedInvoice, checkInvoiceUsage, generateNextInvoiceNumber } from "@/app/actions/invoice"
 import { toast } from "sonner"
 import { createClient } from "@/lib/supabase/client"
@@ -107,6 +107,22 @@ export default function NewInvoicePage() {
         } catch (settingsErr) {
           console.error("[v0] Error loading settings:", settingsErr)
           // Continue with defaults
+        }
+
+        try {
+          const { data: bankAccount } = await supabase
+            .from("bank_accounts")
+            .select("account_name, bank_name, account_number, routing_number, swift_code")
+            .eq("user_id", user.id)
+            .order("is_default", { ascending: false })
+            .limit(1)
+            .maybeSingle()
+
+          if (mounted && bankAccount) {
+            setInitialData((prev) => ({ ...prev, bankDetails: formatBankDetails(bankAccount) }))
+          }
+        } catch (bankErr) {
+          console.error("[v0] Error loading bank details:", bankErr)
         }
 
         try {

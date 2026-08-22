@@ -23,7 +23,7 @@ export default async function NewAccountPage() {
         title="Add Bank Account"
         breadcrumbs={[
           { label: "Dashboard", href: "/app" },
-          { label: "Accounts", href: "/app/accounts" },
+          { label: "Bank Details", href: "/app/accounts" },
           { label: "New" },
         ]}
       />

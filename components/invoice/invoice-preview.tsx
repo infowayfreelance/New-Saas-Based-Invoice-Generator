@@ -244,6 +244,21 @@ export function InvoicePreview({ data, className }: InvoicePreviewProps) {
           </div>
         </>
       )}
+
+      {/* Bank Details */}
+      {data.bankDetails && (
+        <>
+          <Separator className="my-6" style={{ backgroundColor: "#e5e5e5" }} />
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-wider" style={{ color: "#737373" }}>
+              Bank Details
+            </p>
+            <p className="mt-2 whitespace-pre-line text-base" style={{ color: "#171717" }}>
+              {data.bankDetails}
+            </p>
+          </div>
+        </>
+      )}
       </Card>
       </div>
     </div>

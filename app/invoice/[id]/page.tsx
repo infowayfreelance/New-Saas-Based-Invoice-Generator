@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import { createServiceClient } from "@/lib/supabase/service"
-import { toNumber, formatCurrency, formatDate, type InvoiceFormData } from "@/lib/utils/invoice"
+import { toNumber, formatCurrency, formatDate, formatBankDetails, type InvoiceFormData } from "@/lib/utils/invoice"
 import { PublicInvoiceView } from "@/components/invoice/public-invoice-view"
 import { getPublicInvoiceSummary } from "@/lib/data/public-invoice"
 
@@ -62,12 +62,19 @@ export default async function PublicInvoicePage({ params }: { params: Promise<{ 
       return <NotFound />
     }
 
-    const [{ data: items }, { data: client }, { data: userSettings }] = await Promise.all([
+    const [{ data: items }, { data: client }, { data: userSettings }, { data: bankAccount }] = await Promise.all([
       supabase.from("invoice_items").select("*").eq("invoice_id", id).order("created_at", { ascending: true }),
       invoice.client_id
         ? supabase.from("clients").select("*").eq("id", invoice.client_id).maybeSingle()
         : Promise.resolve({ data: null }),
       supabase.from("user_settings").select("*").eq("user_id", invoice.user_id).maybeSingle(),
+      supabase
+        .from("bank_accounts")
+        .select("account_name, bank_name, account_number, routing_number, swift_code")
+        .eq("user_id", invoice.user_id)
+        .order("is_default", { ascending: false })
+        .limit(1)
+        .maybeSingle(),
     ])
 
     const clientAddress = client
@@ -125,6 +132,7 @@ export default async function PublicInvoicePage({ params }: { params: Promise<{ 
       terms: invoice.terms || "",
       taxRate: 0,
       discountAmount: toNumber(invoice.discount_amount),
+      bankDetails: invoice.bank_details || formatBankDetails(bankAccount),
     }
 
     return <PublicInvoiceView data={formData} invoiceNumber={invoice.invoice_number} />

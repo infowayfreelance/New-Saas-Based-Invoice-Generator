@@ -83,15 +83,14 @@ export function AppSidebar() {
       locked: !canAccessRecurring,
       minPlan: "Pro",
     },
-    // Accounts feature temporarily hidden - bank_accounts table not yet created
-    // {
-    //   title: "Accounts",
-    //   href: "/app/accounts",
-    //   icon: CreditCard,
-    //   active: pathname.startsWith("/app/accounts"),
-    //   locked: !canAccessAccounts,
-    //   minPlan: "Pro",
-    // },
+    {
+      title: "Bank Details",
+      href: "/app/accounts",
+      icon: CreditCard,
+      active: pathname.startsWith("/app/accounts"),
+      locked: !canAccessAccounts,
+      minPlan: "Pro",
+    },
     {
       title: "Analytics",
       href: "/app/analytics",

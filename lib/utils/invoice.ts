@@ -19,6 +19,27 @@ export interface InvoiceFormData {
   terms: string
   taxRate: number
   discountAmount: number
+  bankDetails?: string
+}
+
+export interface BankAccountRecord {
+  account_name: string
+  bank_name: string
+  account_number: string
+  routing_number: string | null
+  swift_code: string | null
+}
+
+export function formatBankDetails(account: BankAccountRecord | null | undefined): string {
+  if (!account) return ""
+  const lines = [
+    `Bank Name: ${account.bank_name}`,
+    `Account Name: ${account.account_name}`,
+    `Account Number: ${account.account_number}`,
+  ]
+  if (account.routing_number) lines.push(`Routing Number: ${account.routing_number}`)
+  if (account.swift_code) lines.push(`SWIFT / IBAN: ${account.swift_code}`)
+  return lines.join("\n")
 }
 
 export interface InvoiceItemFormData {
@@ -152,5 +173,6 @@ export function getDefaultInvoiceData(): InvoiceFormData {
     terms: "Payment is due within 30 days of invoice date.",
     taxRate: 0,
     discountAmount: 0,
+    bankDetails: "",
   }
 }
