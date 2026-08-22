@@ -119,9 +119,10 @@ export function InvoiceForm({
       updateField("clientName", "")
       updateField("clientEmail", "")
       updateField("clientAddress", "")
+      updateField("clientTaxId", "")
       return
     }
-    
+
     setSelectedClientId(clientId)
 
     const client = clients.find((c) => c.id === clientId)
@@ -139,6 +140,7 @@ export function InvoiceForm({
       updateField("clientName", client.name || client.company_name || "")
       updateField("clientEmail", client.email || "")
       updateField("clientAddress", clientAddress)
+      updateField("clientTaxId", client.tax_number || "")
     }
   }
 
@@ -221,6 +223,15 @@ export function InvoiceForm({
                 value={formData.invoiceNumber}
                 onChange={(e) => updateField("invoiceNumber", e.target.value)}
                 required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="poNumber">PO Number (optional)</Label>
+              <Input
+                id="poNumber"
+                value={formData.poNumber || ""}
+                onChange={(e) => updateField("poNumber", e.target.value)}
+                placeholder="Client's purchase order #"
               />
             </div>
             <div className="space-y-2">

@@ -40,6 +40,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
   let client: any = null
   let userSettings: any = null
   let bankAccount: any = null
+  let template: any = null
 
   try {
     // Fetch invoice first to check if it exists
@@ -86,7 +87,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
     invoice = invoiceResult.data
 
     // Now fetch related data in parallel - using separate queries to avoid LEFT JOIN issues
-    const [itemsResult, clientResult, settingsResult, bankAccountResult] = await Promise.all([
+    const [itemsResult, clientResult, settingsResult, bankAccountResult, templateResult] = await Promise.all([
       supabase.from("invoice_items").select("*").eq("invoice_id", id).order("created_at", { ascending: true }),
       invoice.client_id
         ? supabase
@@ -104,7 +105,8 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
             city,
             state,
             postal_code,
-            country
+            country,
+            tax_number
           `
             )
             .eq("id", invoice.client_id)
@@ -122,12 +124,20 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
         .order("is_default", { ascending: false })
         .limit(1)
         .maybeSingle(),
+      supabase
+        .from("invoice_templates")
+        .select("logo_url, primary_color, accent_color, watermark_text, signature_url")
+        .eq("user_id", user.id)
+        .order("is_default", { ascending: false })
+        .limit(1)
+        .maybeSingle(),
     ])
 
     items = itemsResult.data
     client = clientResult.data
     userSettings = settingsResult.data
     bankAccount = bankAccountResult.data
+    template = templateResult.data
 
     console.log("[v0] User settings data:", userSettings)
     console.log("[v0] Client data:", client)
@@ -222,6 +232,16 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
     taxRate: 0,
     discountAmount: toNumber(invoice.discount_amount),
     bankDetails: invoice.bank_details || formatBankDetails(bankAccount),
+    poNumber: invoice.po_number || "",
+    fromTaxId: userSettings?.tax_id || "",
+    clientTaxId: client?.tax_number || "",
+    logoUrl: template?.logo_url || undefined,
+    primaryColor: template?.primary_color || undefined,
+    accentColor: template?.accent_color || undefined,
+    watermarkText: template?.watermark_text || undefined,
+    signatureUrl: template?.signature_url || undefined,
+    status: invoice.status || undefined,
+    amountPaid: toNumber(invoice.amount_paid),
   }
 
   const invoiceStatus = (invoice.status || "").toLowerCase()

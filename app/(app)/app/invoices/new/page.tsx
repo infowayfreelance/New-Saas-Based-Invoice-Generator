@@ -102,6 +102,7 @@ export default function NewInvoicePage() {
               fromEmail: settings.email || user.email || "",
               fromAddress: senderAddressBlock,
               currency: settings.currency || "USD",
+              fromTaxId: settings.tax_id || "",
             }))
           }
         } catch (settingsErr) {
@@ -123,6 +124,29 @@ export default function NewInvoicePage() {
           }
         } catch (bankErr) {
           console.error("[v0] Error loading bank details:", bankErr)
+        }
+
+        try {
+          const { data: template } = await supabase
+            .from("invoice_templates")
+            .select("logo_url, primary_color, accent_color, watermark_text, signature_url")
+            .eq("user_id", user.id)
+            .order("is_default", { ascending: false })
+            .limit(1)
+            .maybeSingle()
+
+          if (mounted && template) {
+            setInitialData((prev) => ({
+              ...prev,
+              logoUrl: template.logo_url || undefined,
+              primaryColor: template.primary_color || undefined,
+              accentColor: template.accent_color || undefined,
+              watermarkText: template.watermark_text || undefined,
+              signatureUrl: template.signature_url || undefined,
+            }))
+          }
+        } catch (templateErr) {
+          console.error("[v0] Error loading invoice template:", templateErr)
         }
 
         try {

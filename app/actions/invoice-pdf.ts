@@ -33,7 +33,8 @@ export async function getInvoiceDataForPDF(invoiceId: string): Promise<{
         name,
         email,
         address,
-        company_name
+        company_name,
+        tax_number
       )
     `)
     .eq("id", invoiceId)
@@ -61,6 +62,20 @@ export async function getInvoiceDataForPDF(invoiceId: string): Promise<{
   const { data: bankAccount } = await supabase
     .from("bank_accounts")
     .select("account_name, bank_name, account_number, routing_number, swift_code")
+    .eq("user_id", user.id)
+    .order("is_default", { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  const { data: userSettings } = await supabase
+    .from("user_settings")
+    .select("tax_id")
+    .eq("user_id", user.id)
+    .maybeSingle()
+
+  const { data: template } = await supabase
+    .from("invoice_templates")
+    .select("logo_url, primary_color, accent_color, watermark_text, signature_url")
     .eq("user_id", user.id)
     .order("is_default", { ascending: false })
     .limit(1)
@@ -100,6 +115,16 @@ export async function getInvoiceDataForPDF(invoiceId: string): Promise<{
     notes: invoice.notes || "",
     terms: invoice.terms || "",
     bankDetails: invoice.bank_details || formatBankDetails(bankAccount),
+    poNumber: invoice.po_number || "",
+    fromTaxId: userSettings?.tax_id || "",
+    clientTaxId: invoice.clients?.tax_number || "",
+    logoUrl: template?.logo_url || undefined,
+    primaryColor: template?.primary_color || undefined,
+    accentColor: template?.accent_color || undefined,
+    watermarkText: template?.watermark_text || undefined,
+    signatureUrl: template?.signature_url || undefined,
+    status: invoice.status || undefined,
+    amountPaid: Number(invoice.amount_paid) || 0,
   }
 
   return { success: true, data: invoiceData }

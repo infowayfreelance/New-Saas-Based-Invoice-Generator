@@ -20,6 +20,19 @@ export interface InvoiceFormData {
   taxRate: number
   discountAmount: number
   bankDetails?: string
+  // Reference / compliance
+  poNumber?: string
+  fromTaxId?: string
+  clientTaxId?: string
+  // Branding (from the user's default invoice template)
+  logoUrl?: string
+  primaryColor?: string
+  accentColor?: string
+  watermarkText?: string
+  signatureUrl?: string
+  // Payment status
+  status?: string
+  amountPaid?: number
 }
 
 export interface BankAccountRecord {
