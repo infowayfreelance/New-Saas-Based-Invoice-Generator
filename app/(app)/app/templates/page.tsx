@@ -4,8 +4,9 @@ import { PageHeader } from "@/components/app/page-header"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Check, Lock, Palette } from "lucide-react"
+import { Check, Lock } from "lucide-react"
 import Link from "next/link"
+import { BrandingForm } from "@/components/templates/branding-form"
 
 export default async function TemplatesPage() {
   const supabase = await createClient()
@@ -140,24 +141,13 @@ export default async function TemplatesPage() {
         <Card>
           <CardHeader>
             <CardTitle>Branding Options</CardTitle>
-            <CardDescription>Customize how your invoices look</CardDescription>
+            <CardDescription>
+              Set a logo, brand colors, watermark, and signature — these appear automatically on every invoice you
+              create.
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              <Link href="/app/settings/branding">
-                <Card className="cursor-pointer transition-colors hover:bg-muted/50">
-                  <CardContent className="flex items-center gap-4 p-4">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                      <Palette className="h-5 w-5 text-primary" />
-                    </div>
-                    <div>
-                      <h3 className="font-medium">Customize Colors</h3>
-                      <p className="text-sm text-muted-foreground">Set your brand colors</p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            </div>
+            <BrandingForm />
           </CardContent>
         </Card>
       </div>
