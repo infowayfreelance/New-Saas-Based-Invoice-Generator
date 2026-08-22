@@ -7,10 +7,17 @@ import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { toast } from "sonner"
+
+const LAYOUTS = [
+  { value: "classic", label: "Classic", description: "Simple layout with a right-aligned business header." },
+  { value: "banner", label: "Banner", description: "Bold banner header with a dark items table." },
+]
 
 export function BrandingForm() {
   const [templateId, setTemplateId] = useState<string | null>(null)
+  const [layoutStyle, setLayoutStyle] = useState("classic")
   const [primaryColor, setPrimaryColor] = useState("#171717")
   const [accentColor, setAccentColor] = useState("#171717")
   const [logoUrl, setLogoUrl] = useState("")
@@ -45,6 +52,8 @@ export function BrandingForm() {
         setLogoUrl(data.logo_url || "")
         setWatermarkText(data.watermark_text || "")
         setSignatureUrl(data.signature_url || "")
+        const layout = data.layout_config as { style?: string } | null
+        setLayoutStyle(layout?.style || "classic")
       }
       setIsLoading(false)
     }
@@ -70,6 +79,7 @@ export function BrandingForm() {
         logo_url: logoUrl || null,
         watermark_text: watermarkText || null,
         signature_url: signatureUrl || null,
+        layout_config: { style: layoutStyle },
       }
 
       const { error } = templateId
@@ -104,6 +114,25 @@ export function BrandingForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="space-y-2">
+        <Label>Layout Style</Label>
+        <RadioGroup value={layoutStyle} onValueChange={setLayoutStyle} className="grid gap-3 sm:grid-cols-2">
+          {LAYOUTS.map((layout) => (
+            <Label
+              key={layout.value}
+              htmlFor={`layout-${layout.value}`}
+              className="flex cursor-pointer items-start gap-3 rounded-lg border p-3 hover:bg-muted/50"
+            >
+              <RadioGroupItem value={layout.value} id={`layout-${layout.value}`} className="mt-1" />
+              <div>
+                <p className="font-medium">{layout.label}</p>
+                <p className="text-xs text-muted-foreground">{layout.description}</p>
+              </div>
+            </Label>
+          ))}
+        </RadioGroup>
+      </div>
+
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="primaryColor">Primary Color</Label>

@@ -129,13 +129,14 @@ export default function NewInvoicePage() {
         try {
           const { data: template } = await supabase
             .from("invoice_templates")
-            .select("logo_url, primary_color, accent_color, watermark_text, signature_url")
+            .select("logo_url, primary_color, accent_color, watermark_text, signature_url, layout_config")
             .eq("user_id", user.id)
             .order("is_default", { ascending: false })
             .limit(1)
             .maybeSingle()
 
           if (mounted && template) {
+            const layout = template.layout_config as { style?: string } | null
             setInitialData((prev) => ({
               ...prev,
               logoUrl: template.logo_url || undefined,
@@ -143,6 +144,7 @@ export default function NewInvoicePage() {
               accentColor: template.accent_color || undefined,
               watermarkText: template.watermark_text || undefined,
               signatureUrl: template.signature_url || undefined,
+              layoutStyle: layout?.style || undefined,
             }))
           }
         } catch (templateErr) {

@@ -33,6 +33,8 @@ export interface InvoiceFormData {
   // Payment status
   status?: string
   amountPaid?: number
+  // Layout
+  layoutStyle?: string
 }
 
 export interface BankAccountRecord {
