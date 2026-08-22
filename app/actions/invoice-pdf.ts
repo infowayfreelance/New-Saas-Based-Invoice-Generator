@@ -123,7 +123,7 @@ export async function getInvoiceDataForPDF(invoiceId: string): Promise<{
     accentColor: template?.accent_color || undefined,
     watermarkText: template?.watermark_text || undefined,
     signatureUrl: template?.signature_url || undefined,
-    layoutStyle: (template?.layout_config as { style?: string } | null)?.style || undefined,
+    layoutStyle: invoice.layout_style || (template?.layout_config as { style?: string } | null)?.style || undefined,
     status: invoice.status || undefined,
     amountPaid: Number(invoice.amount_paid) || 0,
   }

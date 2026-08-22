@@ -15,6 +15,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { InvoiceForm } from "@/components/invoice/invoice-form"
 import { InvoicePreview } from "@/components/invoice/invoice-preview"
+import { DesignSlider } from "@/components/invoice/design-slider"
 import { UsageMeter } from "@/components/invoice/usage-meter"
 import { type InvoiceFormData, getDefaultInvoiceData, calculateInvoiceTotals } from "@/lib/utils/invoice"
 import { generateGuestInvoice, checkInvoiceUsage } from "@/app/actions/invoice"
@@ -185,7 +186,21 @@ export function EmbeddedInvoiceGenerator({ showHeading = false, useBackend = fal
               <TabsTrigger value="preview">Preview</TabsTrigger>
               <TabsTrigger value="details">Details</TabsTrigger>
             </TabsList>
-            <TabsContent value="preview" className="mt-6">
+            <TabsContent value="preview" className="mt-6 space-y-4">
+              <Card>
+                <CardHeader className="pb-4">
+                  <CardTitle className="text-base">Invoice Design</CardTitle>
+                  <CardDescription>Choose how this invoice looks.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <DesignSlider
+                    value={formData.layoutStyle || "classic"}
+                    primaryColor={formData.primaryColor}
+                    accentColor={formData.accentColor}
+                    onChange={(value) => setFormData((prev) => ({ ...prev, layoutStyle: value }))}
+                  />
+                </CardContent>
+              </Card>
               <div ref={previewRef} className="rounded-lg border border-border shadow-sm">
                 <InvoicePreview data={formData} />
               </div>
