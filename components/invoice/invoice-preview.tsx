@@ -404,6 +404,10 @@ function ClassicInvoiceBody({ data }: { data: InvoiceFormData }) {
 function BannerInvoiceBody({ data }: { data: InvoiceFormData }) {
   const totals = calculateInvoiceTotals(data.items, data.discountAmount)
   const accentColor = data.accentColor || "#f5c518"
+  // The user's chosen brand color is always used for text/labels (readable on
+  // white regardless of brightness). A separate, contrast-safe variant is used
+  // only where white text sits on top of it (e.g. the table header row).
+  const brandColor = data.primaryColor || "#171717"
   const darkColor = getReadableDarkColor(data.primaryColor)
   const amountPaid = toNumber(data.amountPaid)
   const balanceDue = Math.max(totals.totalAmount - amountPaid, 0)
@@ -455,30 +459,36 @@ function BannerInvoiceBody({ data }: { data: InvoiceFormData }) {
               style={{ height: "40px", width: "auto", objectFit: "contain" }}
             />
           ) : null}
-          <span className="text-lg font-bold" style={{ color: darkColor }}>
+          <span className="text-lg font-bold" style={{ color: brandColor }}>
             {data.fromName || "Your Business Name"}
           </span>
         </div>
 
         {/* Banner bar */}
-        <div className="mt-4 flex items-center justify-between">
+        <div className="mt-4 flex items-center justify-between gap-4">
           <div style={{ height: "10px", flex: 1, backgroundColor: accentColor }} />
           <h1
             className="px-4 text-4xl font-extrabold tracking-wide"
-            style={{ color: darkColor, backgroundColor: "#ffffff" }}
+            style={{ color: brandColor, backgroundColor: "#ffffff" }}
           >
             INVOICE
           </h1>
-          <div style={{ height: "10px", width: "48px", backgroundColor: accentColor }} />
+          <div style={{ height: "10px", width: "48px", backgroundColor: darkColor }} />
+        </div>
+
+        {/* Divider bar */}
+        <div className="mt-1 flex items-center justify-end">
+          <div style={{ height: "8px", flex: 1, backgroundColor: accentColor }} />
+          <div style={{ height: "8px", width: "48px", backgroundColor: darkColor }} />
         </div>
 
         {/* Bill To / Invoice Info */}
         <div className="mt-6 flex items-start justify-between gap-6">
           <div>
-            <p className="text-sm font-bold" style={{ color: darkColor }}>
+            <p className="text-sm font-bold" style={{ color: brandColor }}>
               Invoice to:
             </p>
-            <p className="mt-1 text-base font-bold" style={{ color: darkColor }}>
+            <p className="mt-1 text-base font-bold" style={{ color: brandColor }}>
               {data.clientName || "Client Name"}
             </p>
             <p className="whitespace-pre-line text-sm" style={{ color: "#737373" }}>
@@ -492,7 +502,7 @@ function BannerInvoiceBody({ data }: { data: InvoiceFormData }) {
           </div>
           <div className="text-right text-sm">
             <div className="flex items-center justify-end gap-2">
-              <span style={{ color: darkColor }} className="font-semibold">
+              <span style={{ color: brandColor }} className="font-semibold">
                 Invoice#
               </span>
               <span style={{ color: "#737373" }}>{data.invoiceNumber}</span>
@@ -506,20 +516,20 @@ function BannerInvoiceBody({ data }: { data: InvoiceFormData }) {
               )}
             </div>
             <div className="mt-1 flex items-center justify-end gap-2">
-              <span style={{ color: darkColor }} className="font-semibold">
+              <span style={{ color: brandColor }} className="font-semibold">
                 Date
               </span>
               <span style={{ color: "#737373" }}>{formatDate(data.issueDate)}</span>
             </div>
             <div className="mt-1 flex items-center justify-end gap-2">
-              <span style={{ color: darkColor }} className="font-semibold">
+              <span style={{ color: brandColor }} className="font-semibold">
                 Due
               </span>
               <span style={{ color: "#737373" }}>{formatDate(data.dueDate)}</span>
             </div>
             {data.poNumber && (
               <div className="mt-1 flex items-center justify-end gap-2">
-                <span style={{ color: darkColor }} className="font-semibold">
+                <span style={{ color: brandColor }} className="font-semibold">
                   PO #
                 </span>
                 <span style={{ color: "#737373" }}>{data.poNumber}</span>
@@ -527,7 +537,7 @@ function BannerInvoiceBody({ data }: { data: InvoiceFormData }) {
             )}
             {data.fromTaxId && (
               <div className="mt-1 flex items-center justify-end gap-2">
-                <span style={{ color: darkColor }} className="font-semibold">
+                <span style={{ color: brandColor }} className="font-semibold">
                   Tax ID
                 </span>
                 <span style={{ color: "#737373" }}>{data.fromTaxId}</span>
@@ -592,12 +602,12 @@ function BannerInvoiceBody({ data }: { data: InvoiceFormData }) {
         {/* Footer: notes/terms/bank on the left, totals on the right */}
         <div className="mt-auto grid grid-cols-2 gap-8 pt-10">
           <div className="space-y-4 text-sm">
-            <p className="font-bold" style={{ color: darkColor }}>
+            <p className="font-bold" style={{ color: brandColor }}>
               Thank you for your business
             </p>
             {data.terms && (
               <div>
-                <p className="font-semibold" style={{ color: darkColor }}>
+                <p className="font-semibold" style={{ color: brandColor }}>
                   Terms & Conditions
                 </p>
                 <p className="whitespace-pre-line" style={{ color: "#737373" }}>
@@ -607,7 +617,7 @@ function BannerInvoiceBody({ data }: { data: InvoiceFormData }) {
             )}
             {data.notes && (
               <div>
-                <p className="font-semibold" style={{ color: darkColor }}>
+                <p className="font-semibold" style={{ color: brandColor }}>
                   Notes
                 </p>
                 <p className="whitespace-pre-line" style={{ color: "#737373" }}>
@@ -617,7 +627,7 @@ function BannerInvoiceBody({ data }: { data: InvoiceFormData }) {
             )}
             {data.bankDetails && (
               <div>
-                <p className="font-semibold" style={{ color: darkColor }}>
+                <p className="font-semibold" style={{ color: brandColor }}>
                   Payment Info
                 </p>
                 <p className="whitespace-pre-line" style={{ color: "#737373" }}>
@@ -656,7 +666,7 @@ function BannerInvoiceBody({ data }: { data: InvoiceFormData }) {
                   <span style={{ color: "#16a34a" }}>-{formatCurrency(amountPaid, data.currency)}</span>
                 </div>
                 <div className="flex justify-between text-base font-bold">
-                  <span style={{ color: darkColor }}>Balance Due:</span>
+                  <span style={{ color: brandColor }}>Balance Due:</span>
                   <span style={{ color: balanceDue > 0 ? "#dc2626" : "#16a34a" }}>
                     {formatCurrency(balanceDue, data.currency)}
                   </span>
@@ -681,9 +691,12 @@ function BannerInvoiceBody({ data }: { data: InvoiceFormData }) {
           </div>
         </div>
 
-        {/* Footer banner */}
-        <div className="mt-8 flex items-center justify-center py-3 text-xs" style={{ backgroundColor: accentColor }}>
-          <span style={{ color: darkColor }} className="font-medium">
+        {/* Footer contact bar */}
+        <div
+          className="mt-8 flex items-center justify-center py-3 text-xs"
+          style={{ borderTop: `2px solid ${accentColor}` }}
+        >
+          <span style={{ color: "#737373" }} className="font-medium">
             {footerContact || " "}
           </span>
         </div>
