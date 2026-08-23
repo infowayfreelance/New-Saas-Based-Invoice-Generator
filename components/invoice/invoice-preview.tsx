@@ -26,6 +26,18 @@ function getReadableDarkColor(hex?: string): string {
   return luminance > 0.55 ? "#171717" : hex
 }
 
+function getContrastTextColor(hex?: string): string {
+  if (!hex) return "#171717"
+  const match = /^#?([0-9a-f]{6})$/i.exec(hex)
+  if (!match) return "#171717"
+  const value = match[1]
+  const r = Number.parseInt(value.slice(0, 2), 16)
+  const g = Number.parseInt(value.slice(2, 4), 16)
+  const b = Number.parseInt(value.slice(4, 6), 16)
+  const luminance = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255
+  return luminance > 0.5 ? "#171717" : "#ffffff"
+}
+
 function getStatusStamp(status?: string): { label: string; color: string } | null {
   const normalized = (status || "").toLowerCase()
   if (normalized === "paid") return { label: "PAID", color: "#16a34a" }
@@ -670,7 +682,7 @@ function BannerInvoiceBody({ data }: { data: InvoiceFormData }) {
             )}
             <div
               className="flex justify-between px-3 py-2 text-base font-bold"
-              style={{ backgroundColor: accentColor, color: darkColor }}
+              style={{ backgroundColor: accentColor, color: getContrastTextColor(accentColor) }}
             >
               <span>Total:</span>
               <span>{formatCurrency(totals.totalAmount, data.currency)}</span>
