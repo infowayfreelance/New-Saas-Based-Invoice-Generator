@@ -50,13 +50,28 @@ export function InvoiceStyleControls({
 
       <Popover>
         <PopoverTrigger asChild>
-          <Button type="button" variant="outline" className="w-full justify-start gap-3 bg-transparent">
-            <span className="flex shrink-0 overflow-hidden rounded-full border">
-              <span className="h-5 w-5" style={{ backgroundColor: primary }} />
-              <span className="h-5 w-5" style={{ backgroundColor: accent }} />
+          <Button
+            type="button"
+            variant="outline"
+            className="h-auto w-full justify-start gap-3 bg-transparent py-2.5 shadow-sm hover:shadow"
+          >
+            <span className="relative flex h-7 w-9 shrink-0 items-center">
+              <span
+                className="absolute left-0 h-7 w-7 rounded-full border-2 border-background shadow-sm"
+                style={{ backgroundColor: primary }}
+              />
+              <span
+                className="absolute left-3.5 h-7 w-7 rounded-full border-2 border-background shadow-sm"
+                style={{ backgroundColor: accent }}
+              />
             </span>
-            <span className="flex-1 text-left">Customize colors &amp; font</span>
-            <Palette className="h-4 w-4 text-muted-foreground" />
+            <span className="flex-1 text-left">
+              <span className="block text-sm font-medium leading-none">Customize colors &amp; font</span>
+              <span className="mt-1 block text-xs font-normal text-muted-foreground">
+                {FONT_OPTIONS.find((f) => f.id === (fontFamily || "sans"))?.label} font
+              </span>
+            </span>
+            <Palette className="h-4 w-4 shrink-0 text-muted-foreground" />
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-80 space-y-5 p-5" align="start">
@@ -143,13 +158,15 @@ export function InvoiceStyleControls({
                     type="button"
                     onClick={() => onFontFamilyChange(font.id)}
                     className={cn(
-                      "relative flex items-center justify-center gap-1.5 rounded-md border px-3 py-2 text-sm transition-colors",
+                      "relative flex flex-col items-center gap-0.5 rounded-md border px-3 py-2 transition-colors",
                       isSelected ? "border-primary bg-primary/5" : "border-border hover:border-primary/50",
                     )}
-                    style={{ fontFamily: font.stack }}
                   >
-                    {isSelected && <Check className="h-3.5 w-3.5" />}
-                    {font.label}
+                    {isSelected && <Check className="absolute right-1.5 top-1.5 h-3 w-3 text-primary" />}
+                    <span className="text-base" style={{ fontFamily: font.stack }}>
+                      Aa
+                    </span>
+                    <span className="text-xs text-muted-foreground">{font.label}</span>
                   </button>
                 )
               })}
