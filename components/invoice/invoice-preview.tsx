@@ -322,9 +322,9 @@ function ClassicInvoiceBody({ data }: { data: InvoiceFormData }) {
               </div>
             )}
             <Separator style={{ backgroundColor: "#e5e5e5" }} />
-            <div className="mt-4 flex justify-between py-3 text-2xl font-extrabold">
+            <div className="mt-4 flex items-center justify-between py-3 text-2xl font-bold" style={{ lineHeight: 1.3 }}>
               <span style={{ color: "#171717" }}>Total</span>
-              <span className="text-3xl font-extrabold tracking-wide" style={{ color: accentColor }}>
+              <span className="text-3xl font-bold tracking-wide" style={{ color: accentColor, lineHeight: 1.3 }}>
                 {formatCurrency(totals.totalAmount, data.currency)}
               </span>
             </div>
@@ -482,8 +482,8 @@ function BannerInvoiceBody({ data }: { data: InvoiceFormData }) {
         <div className="mt-4 flex items-center justify-between gap-4">
           <div style={{ height: "10px", flex: 1, backgroundColor: accentColor }} />
           <h1
-            className="px-4 text-4xl font-extrabold tracking-wide"
-            style={{ color: brandColor, backgroundColor: "#ffffff" }}
+            className="px-4 text-4xl font-bold tracking-wide"
+            style={{ color: brandColor, backgroundColor: "#ffffff", lineHeight: 1.3, paddingTop: 4, paddingBottom: 4 }}
           >
             INVOICE
           </h1>
