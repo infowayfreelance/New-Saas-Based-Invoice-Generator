@@ -613,21 +613,27 @@ function BannerInvoiceBody({ data }: { data: InvoiceFormData }) {
           </table>
           {/* Filler stripes: continue the row zebra pattern down through the
               blank space until the footer, instead of leaving it plain white.
-              Solid rows (not a CSS gradient) — html2canvas rasterizes gradients
-              very slowly, which was making PDF export take a long time. A fixed
-              number of 36px rows is more than enough to fill any leftover space;
-              the flex-1 wrapper's own bounded height clips off any excess. */}
-          <div aria-hidden style={{ flex: 1, minHeight: 0, overflow: "hidden" }}>
-            {Array.from({ length: 24 }).map((_, i) => (
-              <div
-                key={i}
-                style={{
-                  height: "36px",
-                  backgroundColor: (data.items.length + i) % 2 === 1 ? "#f5f5f5" : "#ffffff",
-                }}
-              />
-            ))}
-          </div>
+              A tiny tiled SVG background (not a live CSS gradient, and not a
+              stack of real DOM rows) so it stays fast for html2canvas to
+              rasterize AND has no intrinsic content height of its own — the
+              flex-1 box sizes to exactly the leftover space with nothing
+              pushing the invoice past one A4 page. */}
+          <div
+            aria-hidden
+            style={{
+              flex: 1,
+              minHeight: 0,
+              backgroundImage: `url("data:image/svg+xml,${encodeURIComponent(
+                `<svg xmlns='http://www.w3.org/2000/svg' width='4' height='72'><rect width='4' height='36' fill='${
+                  data.items.length % 2 === 1 ? "#f5f5f5" : "#ffffff"
+                }'/><rect y='36' width='4' height='36' fill='${
+                  data.items.length % 2 === 1 ? "#ffffff" : "#f5f5f5"
+                }'/></svg>`,
+              )}")`,
+              backgroundRepeat: "repeat",
+              backgroundSize: "100% 72px",
+            }}
+          />
         </div>
 
         {/* Footer: notes/terms/bank on the left, totals on the right */}
