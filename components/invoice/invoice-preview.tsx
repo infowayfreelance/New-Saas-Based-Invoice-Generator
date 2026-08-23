@@ -547,7 +547,7 @@ function BannerInvoiceBody({ data }: { data: InvoiceFormData }) {
         </div>
 
         {/* Items table */}
-        <div className="mt-6 overflow-x-auto">
+        <div className="mt-6 flex flex-1 flex-col overflow-x-auto overflow-y-hidden">
           <table className="w-full text-sm">
             <thead>
               <tr style={{ backgroundColor: darkColor }}>
@@ -597,10 +597,24 @@ function BannerInvoiceBody({ data }: { data: InvoiceFormData }) {
               })}
             </tbody>
           </table>
+          {/* Filler stripes: continue the row zebra pattern down through the
+              blank space until the footer, instead of leaving it plain white. */}
+          <div
+            aria-hidden
+            style={{
+              flex: 1,
+              minHeight: 0,
+              backgroundImage: `repeating-linear-gradient(to bottom, ${
+                data.items.length % 2 === 1 ? "#f5f5f5" : "#ffffff"
+              } 0px, ${data.items.length % 2 === 1 ? "#f5f5f5" : "#ffffff"} 36px, ${
+                data.items.length % 2 === 1 ? "#ffffff" : "#f5f5f5"
+              } 36px, ${data.items.length % 2 === 1 ? "#ffffff" : "#f5f5f5"} 72px)`,
+            }}
+          />
         </div>
 
         {/* Footer: notes/terms/bank on the left, totals on the right */}
-        <div className="mt-auto grid grid-cols-2 gap-8 pt-10">
+        <div className="grid grid-cols-2 gap-8 pt-10">
           <div className="space-y-4 text-sm">
             <p className="font-bold" style={{ color: brandColor }}>
               Thank you for your business
