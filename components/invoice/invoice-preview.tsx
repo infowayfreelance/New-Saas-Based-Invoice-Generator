@@ -612,19 +612,22 @@ function BannerInvoiceBody({ data }: { data: InvoiceFormData }) {
             </tbody>
           </table>
           {/* Filler stripes: continue the row zebra pattern down through the
-              blank space until the footer, instead of leaving it plain white. */}
-          <div
-            aria-hidden
-            style={{
-              flex: 1,
-              minHeight: 0,
-              backgroundImage: `repeating-linear-gradient(to bottom, ${
-                data.items.length % 2 === 1 ? "#f5f5f5" : "#ffffff"
-              } 0px, ${data.items.length % 2 === 1 ? "#f5f5f5" : "#ffffff"} 36px, ${
-                data.items.length % 2 === 1 ? "#ffffff" : "#f5f5f5"
-              } 36px, ${data.items.length % 2 === 1 ? "#ffffff" : "#f5f5f5"} 72px)`,
-            }}
-          />
+              blank space until the footer, instead of leaving it plain white.
+              Solid rows (not a CSS gradient) — html2canvas rasterizes gradients
+              very slowly, which was making PDF export take a long time. A fixed
+              number of 36px rows is more than enough to fill any leftover space;
+              the flex-1 wrapper's own bounded height clips off any excess. */}
+          <div aria-hidden style={{ flex: 1, minHeight: 0, overflow: "hidden" }}>
+            {Array.from({ length: 24 }).map((_, i) => (
+              <div
+                key={i}
+                style={{
+                  height: "36px",
+                  backgroundColor: (data.items.length + i) % 2 === 1 ? "#f5f5f5" : "#ffffff",
+                }}
+              />
+            ))}
+          </div>
         </div>
 
         {/* Footer: notes/terms/bank on the left, totals on the right */}
