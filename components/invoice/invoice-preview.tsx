@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { type InvoiceFormData, calculateInvoiceTotals, formatCurrency, formatDate, toNumber } from "@/lib/utils/invoice"
 import { PDF_RENDER_WIDTH, PDF_RENDER_HEIGHT } from "@/lib/utils/pdf"
+import { getFontStack } from "@/lib/utils/fonts"
 
 interface InvoicePreviewProps {
   data: InvoiceFormData
@@ -92,6 +93,7 @@ export function InvoicePreview({ data, className }: InvoicePreviewProps) {
             padding: data.layoutStyle === "banner" ? 0 : undefined,
             border: "1px solid #e5e5e5",
             boxShadow: "none",
+            fontFamily: getFontStack(data.fontFamily),
           }}
         >
           {data.layoutStyle === "banner" ? <BannerInvoiceBody data={data} /> : <ClassicInvoiceBody data={data} />}

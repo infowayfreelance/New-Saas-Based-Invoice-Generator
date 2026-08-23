@@ -35,6 +35,7 @@ export interface InvoiceFormData {
   amountPaid?: number
   // Layout
   layoutStyle?: string
+  fontFamily?: string
 }
 
 export interface BankAccountRecord {

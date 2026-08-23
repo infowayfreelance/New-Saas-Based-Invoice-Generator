@@ -146,6 +146,9 @@ export async function generateAuthenticatedInvoice(
       bank_details: data.bankDetails || null,
       po_number: data.poNumber || null,
       layout_style: data.layoutStyle || null,
+      primary_color: data.primaryColor || null,
+      accent_color: data.accentColor || null,
+      font_family: data.fontFamily || null,
     })
     .select()
     .single()
@@ -329,6 +332,9 @@ export async function updateInvoice(
     bank_details: data.bankDetails || null,
     po_number: data.poNumber || null,
     layout_style: data.layoutStyle || null,
+    primary_color: data.primaryColor || null,
+    accent_color: data.accentColor || null,
+    font_family: data.fontFamily || null,
     client_id: data.clientId && data.clientId !== "none" ? data.clientId : null,
   }
   console.log("[v0] STEP 7 COMPLETE: Update payload built:", updateData)
@@ -449,9 +455,16 @@ export async function updateInvoiceAction(
   return result
 }
 
-export async function updateInvoiceLayoutStyle(
+export interface InvoiceStyleUpdate {
+  layoutStyle?: string
+  primaryColor?: string
+  accentColor?: string
+  fontFamily?: string
+}
+
+export async function updateInvoiceStyle(
   invoiceId: string,
-  layoutStyle: string,
+  style: InvoiceStyleUpdate,
 ): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient()
 
@@ -463,14 +476,20 @@ export async function updateInvoiceLayoutStyle(
     return { success: false, error: "Not authenticated" }
   }
 
+  const updatePayload: Record<string, string> = {}
+  if (style.layoutStyle !== undefined) updatePayload.layout_style = style.layoutStyle
+  if (style.primaryColor !== undefined) updatePayload.primary_color = style.primaryColor
+  if (style.accentColor !== undefined) updatePayload.accent_color = style.accentColor
+  if (style.fontFamily !== undefined) updatePayload.font_family = style.fontFamily
+
   const { error } = await supabase
     .from("invoices")
-    .update({ layout_style: layoutStyle })
+    .update(updatePayload)
     .eq("id", invoiceId)
     .eq("user_id", user.id)
 
   if (error) {
-    console.error("[v0] Error updating invoice layout style:", error)
+    console.error("[v0] Error updating invoice style:", error)
     return { success: false, error: error.message }
   }
 

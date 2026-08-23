@@ -15,7 +15,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { InvoiceForm } from "@/components/invoice/invoice-form"
 import { InvoicePreview } from "@/components/invoice/invoice-preview"
-import { DesignSlider } from "@/components/invoice/design-slider"
+import { InvoiceStyleControls } from "@/components/invoice/invoice-style-controls"
 import { UsageMeter } from "@/components/invoice/usage-meter"
 import { type InvoiceFormData, getDefaultInvoiceData, calculateInvoiceTotals } from "@/lib/utils/invoice"
 import { generateGuestInvoice, checkInvoiceUsage } from "@/app/actions/invoice"
@@ -189,15 +189,19 @@ export function EmbeddedInvoiceGenerator({ showHeading = false, useBackend = fal
             <TabsContent value="preview" className="mt-6 space-y-4">
               <Card>
                 <CardHeader className="pb-4">
-                  <CardTitle className="text-base">Invoice Design</CardTitle>
-                  <CardDescription>Choose how this invoice looks.</CardDescription>
+                  <CardTitle className="text-base">Invoice Style</CardTitle>
+                  <CardDescription>Choose the design, colors, and font for this invoice.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <DesignSlider
-                    value={formData.layoutStyle || "classic"}
+                  <InvoiceStyleControls
+                    layoutStyle={formData.layoutStyle || "classic"}
                     primaryColor={formData.primaryColor}
                     accentColor={formData.accentColor}
-                    onChange={(value) => setFormData((prev) => ({ ...prev, layoutStyle: value }))}
+                    fontFamily={formData.fontFamily || "sans"}
+                    onLayoutStyleChange={(value) => setFormData((prev) => ({ ...prev, layoutStyle: value }))}
+                    onPrimaryColorChange={(value) => setFormData((prev) => ({ ...prev, primaryColor: value }))}
+                    onAccentColorChange={(value) => setFormData((prev) => ({ ...prev, accentColor: value }))}
+                    onFontFamilyChange={(value) => setFormData((prev) => ({ ...prev, fontFamily: value }))}
                   />
                 </CardContent>
               </Card>
