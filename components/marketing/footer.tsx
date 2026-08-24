@@ -5,7 +5,7 @@ export function MarketingFooter() {
   return (
     <footer className="border-t border-border bg-muted/30">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="grid gap-8 md:grid-cols-5">
+        <div className="grid gap-8 md:grid-cols-6">
           <div className="space-y-4 md:col-span-2">
             <Link href="/" className="flex items-center">
               <Image
@@ -69,37 +69,97 @@ export function MarketingFooter() {
                   Freelancer Invoicing Guide
                 </Link>
               </li>
+              <li>
+                <Link href="/contact" className="text-muted-foreground hover:text-foreground">
+                  Help or Support
+                </Link>
+              </li>
             </ul>
           </div>
           <div>
             <h3 className="mb-4 text-sm font-semibold">Company</h3>
             <ul className="space-y-3 text-sm">
               <li>
-                <Link href="/affiliate-program" className="text-muted-foreground hover:text-foreground">
-                  Affiliate Program
+                <Link href="/about" className="text-muted-foreground hover:text-foreground">
+                  About
                 </Link>
               </li>
               <li>
-                <Link href="/terms" className="text-muted-foreground hover:text-foreground">
-                  Terms of Service
+                <Link href="/contact" className="text-muted-foreground hover:text-foreground">
+                  Contact
                 </Link>
               </li>
+              <li>
+                <Link href="/security" className="text-muted-foreground hover:text-foreground">
+                  Security
+                </Link>
+              </li>
+              <li>
+                <Link href="/affiliate-program" className="text-muted-foreground hover:text-foreground">
+                  Affiliate Programme
+                </Link>
+              </li>
+              <li>
+                <Link href="/affiliate-disclosure" className="text-muted-foreground hover:text-foreground">
+                  Affiliate Disclosure
+                </Link>
+              </li>
+            </ul>
+          </div>
+          <div>
+            <h3 className="mb-4 text-sm font-semibold">Legal</h3>
+            <ul className="space-y-3 text-sm">
               <li>
                 <Link href="/privacy" className="text-muted-foreground hover:text-foreground">
                   Privacy Policy
                 </Link>
               </li>
               <li>
-                <Link href="/login" className="text-muted-foreground hover:text-foreground">
-                  Sign In
+                <Link href="/terms" className="text-muted-foreground hover:text-foreground">
+                  Terms and Conditions
+                </Link>
+              </li>
+              <li>
+                <Link href="/refund-policy" className="text-muted-foreground hover:text-foreground">
+                  Refund and Cancellation Policy
+                </Link>
+              </li>
+              <li>
+                <Link href="/billing-disputes" className="text-muted-foreground hover:text-foreground">
+                  Billing and Dispute Policy
+                </Link>
+              </li>
+              <li>
+                <Link href="/cookie-policy" className="text-muted-foreground hover:text-foreground">
+                  Cookie Policy
+                </Link>
+              </li>
+              <li>
+                <Link href="/acceptable-use" className="text-muted-foreground hover:text-foreground">
+                  Acceptable Use Policy
+                </Link>
+              </li>
+              <li>
+                <Link href="/data-deletion" className="text-muted-foreground hover:text-foreground">
+                  Data Deletion
+                </Link>
+              </li>
+              <li>
+                <Link href="/subprocessors" className="text-muted-foreground hover:text-foreground">
+                  Subprocessors
                 </Link>
               </li>
             </ul>
           </div>
         </div>
-        <div className="mt-12 border-t border-border pt-8">
-          <p className="text-center text-sm text-muted-foreground">
+        <div className="mt-12 flex flex-col gap-2 border-t border-border pt-8 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-muted-foreground">
             &copy; {new Date().getFullYear()} MakeInvo. All rights reserved.
+          </p>
+          <p className="text-sm text-muted-foreground">
+            <Link href="/login" className="hover:text-foreground">
+              Sign In
+            </Link>
           </p>
         </div>
       </div>
