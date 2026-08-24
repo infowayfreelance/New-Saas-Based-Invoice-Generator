@@ -13,9 +13,19 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/free-invoice",
     "/login",
     "/register",
+    "/about",
+    "/contact",
     "/terms",
     "/privacy",
+    "/refund-policy",
+    "/billing-disputes",
+    "/cookie-policy",
+    "/security",
+    "/data-deletion",
+    "/acceptable-use",
+    "/subprocessors",
     "/affiliate-program",
+    "/affiliate-disclosure",
   ]
 
   return routes.map((route) => ({
