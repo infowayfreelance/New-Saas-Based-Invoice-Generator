@@ -26,6 +26,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/subprocessors",
     "/affiliate-program",
     "/affiliate-disclosure",
+    "/invoice-generator-for-freelancers",
+    "/invoice-generator-for-contractors",
+    "/invoice-generator-for-consultants",
+    "/invoice-generator-for-designers",
+    "/invoice-generator-for-photographers",
+    "/invoice-generator-for-agencies",
+    "/invoice-generator-for-small-businesses",
+    "/invoice-generator-for-tradespeople",
+    "/invoice-generator-for-self-employed",
   ]
 
   return routes.map((route) => ({
