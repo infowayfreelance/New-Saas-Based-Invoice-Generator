@@ -3,7 +3,7 @@ import { getSiteUrl } from "@/lib/utils/site-url"
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
-  description: "InvoiceFlow Privacy Policy",
+  description: "MakeInvo Privacy Policy",
 }
 
 const siteUrl = getSiteUrl()

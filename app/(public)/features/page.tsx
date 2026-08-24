@@ -19,7 +19,7 @@ import {
 
 export const metadata: Metadata = {
   title: "Features",
-  description: "Discover all the powerful features InvoiceFlow offers to streamline your invoicing workflow.",
+  description: "Discover all the powerful features MakeInvo offers to streamline your invoicing workflow.",
 }
 
 const siteUrl = getSiteUrl()

@@ -7,7 +7,7 @@ import { DollarSign, Users, TrendingUp, Gift } from "lucide-react"
 
 export const metadata: Metadata = {
   title: "Affiliate Program",
-  description: "Earn commissions by referring customers to InvoiceFlow",
+  description: "Earn commissions by referring customers to MakeInvo",
 }
 
 const siteUrl = getSiteUrl()
@@ -33,7 +33,7 @@ export default function AffiliateProgramPage() {
         <div className="text-center">
           <h1 className="text-balance text-4xl font-bold tracking-tight sm:text-5xl">Affiliate Program</h1>
           <p className="mt-4 text-pretty text-lg text-muted-foreground">
-            Earn recurring commissions by sharing InvoiceFlow with your network
+            Earn recurring commissions by sharing MakeInvo with your network
           </p>
         </div>
         <div className="mt-16 grid gap-6 md:grid-cols-2">

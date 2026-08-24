@@ -74,7 +74,7 @@ export default function LoginPage() {
             </div>
           </Link>
           <h1 className="text-2xl font-bold">Welcome back</h1>
-          <p className="mt-1 text-muted-foreground">Sign in to your InvoiceFlow account</p>
+          <p className="mt-1 text-muted-foreground">Sign in to your MakeInvo account</p>
         </div>
         <Card>
           <CardHeader className="space-y-1">
