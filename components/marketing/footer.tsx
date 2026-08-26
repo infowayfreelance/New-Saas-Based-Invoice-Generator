@@ -47,31 +47,51 @@ export function MarketingFooter() {
             </ul>
           </div>
           <div>
-            <h3 className="mb-4 text-sm font-semibold">Resources</h3>
+            <h3 className="mb-4 text-sm font-semibold">Solutions</h3>
             <ul className="space-y-3 text-sm">
               <li>
-                <Link href="/blog/how-to-write-an-invoice" className="text-muted-foreground hover:text-foreground">
-                  How to Write an Invoice
+                <Link href="/invoice-generator-for-freelancers" className="text-muted-foreground hover:text-foreground">
+                  Freelancers
                 </Link>
               </li>
               <li>
-                <Link href="/blog/invoice-vs-receipt" className="text-muted-foreground hover:text-foreground">
-                  Invoice vs. Receipt
+                <Link href="/invoice-generator-for-contractors" className="text-muted-foreground hover:text-foreground">
+                  Contractors
                 </Link>
               </li>
               <li>
-                <Link href="/blog/vat-invoice-guide" className="text-muted-foreground hover:text-foreground">
-                  VAT Invoice Guide
+                <Link href="/invoice-generator-for-consultants" className="text-muted-foreground hover:text-foreground">
+                  Consultants
                 </Link>
               </li>
               <li>
-                <Link href="/blog/freelancer-invoicing-guide" className="text-muted-foreground hover:text-foreground">
-                  Freelancer Invoicing Guide
+                <Link href="/invoice-generator-for-designers" className="text-muted-foreground hover:text-foreground">
+                  Designers
                 </Link>
               </li>
               <li>
-                <Link href="/contact" className="text-muted-foreground hover:text-foreground">
-                  Help or Support
+                <Link href="/invoice-generator-for-photographers" className="text-muted-foreground hover:text-foreground">
+                  Photographers
+                </Link>
+              </li>
+              <li>
+                <Link href="/invoice-generator-for-agencies" className="text-muted-foreground hover:text-foreground">
+                  Agencies
+                </Link>
+              </li>
+              <li>
+                <Link href="/invoice-generator-for-small-businesses" className="text-muted-foreground hover:text-foreground">
+                  Small Businesses
+                </Link>
+              </li>
+              <li>
+                <Link href="/invoice-generator-for-tradespeople" className="text-muted-foreground hover:text-foreground">
+                  Tradespeople
+                </Link>
+              </li>
+              <li>
+                <Link href="/invoice-generator-for-self-employed" className="text-muted-foreground hover:text-foreground">
+                  Self-Employed
                 </Link>
               </li>
             </ul>
