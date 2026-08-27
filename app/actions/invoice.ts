@@ -141,8 +141,8 @@ export async function generateAuthenticatedInvoice(
       tax_amount: totals.taxAmount, // Correct column name
       discount_amount: totals.discountAmount, // Correct column name
       total_amount: totals.totalAmount, // Correct column name
-      notes: data.notes || null,
       terms: data.terms || null,
+      terms_detail: data.termsDetail || null,
       bank_details: data.bankDetails || null,
       po_number: data.poNumber || null,
       layout_style: data.layoutStyle || null,
@@ -227,7 +227,6 @@ export async function updateInvoice(
     itemsCount: data.items?.length || 0,
     items: data.items,
     discountAmount: data.discountAmount,
-    notes: data.notes ? `${data.notes.substring(0, 50)}...` : null,
     terms: data.terms ? `${data.terms.substring(0, 50)}...` : null,
   })
 
@@ -327,8 +326,8 @@ export async function updateInvoice(
     tax_amount: totals.taxAmount, // Correct column name
     discount_amount: totals.discountAmount, // Correct column name
     total_amount: totals.totalAmount, // Correct column name
-    notes: data.notes || null,
     terms: data.terms || null,
+    terms_detail: data.termsDetail || null,
     bank_details: data.bankDetails || null,
     po_number: data.poNumber || null,
     layout_style: data.layoutStyle || null,

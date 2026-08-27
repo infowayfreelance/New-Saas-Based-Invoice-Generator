@@ -10,7 +10,12 @@ export const PDF_RENDER_HEIGHT = 1123
  * Generates and downloads an A4 PDF from an invoice preview element.
  * The element is cloned into an off-screen container locked to a fixed
  * width before capture, so the current viewport size never affects the
- * PDF layout. Content taller than one page is split across pages.
+ * PDF layout.
+ *
+ * The element may contain multiple `.pdf-page` children (e.g. the invoice
+ * itself, followed by a separate Terms & Conditions page) — each is
+ * captured and added as its own PDF page. Any single page taller than one
+ * A4 sheet is still split across pages via the canvas-slicing fallback.
  */
 export async function downloadInvoicePdf(element: HTMLElement, fileName: string): Promise<void> {
   const [html2canvas, { jsPDF }] = await Promise.all([
@@ -40,13 +45,8 @@ export async function downloadInvoicePdf(element: HTMLElement, fileName: string)
   doc.body.appendChild(container)
 
   try {
-    const canvas = await html2canvas(clone, {
-      scale: 2,
-      useCORS: true,
-      logging: false,
-      backgroundColor: "#ffffff",
-      windowWidth: PDF_RENDER_WIDTH,
-    })
+    const pageElements = Array.from(clone.querySelectorAll<HTMLElement>(".pdf-page"))
+    const targets = pageElements.length > 0 ? pageElements : [clone]
 
     const pdf = new jsPDF("p", "mm", "a4")
     const pageWidth = pdf.internal.pageSize.getWidth()
@@ -54,40 +54,54 @@ export async function downloadInvoicePdf(element: HTMLElement, fileName: string)
     const margin = 10
     const imgWidth = pageWidth - margin * 2
     const usableHeight = pageHeight - margin * 2
-    const fullImgHeight = (canvas.height * imgWidth) / canvas.width
 
-    if (fullImgHeight <= usableHeight) {
-      pdf.addImage(canvas.toDataURL("image/png"), "PNG", margin, margin, imgWidth, fullImgHeight)
-    } else {
-      // Slice the rendered canvas into page-sized chunks
-      const pageCanvasHeight = Math.floor((usableHeight * canvas.width) / imgWidth)
-      let renderedHeight = 0
-      let pageIndex = 0
+    let addedAnyPage = false
 
-      while (renderedHeight < canvas.height) {
-        const sliceHeight = Math.min(pageCanvasHeight, canvas.height - renderedHeight)
-        const slice = doc.createElement("canvas")
-        slice.width = canvas.width
-        slice.height = sliceHeight
+    for (const target of targets) {
+      const canvas = await html2canvas(target, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: "#ffffff",
+        windowWidth: PDF_RENDER_WIDTH,
+      })
 
-        const ctx = slice.getContext("2d")
-        if (!ctx) throw new Error("Could not create canvas context")
-        ctx.fillStyle = "#ffffff"
-        ctx.fillRect(0, 0, slice.width, slice.height)
-        ctx.drawImage(canvas, 0, renderedHeight, canvas.width, sliceHeight, 0, 0, canvas.width, sliceHeight)
+      const fullImgHeight = (canvas.height * imgWidth) / canvas.width
 
-        if (pageIndex > 0) pdf.addPage()
-        pdf.addImage(
-          slice.toDataURL("image/png"),
-          "PNG",
-          margin,
-          margin,
-          imgWidth,
-          (sliceHeight * imgWidth) / canvas.width,
-        )
+      if (fullImgHeight <= usableHeight) {
+        if (addedAnyPage) pdf.addPage()
+        pdf.addImage(canvas.toDataURL("image/png"), "PNG", margin, margin, imgWidth, fullImgHeight)
+        addedAnyPage = true
+      } else {
+        // Slice the rendered canvas into page-sized chunks
+        const pageCanvasHeight = Math.floor((usableHeight * canvas.width) / imgWidth)
+        let renderedHeight = 0
 
-        renderedHeight += sliceHeight
-        pageIndex++
+        while (renderedHeight < canvas.height) {
+          const sliceHeight = Math.min(pageCanvasHeight, canvas.height - renderedHeight)
+          const slice = doc.createElement("canvas")
+          slice.width = canvas.width
+          slice.height = sliceHeight
+
+          const ctx = slice.getContext("2d")
+          if (!ctx) throw new Error("Could not create canvas context")
+          ctx.fillStyle = "#ffffff"
+          ctx.fillRect(0, 0, slice.width, slice.height)
+          ctx.drawImage(canvas, 0, renderedHeight, canvas.width, sliceHeight, 0, 0, canvas.width, sliceHeight)
+
+          if (addedAnyPage) pdf.addPage()
+          pdf.addImage(
+            slice.toDataURL("image/png"),
+            "PNG",
+            margin,
+            margin,
+            imgWidth,
+            (sliceHeight * imgWidth) / canvas.width,
+          )
+          addedAnyPage = true
+
+          renderedHeight += sliceHeight
+        }
       }
     }
 

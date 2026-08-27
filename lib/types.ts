@@ -71,8 +71,9 @@ export interface Invoice {
   discount_amount: number
   total_amount: number
   amount_paid: number
-  notes: string | null
   terms: string | null
+  terms_detail: string | null
+  bank_details: string | null
   template_id: string | null
   client_name: string | null
   client_email: string | null

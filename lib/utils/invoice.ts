@@ -15,8 +15,8 @@ export interface InvoiceFormData {
   // Items
   items: InvoiceItemFormData[]
   // Additional
-  notes: string
   terms: string
+  termsDetail?: string
   taxRate: number
   discountAmount: number
   bankDetails?: string
@@ -185,8 +185,8 @@ export function getDefaultInvoiceData(): InvoiceFormData {
         taxRate: 0,
       },
     ],
-    notes: "",
     terms: "Payment is due within 3 days of invoice date.",
+    termsDetail: "",
     taxRate: 0,
     discountAmount: 0,
     bankDetails: "",

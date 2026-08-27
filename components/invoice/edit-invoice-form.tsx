@@ -23,6 +23,7 @@ import { createClient } from "@/lib/supabase/client"
 import Link from "next/link"
 import { updateInvoice } from "@/app/actions/invoice-update"
 import { toast } from "sonner"
+import { TermsDetailField } from "@/components/invoice/terms-detail-field"
 import { useCurrencyOrDefault } from "@/components/app/currency-provider"
 import { useAuth } from "@/components/app/auth-provider"
 import { ALL_CURRENCIES } from "@/lib/utils/currency"
@@ -409,24 +410,12 @@ export function EditInvoiceForm({ invoiceId, initialData }: EditInvoiceFormProps
         </CardContent>
       </Card>
 
-      {/* Notes & Terms */}
+      {/* Important note & Bank Details */}
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader className="pb-4">
-            <CardTitle className="text-base">Notes</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Textarea
-              placeholder="Additional notes for the client..."
-              value={formData.notes}
-              onChange={(e) => updateField("notes", e.target.value)}
-              rows={4}
-            />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-4">
-            <CardTitle className="text-base">Terms & Conditions</CardTitle>
+            <CardTitle className="text-base">Important</CardTitle>
+            <CardDescription>A short note shown on the invoice itself, e.g. a late payment policy.</CardDescription>
           </CardHeader>
           <CardContent>
             <Textarea
@@ -437,7 +426,36 @@ export function EditInvoiceForm({ invoiceId, initialData }: EditInvoiceFormProps
             />
           </CardContent>
         </Card>
+        <Card>
+          <CardHeader className="pb-4">
+            <CardTitle className="text-base">Bank Details</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Textarea
+              placeholder="Bank name, account name, account number..."
+              value={formData.bankDetails || ""}
+              onChange={(e) => updateField("bankDetails", e.target.value)}
+              rows={4}
+            />
+          </CardContent>
+        </Card>
       </div>
+
+      {/* Full Terms & Conditions (rendered as its own page in the PDF) */}
+      <Card>
+        <CardHeader className="pb-4">
+          <CardTitle className="text-base">Terms & Conditions</CardTitle>
+          <CardDescription>
+            Optional. When filled in, this is added as a separate page at the end of the invoice PDF.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <TermsDetailField
+            value={formData.termsDetail || ""}
+            onChange={(value) => updateField("termsDetail", value)}
+          />
+        </CardContent>
+      </Card>
 
       {/* Submit */}
       <div className="flex justify-end gap-4">

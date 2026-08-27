@@ -3,7 +3,7 @@ import Link from "next/link"
 import { createClient } from "@/lib/supabase/server"
 import { PageHeader } from "@/components/app/page-header"
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { User, Building, Mail, Palette, ChevronRight, Settings } from "lucide-react"
+import { User, Building, Mail, Palette, ChevronRight, Settings, FileText } from "lucide-react"
 
 export default async function SettingsPage() {
   const supabase = await createClient()
@@ -39,6 +39,12 @@ export default async function SettingsPage() {
       description: "Customize your invoice appearance",
       href: "/app/settings/branding",
       icon: Palette,
+    },
+    {
+      title: "Terms & Conditions",
+      description: "Save and manage reusable Terms & Conditions templates",
+      href: "/app/settings/terms",
+      icon: FileText,
     },
   ]
 

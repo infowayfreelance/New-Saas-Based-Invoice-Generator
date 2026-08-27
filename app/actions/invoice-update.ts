@@ -63,8 +63,9 @@ export async function updateInvoice(
     tax_amount: totals.taxAmount,
     discount_amount: totals.discountAmount,
     total_amount: totals.totalAmount,
-    notes: data.notes || null,
     terms: data.terms || null,
+    terms_detail: data.termsDetail || null,
+    bank_details: data.bankDetails || null,
     client_id: data.clientId && data.clientId !== "none" ? data.clientId : null,
     updated_at: new Date().toISOString(),
   }

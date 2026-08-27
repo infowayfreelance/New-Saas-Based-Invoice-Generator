@@ -111,9 +111,8 @@ export async function getInvoiceDataForPDF(invoiceId: string): Promise<{
     // Totals
     discountAmount: invoice.discount_amount?.toString() || "0",
     
-    // Notes
-    notes: invoice.notes || "",
     terms: invoice.terms || "",
+    termsDetail: invoice.terms_detail || "",
     bankDetails: invoice.bank_details || formatBankDetails(bankAccount),
     poNumber: invoice.po_number || "",
     fromTaxId: userSettings?.tax_id || "",
