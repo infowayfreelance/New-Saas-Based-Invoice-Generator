@@ -90,26 +90,54 @@ export function InvoicePreview({ data, className }: InvoicePreviewProps) {
           margin: scale >= 1 ? "0 auto" : undefined,
         }}
       >
-        <Card
-          className="pdf-safe-wrapper p-8"
-          id="invoice-preview"
-          style={{
-            backgroundColor: "#ffffff",
-            color: "#171717",
-            width: `${PDF_RENDER_WIDTH}px`,
-            minWidth: `${PDF_RENDER_WIDTH}px`,
-            maxWidth: `${PDF_RENDER_WIDTH}px`,
-            minHeight: `${PDF_RENDER_HEIGHT}px`,
-            position: "relative",
-            overflow: "hidden",
-            padding: data.layoutStyle === "banner" ? 0 : undefined,
-            border: "1px solid #e5e5e5",
-            boxShadow: "none",
-            fontFamily: getFontStack(data.fontFamily),
-          }}
-        >
-          {data.layoutStyle === "banner" ? <BannerInvoiceBody data={data} /> : <ClassicInvoiceBody data={data} />}
-        </Card>
+        {/* id="invoice-preview" wraps every A4 page so PDF export (see
+            lib/utils/pdf.ts) can capture each .pdf-page child as its own
+            page instead of slicing one tall canvas. */}
+        <div id="invoice-preview" className="flex flex-col gap-6">
+          <Card
+            className="pdf-safe-wrapper pdf-page p-8"
+            style={{
+              backgroundColor: "#ffffff",
+              color: "#171717",
+              width: `${PDF_RENDER_WIDTH}px`,
+              minWidth: `${PDF_RENDER_WIDTH}px`,
+              maxWidth: `${PDF_RENDER_WIDTH}px`,
+              minHeight: `${PDF_RENDER_HEIGHT}px`,
+              position: "relative",
+              overflow: "hidden",
+              padding: data.layoutStyle === "banner" ? 0 : undefined,
+              border: "1px solid #e5e5e5",
+              boxShadow: "none",
+              fontFamily: getFontStack(data.fontFamily),
+            }}
+          >
+            {data.layoutStyle === "banner" ? <BannerInvoiceBody data={data} /> : <ClassicInvoiceBody data={data} />}
+          </Card>
+
+          {data.termsDetail && (
+            <Card
+              className="pdf-safe-wrapper pdf-page p-10"
+              style={{
+                backgroundColor: "#ffffff",
+                color: "#171717",
+                width: `${PDF_RENDER_WIDTH}px`,
+                minWidth: `${PDF_RENDER_WIDTH}px`,
+                maxWidth: `${PDF_RENDER_WIDTH}px`,
+                minHeight: `${PDF_RENDER_HEIGHT}px`,
+                border: "1px solid #e5e5e5",
+                boxShadow: "none",
+                fontFamily: getFontStack(data.fontFamily),
+              }}
+            >
+              <p className="text-xl font-bold" style={{ color: "#171717" }}>
+                Terms &amp; Conditions
+              </p>
+              <p className="mt-4 whitespace-pre-line text-sm leading-relaxed" style={{ color: "#404040" }}>
+                {data.termsDetail}
+              </p>
+            </Card>
+          )}
+        </div>
       </div>
     </div>
   )
@@ -346,46 +374,31 @@ function ClassicInvoiceBody({ data }: { data: InvoiceFormData }) {
           </div>
         </div>
 
-        {/* Notes & Terms */}
-        {(data.notes || data.terms) && (
+        {/* Bank Details & Important note */}
+        {(data.bankDetails || data.terms) && (
           <>
             <Separator className="my-6" style={{ backgroundColor: "#e5e5e5" }} />
             <div className="grid gap-6 sm:grid-cols-2">
-              {data.notes && (
+              {data.bankDetails && (
                 <div>
                   <p className="text-sm font-semibold uppercase tracking-wider" style={{ color: "#737373" }}>
-                    Notes
+                    Bank Details
                   </p>
                   <p className="mt-2 whitespace-pre-line text-base" style={{ color: "#171717" }}>
-                    {data.notes}
+                    {data.bankDetails}
                   </p>
                 </div>
               )}
               {data.terms && (
                 <div>
                   <p className="text-sm font-semibold uppercase tracking-wider" style={{ color: "#737373" }}>
-                    Terms & Conditions
+                    Important
                   </p>
                   <p className="mt-2 whitespace-pre-line text-base" style={{ color: "#171717" }}>
                     {data.terms}
                   </p>
                 </div>
               )}
-            </div>
-          </>
-        )}
-
-        {/* Bank Details */}
-        {data.bankDetails && (
-          <>
-            <Separator className="my-6" style={{ backgroundColor: "#e5e5e5" }} />
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-wider" style={{ color: "#737373" }}>
-                Bank Details
-              </p>
-              <p className="mt-2 whitespace-pre-line text-base" style={{ color: "#171717" }}>
-                {data.bankDetails}
-              </p>
             </div>
           </>
         )}
@@ -636,7 +649,7 @@ function BannerInvoiceBody({ data }: { data: InvoiceFormData }) {
           />
         </div>
 
-        {/* Footer: notes/terms/bank on the left, totals on the right */}
+        {/* Footer: important note/bank on the left, totals on the right */}
         <div className="grid grid-cols-2 gap-8 pt-10">
           <div className="space-y-4 text-sm">
             <p className="font-bold" style={{ color: brandColor }}>
@@ -645,20 +658,10 @@ function BannerInvoiceBody({ data }: { data: InvoiceFormData }) {
             {data.terms && (
               <div>
                 <p className="font-semibold" style={{ color: brandColor }}>
-                  Terms & Conditions
+                  Important
                 </p>
                 <p className="whitespace-pre-line" style={{ color: "#737373" }}>
                   {data.terms}
-                </p>
-              </div>
-            )}
-            {data.notes && (
-              <div>
-                <p className="font-semibold" style={{ color: brandColor }}>
-                  Notes
-                </p>
-                <p className="whitespace-pre-line" style={{ color: "#737373" }}>
-                  {data.notes}
                 </p>
               </div>
             )}

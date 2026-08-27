@@ -202,24 +202,31 @@ export async function GET(
       </div>
     </div>
 
-    ${invoiceData.notes || invoiceData.terms ? `
+    ${invoiceData.bankDetails || invoiceData.terms ? `
       <div class="separator"></div>
       <div class="grid">
-        ${invoiceData.notes ? `
+        ${invoiceData.bankDetails ? `
           <div>
-            <p class="section-title">Notes</p>
-            <p class="section-content" style="white-space: pre-line;">${invoiceData.notes}</p>
+            <p class="section-title">Bank Details</p>
+            <p class="section-content" style="white-space: pre-line;">${invoiceData.bankDetails}</p>
           </div>
         ` : ''}
         ${invoiceData.terms ? `
           <div>
-            <p class="section-title">Terms & Conditions</p>
+            <p class="section-title">Important</p>
             <p class="section-content" style="white-space: pre-line;">${invoiceData.terms}</p>
           </div>
         ` : ''}
       </div>
     ` : ''}
   </div>
+
+  ${invoiceData.termsDetail ? `
+  <div id="terms-page" style="display: none; background: white; padding: 3rem; width: 794px; min-width: 794px; max-width: 794px; margin: 0 auto;">
+    <p style="font-size: 1.25rem; font-weight: 700; color: #171717;">Terms &amp; Conditions</p>
+    <p style="margin-top: 1rem; white-space: pre-line; font-size: 0.875rem; line-height: 1.6; color: #404040;">${invoiceData.termsDetail}</p>
+  </div>
+  ` : ''}
 
   <script>
     console.log('[v0] PDF Download: Starting PDF generation');
@@ -233,40 +240,38 @@ export async function GET(
         // Wait for fonts to load
         await new Promise(resolve => setTimeout(resolve, 500));
         
-        const element = document.getElementById('invoice-preview');
         console.log('[v0] PDF Download: Capturing element as canvas');
-        
-        const canvas = await html2canvas(element, {
-          scale: 2,
-          useCORS: true,
-          backgroundColor: '#ffffff',
-          logging: false
-        });
-        
-        console.log('[v0] PDF Download: Creating PDF');
+
         const { jsPDF } = window.jspdf;
         const pdf = new jsPDF('p', 'mm', 'a4');
-        
-        const pageWidth = pdf.internal.pageSize.getWidth();
-        const pageHeight = pdf.internal.pageSize.getHeight();
-        const margin = 10;
-        
-        const imgData = canvas.toDataURL('image/png');
-        let imgWidth = pageWidth - margin * 2;
-        let imgHeight = (canvas.height * imgWidth) / canvas.width;
-        
 
-        if (imgWidth > pageWidth - margin * 2) {
-          const fitScale = (pageWidth - margin * 2) / imgWidth;
-          imgWidth = imgWidth * fitScale;
-          imgHeight = imgHeight * fitScale;
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const margin = 10;
+
+        async function addPageFromElement(el, isFirstPage) {
+          const canvas = await html2canvas(el, {
+            scale: 2,
+            useCORS: true,
+            backgroundColor: '#ffffff',
+            logging: false
+          });
+
+          const imgData = canvas.toDataURL('image/png');
+          const imgWidth = pageWidth - margin * 2;
+          const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+          if (!isFirstPage) pdf.addPage();
+          pdf.addImage(imgData, 'PNG', margin, margin, imgWidth, imgHeight);
         }
-        
-        const x = (pageWidth - imgWidth) / 2;
-        const y = margin;
-        
-        pdf.addImage(imgData, 'PNG', x, y, imgWidth, imgHeight);
-        
+
+        await addPageFromElement(document.getElementById('invoice-preview'), true);
+
+        const termsPage = document.getElementById('terms-page');
+        if (termsPage) {
+          termsPage.style.display = 'block';
+          await addPageFromElement(termsPage, false);
+        }
+
         console.log('[v0] PDF Download: Saving PDF');
         pdf.save('invoice-${invoiceData.invoiceNumber}.pdf');
         
