@@ -10,7 +10,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Edit, Clock, CheckCircle2, Send } from "lucide-react"
-import { formatCurrency, formatDate, toNumber, formatBankDetails, type InvoiceFormData } from "@/lib/utils/invoice"
+import {
+  formatCurrency,
+  formatDate,
+  toNumber,
+  formatBankDetails,
+  pickBankAccountForCurrency,
+  type InvoiceFormData,
+} from "@/lib/utils/invoice"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { AlertCircle } from "lucide-react"
 
@@ -119,11 +126,9 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
         .maybeSingle(),
       supabase
         .from("bank_accounts")
-        .select("account_name, bank_name, account_number, routing_number, swift_code")
+        .select("account_name, bank_name, account_number, routing_number, swift_code, sort_code, bank_address, currency, is_default")
         .eq("user_id", user.id)
-        .order("is_default", { ascending: false })
-        .limit(1)
-        .maybeSingle(),
+        .order("is_default", { ascending: false }),
       supabase
         .from("invoice_templates")
         .select("logo_url, primary_color, accent_color, watermark_text, signature_url, layout_config")
@@ -136,7 +141,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
     items = itemsResult.data
     client = clientResult.data
     userSettings = settingsResult.data
-    bankAccount = bankAccountResult.data
+    bankAccount = pickBankAccountForCurrency(bankAccountResult.data, invoice.currency)
     template = templateResult.data
 
     console.log("[v0] User settings data:", userSettings)

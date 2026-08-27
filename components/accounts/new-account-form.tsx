@@ -81,25 +81,44 @@ export function NewAccountForm({ userId }: { userId: string }) {
           </div>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
-              <Label htmlFor="routing_number">Routing number (optional)</Label>
+              <Label htmlFor="routing_number">Routing number (US, optional)</Label>
               <Input id="routing_number" name="routing_number" placeholder="021000021" disabled={isSubmitting} />
             </div>
             <div>
-              <Label htmlFor="swift_code">SWIFT / IBAN (optional)</Label>
-              <Input id="swift_code" name="swift_code" placeholder="CHASUS33" disabled={isSubmitting} />
+              <Label htmlFor="sort_code">Sort code (UK, optional)</Label>
+              <Input id="sort_code" name="sort_code" placeholder="04-29-09" disabled={isSubmitting} />
             </div>
           </div>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
+              <Label htmlFor="swift_code">SWIFT / IBAN (optional)</Label>
+              <Input id="swift_code" name="swift_code" placeholder="CHASUS33" disabled={isSubmitting} />
+            </div>
+            <div>
               <Label htmlFor="currency">Currency</Label>
-              <Input id="currency" name="currency" defaultValue="USD" placeholder="USD" disabled={isSubmitting} />
+              <Input
+                id="currency"
+                name="currency"
+                defaultValue="USD"
+                placeholder="USD, GBP, EUR..."
+                disabled={isSubmitting}
+              />
             </div>
-            <div className="flex items-center gap-2 pt-6">
-              <Checkbox id="is_default" name="is_default" disabled={isSubmitting} />
-              <Label htmlFor="is_default" className="cursor-pointer">
-                Make default for invoices
-              </Label>
-            </div>
+          </div>
+          <div>
+            <Label htmlFor="bank_address">Bank address (optional)</Label>
+            <Input
+              id="bank_address"
+              name="bank_address"
+              placeholder="30 South Colonnade, E14 5HX, London, United Kingdom"
+              disabled={isSubmitting}
+            />
+          </div>
+          <div className="flex items-center gap-2 pt-2">
+            <Checkbox id="is_default" name="is_default" disabled={isSubmitting} />
+            <Label htmlFor="is_default" className="cursor-pointer">
+              Make default for invoices
+            </Label>
           </div>
 
           <div className="flex gap-3 pt-2">

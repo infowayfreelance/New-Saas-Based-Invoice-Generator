@@ -5,7 +5,13 @@ import { useRouter } from "next/navigation"
 import { PageHeader } from "@/components/app/page-header"
 import { InvoiceForm } from "@/components/invoice/invoice-form"
 import { UsageMeter } from "@/components/invoice/usage-meter"
-import { type InvoiceFormData, getDefaultInvoiceData, formatBankDetails } from "@/lib/utils/invoice"
+import {
+  type InvoiceFormData,
+  type BankAccountRecord,
+  getDefaultInvoiceData,
+  formatBankDetails,
+  pickBankAccountForCurrency,
+} from "@/lib/utils/invoice"
 import { generateAuthenticatedInvoice, checkInvoiceUsage, generateNextInvoiceNumber } from "@/app/actions/invoice"
 import { toast } from "sonner"
 import { createClient } from "@/lib/supabase/client"
@@ -25,6 +31,7 @@ export default function NewInvoicePage() {
   } | null>(null)
   const [isLoadingData, setIsLoadingData] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
+  const [bankAccounts, setBankAccounts] = useState<BankAccountRecord[]>([])
 
   useEffect(() => {
     let mounted = true
@@ -60,6 +67,8 @@ export default function NewInvoicePage() {
           return
         }
 
+        let resolvedCurrency = "USD"
+
         try {
           const settingsPromise = supabase.from("user_settings").select("*").eq("user_id", user.id).maybeSingle()
 
@@ -78,7 +87,8 @@ export default function NewInvoicePage() {
 
           if (settings) {
             console.log("[v0] Loaded user settings")
-            
+            resolvedCurrency = settings.currency || "USD"
+
             // Build sender address from user_settings fields
             const senderAddress = [
               settings.address_line1,
@@ -111,16 +121,20 @@ export default function NewInvoicePage() {
         }
 
         try {
-          const { data: bankAccount } = await supabase
+          const { data: accounts } = await supabase
             .from("bank_accounts")
-            .select("account_name, bank_name, account_number, routing_number, swift_code")
+            .select(
+              "account_name, bank_name, account_number, routing_number, swift_code, sort_code, bank_address, currency, is_default",
+            )
             .eq("user_id", user.id)
             .order("is_default", { ascending: false })
-            .limit(1)
-            .maybeSingle()
 
-          if (mounted && bankAccount) {
-            setInitialData((prev) => ({ ...prev, bankDetails: formatBankDetails(bankAccount) }))
+          if (mounted && accounts && accounts.length > 0) {
+            setBankAccounts(accounts)
+            const match = pickBankAccountForCurrency(accounts, resolvedCurrency)
+            if (match) {
+              setInitialData((prev) => ({ ...prev, bankDetails: formatBankDetails(match) }))
+            }
           }
         } catch (bankErr) {
           console.error("[v0] Error loading bank details:", bankErr)
@@ -275,6 +289,7 @@ export default function NewInvoicePage() {
             onSubmit={handleSubmit}
             isLoading={isLoading}
             submitLabel="Create Invoice"
+            bankAccounts={bankAccounts}
           />
         )}
       </div>

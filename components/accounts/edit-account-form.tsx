@@ -18,6 +18,8 @@ interface BankAccount {
   account_number: string
   routing_number?: string | null
   swift_code?: string | null
+  sort_code?: string | null
+  bank_address?: string | null
   currency?: string | null
   is_default: boolean
 }
@@ -128,7 +130,7 @@ export function EditAccountForm({ account }: { account: BankAccount }) {
           </div>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
-              <Label htmlFor="routing_number">Routing number</Label>
+              <Label htmlFor="routing_number">Routing number (US)</Label>
               <Input
                 id="routing_number"
                 name="routing_number"
@@ -136,6 +138,17 @@ export function EditAccountForm({ account }: { account: BankAccount }) {
                 disabled={isSubmitting}
               />
             </div>
+            <div>
+              <Label htmlFor="sort_code">Sort code (UK)</Label>
+              <Input
+                id="sort_code"
+                name="sort_code"
+                defaultValue={account.sort_code ?? ""}
+                disabled={isSubmitting}
+              />
+            </div>
+          </div>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
               <Label htmlFor="swift_code">SWIFT / IBAN</Label>
               <Input
@@ -145,23 +158,30 @@ export function EditAccountForm({ account }: { account: BankAccount }) {
                 disabled={isSubmitting}
               />
             </div>
-          </div>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
               <Label htmlFor="currency">Currency</Label>
               <Input id="currency" name="currency" defaultValue={account.currency ?? "USD"} disabled={isSubmitting} />
             </div>
-            <div className="flex items-center gap-2 pt-6">
-              <Checkbox
-                id="is_default"
-                name="is_default"
-                defaultChecked={!!account.is_default}
-                disabled={isSubmitting}
-              />
-              <Label htmlFor="is_default" className="cursor-pointer">
-                Make default
-              </Label>
-            </div>
+          </div>
+          <div>
+            <Label htmlFor="bank_address">Bank address</Label>
+            <Input
+              id="bank_address"
+              name="bank_address"
+              defaultValue={account.bank_address ?? ""}
+              disabled={isSubmitting}
+            />
+          </div>
+          <div className="flex items-center gap-2 pt-2">
+            <Checkbox
+              id="is_default"
+              name="is_default"
+              defaultChecked={!!account.is_default}
+              disabled={isSubmitting}
+            />
+            <Label htmlFor="is_default" className="cursor-pointer">
+              Make default
+            </Label>
           </div>
 
           <div className="flex gap-3 pt-2">

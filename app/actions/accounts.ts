@@ -29,6 +29,8 @@ export async function createAccountAction(formData: FormData) {
       account_number: accountNumber,
       routing_number: String(formData.get("routing_number") || "").trim() || null,
       swift_code: String(formData.get("swift_code") || "").trim() || null,
+      sort_code: String(formData.get("sort_code") || "").trim() || null,
+      bank_address: String(formData.get("bank_address") || "").trim() || null,
       currency: String(formData.get("currency") || "USD").trim(),
       is_default: formData.get("is_default") === "on",
     }
@@ -85,6 +87,8 @@ export async function updateAccountAction(accountId: string, formData: FormData)
       account_number: accountNumber,
       routing_number: String(formData.get("routing_number") || "").trim() || null,
       swift_code: String(formData.get("swift_code") || "").trim() || null,
+      sort_code: String(formData.get("sort_code") || "").trim() || null,
+      bank_address: String(formData.get("bank_address") || "").trim() || null,
       currency: String(formData.get("currency") || "USD").trim(),
       is_default: formData.get("is_default") === "on",
       updated_at: new Date().toISOString(),

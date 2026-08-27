@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -13,8 +13,11 @@ import { Plus, Trash2 } from "lucide-react"
 import {
   type InvoiceFormData,
   type InvoiceItemFormData,
+  type BankAccountRecord,
   calculateInvoiceTotals,
   formatCurrency,
+  formatBankDetails,
+  pickBankAccountForCurrency,
   CURRENCIES,
 } from "@/lib/utils/invoice"
 import { createClient } from "@/lib/supabase/client"
@@ -34,6 +37,7 @@ interface InvoiceFormProps {
   isLoading?: boolean
   submitLabel?: string
   serverAction?: (data: InvoiceFormData & { clientId?: string | null }) => void | Promise<void>
+  bankAccounts?: BankAccountRecord[]
 }
 
 export function InvoiceForm({
@@ -44,6 +48,7 @@ export function InvoiceForm({
   isLoading = false,
   submitLabel = "Generate Invoice",
   serverAction,
+  bankAccounts = [],
 }: InvoiceFormProps) {
   const [formData, setFormData] = useState<InvoiceFormData>(initialData)
   const [clients, setClients] = useState<any[]>([])
@@ -53,6 +58,21 @@ export function InvoiceForm({
   const { profile } = useAuth()
   const planCode = profile?.plan?.code || "BASIC"
   const isPaid = planCode === "STANDARD" || planCode === "PRO"
+  // Tracks the last value we auto-filled into Bank Details so a currency
+  // switch doesn't clobber text the user has since edited by hand.
+  const lastAutoBankDetails = useRef(initialData.bankDetails || "")
+
+  useEffect(() => {
+    if (bankAccounts.length === 0) return
+    const match = pickBankAccountForCurrency(bankAccounts, formData.currency)
+    if (!match) return
+    const formatted = formatBankDetails(match)
+    if (formatted === formData.bankDetails) return
+    if ((formData.bankDetails || "") !== lastAutoBankDetails.current) return
+    lastAutoBankDetails.current = formatted
+    setFormData((prev) => ({ ...prev, bankDetails: formatted }))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formData.currency, bankAccounts])
   // No account at all (e.g. the homepage demo generator) - there's no
   // Settings to lock the From fields to, so just make them editable.
   const isGuest = !profile
