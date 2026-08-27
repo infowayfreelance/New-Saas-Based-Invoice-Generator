@@ -4,7 +4,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { AlertCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { type InvoiceFormData, toNumber, formatBankDetails } from "@/lib/utils/invoice"
+import { type InvoiceFormData, toNumber, formatBankDetails, pickBankAccountForCurrency } from "@/lib/utils/invoice"
 import { EditInvoiceForm } from "@/components/invoice/edit-invoice-form"
 
 function isValidUUID(id: string): boolean {
@@ -130,11 +130,9 @@ export default async function InvoiceEditPage({ params }: { params: Promise<{ id
     supabase.from("user_settings").select("*").eq("user_id", user.id).maybeSingle(),
     supabase
       .from("bank_accounts")
-      .select("account_name, bank_name, account_number, routing_number, swift_code")
+      .select("account_name, bank_name, account_number, routing_number, swift_code, sort_code, bank_address, currency, is_default")
       .eq("user_id", user.id)
-      .order("is_default", { ascending: false })
-      .limit(1)
-      .maybeSingle(),
+      .order("is_default", { ascending: false }),
     supabase
       .from("invoice_templates")
       .select("logo_url, primary_color, accent_color, watermark_text, signature_url, layout_config")
@@ -147,7 +145,8 @@ export default async function InvoiceEditPage({ params }: { params: Promise<{ id
   const items = itemsResult.data || []
   const client = clientResult.data
   const userSettings = settingsResult.data
-  const bankAccount = bankAccountResult.data
+  const bankAccounts = bankAccountResult.data || []
+  const bankAccount = pickBankAccountForCurrency(bankAccounts, invoice.currency)
   const template = templateResult.data
 
   // Prepare form data
@@ -234,7 +233,7 @@ export default async function InvoiceEditPage({ params }: { params: Promise<{ id
         ]}
       />
       <div className="flex-1 space-y-6 p-4 md:p-6">
-        <EditInvoiceForm invoiceId={id} initialData={initialData} />
+        <EditInvoiceForm invoiceId={id} initialData={initialData} bankAccounts={bankAccounts} />
       </div>
     </>
   )

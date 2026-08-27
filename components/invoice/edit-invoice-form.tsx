@@ -15,8 +15,11 @@ import { Plus, Trash2 } from "lucide-react"
 import {
   type InvoiceFormData,
   type InvoiceItemFormData,
+  type BankAccountRecord,
   calculateInvoiceTotals,
   formatCurrency,
+  formatBankDetails,
+  pickBankAccountForCurrency,
   CURRENCIES,
 } from "@/lib/utils/invoice"
 import { createClient } from "@/lib/supabase/client"
@@ -33,9 +36,10 @@ import { InvoiceClientSection } from "@/components/invoice/invoice-client-sectio
 interface EditInvoiceFormProps {
   invoiceId: string
   initialData: InvoiceFormData & { clientId?: string | null }
+  bankAccounts?: BankAccountRecord[]
 }
 
-export function EditInvoiceForm({ invoiceId, initialData }: EditInvoiceFormProps) {
+export function EditInvoiceForm({ invoiceId, initialData, bankAccounts = [] }: EditInvoiceFormProps) {
   const router = useRouter()
   const [formData, setFormData] = useState<InvoiceFormData>(initialData)
   const [clients, setClients] = useState<any[]>([])
@@ -51,6 +55,23 @@ export function EditInvoiceForm({ invoiceId, initialData }: EditInvoiceFormProps
     email: initialData.fromEmail,
     address: initialData.fromAddress,
   })
+  // Tracks the last value we auto-filled into Bank Details so a currency
+  // switch doesn't clobber text the user has since edited by hand.
+  const lastAutoBankDetails = React.useRef(initialData.bankDetails || "")
+
+  useEffect(() => {
+    if (bankAccounts.length === 0) return
+    const match = pickBankAccountForCurrency(bankAccounts, formData.currency)
+    if (!match) return
+    const formatted = formatBankDetails(match)
+    if (formatted === formData.bankDetails) return
+    // Only overwrite if the field still holds what we last auto-filled
+    // (i.e. the user hasn't customized it since).
+    if ((formData.bankDetails || "") !== lastAutoBankDetails.current) return
+    lastAutoBankDetails.current = formatted
+    setFormData((prev) => ({ ...prev, bankDetails: formatted }))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formData.currency, bankAccounts])
 
   // Filter currencies to only show enabled ones
   // If no currencies are enabled (public pages), show all currencies

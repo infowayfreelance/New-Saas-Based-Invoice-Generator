@@ -1,6 +1,13 @@
 import type { Metadata } from "next"
 import { createServiceClient } from "@/lib/supabase/service"
-import { toNumber, formatCurrency, formatDate, formatBankDetails, type InvoiceFormData } from "@/lib/utils/invoice"
+import {
+  toNumber,
+  formatCurrency,
+  formatDate,
+  formatBankDetails,
+  pickBankAccountForCurrency,
+  type InvoiceFormData,
+} from "@/lib/utils/invoice"
 import { PublicInvoiceView } from "@/components/invoice/public-invoice-view"
 import { getPublicInvoiceSummary } from "@/lib/data/public-invoice"
 
@@ -62,7 +69,7 @@ export default async function PublicInvoicePage({ params }: { params: Promise<{ 
       return <NotFound />
     }
 
-    const [{ data: items }, { data: client }, { data: userSettings }, { data: bankAccount }, { data: template }] =
+    const [{ data: items }, { data: client }, { data: userSettings }, { data: bankAccounts }, { data: template }] =
       await Promise.all([
         supabase.from("invoice_items").select("*").eq("invoice_id", id).order("created_at", { ascending: true }),
         invoice.client_id
@@ -71,11 +78,9 @@ export default async function PublicInvoicePage({ params }: { params: Promise<{ 
         supabase.from("user_settings").select("*").eq("user_id", invoice.user_id).maybeSingle(),
         supabase
           .from("bank_accounts")
-          .select("account_name, bank_name, account_number, routing_number, swift_code")
+          .select("account_name, bank_name, account_number, routing_number, swift_code, sort_code, bank_address, currency, is_default")
           .eq("user_id", invoice.user_id)
-          .order("is_default", { ascending: false })
-          .limit(1)
-          .maybeSingle(),
+          .order("is_default", { ascending: false }),
         supabase
           .from("invoice_templates")
           .select("logo_url, primary_color, accent_color, watermark_text, signature_url, layout_config")
@@ -84,6 +89,8 @@ export default async function PublicInvoicePage({ params }: { params: Promise<{ 
           .limit(1)
           .maybeSingle(),
       ])
+
+    const bankAccount = pickBankAccountForCurrency(bankAccounts, invoice.currency)
 
     const clientAddress = client
       ? [

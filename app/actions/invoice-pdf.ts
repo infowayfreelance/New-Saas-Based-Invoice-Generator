@@ -2,7 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
-import { formatBankDetails, type InvoiceFormData } from "@/lib/utils/invoice"
+import { formatBankDetails, pickBankAccountForCurrency, type InvoiceFormData } from "@/lib/utils/invoice"
 
 export async function getInvoiceDataForPDF(invoiceId: string): Promise<{ 
   success: boolean
@@ -59,13 +59,13 @@ export async function getInvoiceDataForPDF(invoiceId: string): Promise<{
     console.error("[v0] PDF: Error fetching user data:", userError)
   }
 
-  const { data: bankAccount } = await supabase
+  const { data: bankAccounts } = await supabase
     .from("bank_accounts")
-    .select("account_name, bank_name, account_number, routing_number, swift_code")
+    .select("account_name, bank_name, account_number, routing_number, swift_code, sort_code, bank_address, currency, is_default")
     .eq("user_id", user.id)
     .order("is_default", { ascending: false })
-    .limit(1)
-    .maybeSingle()
+
+  const bankAccount = pickBankAccountForCurrency(bankAccounts, invoice.currency)
 
   const { data: userSettings } = await supabase
     .from("user_settings")

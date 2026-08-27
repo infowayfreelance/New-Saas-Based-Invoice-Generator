@@ -44,18 +44,42 @@ export interface BankAccountRecord {
   account_number: string
   routing_number: string | null
   swift_code: string | null
+  sort_code?: string | null
+  bank_address?: string | null
+  currency?: string | null
+  is_default?: boolean | null
 }
 
 export function formatBankDetails(account: BankAccountRecord | null | undefined): string {
   if (!account) return ""
   const lines = [
+    `Beneficiary: ${account.account_name}`,
     `Bank Name: ${account.bank_name}`,
-    `Account Name: ${account.account_name}`,
-    `Account Number: ${account.account_number}`,
   ]
+  if (account.sort_code) lines.push(`Sort Code: ${account.sort_code}`)
+  lines.push(`Account Number: ${account.account_number}`)
   if (account.routing_number) lines.push(`Routing Number: ${account.routing_number}`)
   if (account.swift_code) lines.push(`SWIFT / IBAN: ${account.swift_code}`)
+  if (account.bank_address) lines.push(`Bank Address: ${account.bank_address}`)
   return lines.join("\n")
+}
+
+/**
+ * Picks the saved bank account whose currency matches the invoice's
+ * currency (case-insensitive). Falls back to the user's default account,
+ * then the first saved account, so there's always a sensible choice when
+ * no exact currency match exists.
+ */
+export function pickBankAccountForCurrency<T extends BankAccountRecord>(
+  accounts: T[] | null | undefined,
+  currency?: string | null,
+): T | null {
+  if (!accounts || accounts.length === 0) return null
+  if (currency) {
+    const match = accounts.find((a) => (a.currency || "").toUpperCase() === currency.toUpperCase())
+    if (match) return match
+  }
+  return accounts.find((a) => a.is_default) || accounts[0]
 }
 
 export interface InvoiceItemFormData {
