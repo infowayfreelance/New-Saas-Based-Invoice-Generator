@@ -179,7 +179,7 @@ export default function FeaturesPage() {
             Create your first invoice in under 60 seconds. No credit card required.
           </p>
           <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <Link href="/free-invoice">
+            <Link href="/">
               <Button size="lg" className="w-full gap-2 sm:w-auto">
                 Create Free Invoice
                 <ArrowRight className="h-4 w-4" />

@@ -136,7 +136,7 @@ export default async function PricingPage() {
                   </ul>
                 </CardContent>
                 <CardFooter>
-                  <Link href="/free-invoice" className="w-full">
+                  <Link href="/" className="w-full">
                     <button className="w-full rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground">
                       Create Free Invoice
                     </button>
