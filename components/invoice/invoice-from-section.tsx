@@ -1,11 +1,13 @@
 "use client"
 
-import { useState } from "react"
+import type React from "react"
+import { useRef, useState } from "react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { ImagePlus, X } from "lucide-react"
 
 type FromMode = "settings" | "manual"
 
@@ -20,8 +22,10 @@ interface InvoiceFromSectionProps {
   fromName: string
   fromEmail: string
   fromAddress: string
+  logoUrl?: string
   settingsSnapshot: { name: string; email: string; address: string }
   onChange: (field: "fromName" | "fromEmail" | "fromAddress", value: string) => void
+  onLogoChange?: (logoUrl: string | undefined) => void
 }
 
 /**
@@ -37,10 +41,26 @@ export function InvoiceFromSection({
   fromName,
   fromEmail,
   fromAddress,
+  logoUrl,
   settingsSnapshot,
   onChange,
+  onLogoChange,
 }: InvoiceFromSectionProps) {
   const [mode, setMode] = useState<FromMode>("settings")
+  const logoInputRef = useRef<HTMLInputElement>(null)
+
+  const handleLogoFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = (ev) => onLogoChange?.(ev.target?.result as string)
+    reader.readAsDataURL(file)
+  }
+
+  const removeLogo = () => {
+    onLogoChange?.(undefined)
+    if (logoInputRef.current) logoInputRef.current.value = ""
+  }
 
   const handleModeChange = (nextMode: FromMode) => {
     if (nextMode === "settings") {
@@ -56,6 +76,51 @@ export function InvoiceFromSection({
   return (
     <Card>
       <CardHeader className="pb-4">
+        {/* Logo upload — top-left of the From card */}
+        <div className="mb-3">
+          <input
+            ref={logoInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleLogoFile}
+            aria-label="Upload business logo"
+          />
+          {logoUrl ? (
+            <div className="group relative inline-block">
+              <img
+                src={logoUrl}
+                alt="Business logo"
+                className="h-14 w-auto max-w-[140px] rounded-md border border-border object-contain"
+              />
+              <button
+                type="button"
+                onClick={removeLogo}
+                className="absolute -right-2 -top-2 hidden h-5 w-5 items-center justify-center rounded-full bg-destructive text-destructive-foreground group-hover:flex"
+                aria-label="Remove logo"
+              >
+                <X className="h-3 w-3" />
+              </button>
+              <button
+                type="button"
+                onClick={() => logoInputRef.current?.click()}
+                className="absolute inset-0 hidden rounded-md bg-black/40 text-xs font-medium text-white group-hover:flex items-center justify-center"
+              >
+                Change
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => logoInputRef.current?.click()}
+              className="flex h-14 w-[140px] flex-col items-center justify-center gap-1 rounded-md border border-dashed border-border bg-muted/40 text-xs text-muted-foreground transition-colors hover:border-primary/50 hover:bg-primary/5 hover:text-primary"
+            >
+              <ImagePlus className="h-4 w-4" />
+              <span>Add Your Logo</span>
+            </button>
+          )}
+        </div>
+
         <div className="flex items-center justify-between gap-2">
           <CardTitle className="text-base">From (Your Business)</CardTitle>
           {isPaid && (

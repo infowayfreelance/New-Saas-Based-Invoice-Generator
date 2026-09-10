@@ -58,8 +58,6 @@ export function InvoiceForm({
   const { profile } = useAuth()
   const planCode = profile?.plan?.code || "BASIC"
   const isPaid = planCode === "STANDARD" || planCode === "PRO"
-  // Tracks the last value we auto-filled into Bank Details so a currency
-  // switch doesn't clobber text the user has since edited by hand.
   const lastAutoBankDetails = useRef(initialData.bankDetails || "")
 
   useEffect(() => {
@@ -73,8 +71,7 @@ export function InvoiceForm({
     setFormData((prev) => ({ ...prev, bankDetails: formatted }))
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formData.currency, bankAccounts])
-  // No account at all (e.g. the homepage demo generator) - there's no
-  // Settings to lock the From fields to, so just make them editable.
+
   const isGuest = !profile
   const [settingsSnapshot] = useState({
     name: initialData.fromName,
@@ -82,8 +79,6 @@ export function InvoiceForm({
     address: initialData.fromAddress,
   })
 
-  // Filter currencies to only show enabled ones
-  // If no currencies are enabled (public pages), show all currencies
   const availableCurrencies = enabledCurrencies && enabledCurrencies.length > 0
     ? ALL_CURRENCIES.filter(currency => enabledCurrencies.includes(currency.code))
     : ALL_CURRENCIES
@@ -110,11 +105,9 @@ export function InvoiceForm({
         if (!error && data) {
           setClients(data)
           
-          // In edit mode, if we have a clientId, prefill the client data
           if (mode === "edit" && initialData.clientId && initialData.clientId !== "none") {
             const client = data.find((c) => c.id === initialData.clientId)
             if (client) {
-              // Client data is already in initialData, just make sure it's set
               setSelectedClientId(initialData.clientId)
             }
           }
@@ -135,7 +128,6 @@ export function InvoiceForm({
 
   const handleClientSelect = (clientId: string) => {
     if (clientId === "none") {
-      // Clear client fields and set to null
       setSelectedClientId(null)
       updateField("clientName", "")
       updateField("clientEmail", "")
@@ -212,8 +204,10 @@ export function InvoiceForm({
           fromName={formData.fromName}
           fromEmail={formData.fromEmail}
           fromAddress={formData.fromAddress}
+          logoUrl={formData.logoUrl}
           settingsSnapshot={settingsSnapshot}
           onChange={updateField}
+          onLogoChange={(url) => updateField("logoUrl", url)}
         />
 
         <InvoiceClientSection
@@ -469,7 +463,7 @@ export function InvoiceForm({
         </Card>
       </div>
 
-      {/* Full Terms & Conditions (rendered as its own page in the PDF) */}
+      {/* Full Terms & Conditions */}
       <Card>
         <CardHeader className="pb-4">
           <CardTitle className="text-base">Terms & Conditions</CardTitle>
