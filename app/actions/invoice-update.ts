@@ -67,6 +67,7 @@ export async function updateInvoice(
     terms_detail: data.termsDetail || null,
     bank_details: data.bankDetails || null,
     client_id: data.clientId && data.clientId !== "none" ? data.clientId : null,
+    logo_url: data.logoUrl || null,
     updated_at: new Date().toISOString(),
   }
 

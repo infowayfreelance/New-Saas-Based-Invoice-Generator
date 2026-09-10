@@ -210,7 +210,7 @@ export default async function InvoiceEditPage({ params }: { params: Promise<{ id
     poNumber: invoice.po_number || "",
     fromTaxId: userSettings?.tax_id || "",
     clientTaxId: client?.tax_number || "",
-    logoUrl: template?.logo_url || undefined,
+    logoUrl: invoice.logo_url || template?.logo_url || undefined,
     primaryColor: invoice.primary_color || template?.primary_color || undefined,
     accentColor: invoice.accent_color || template?.accent_color || undefined,
     watermarkText: template?.watermark_text || undefined,
