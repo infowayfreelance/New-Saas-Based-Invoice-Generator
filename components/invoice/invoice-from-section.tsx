@@ -76,50 +76,54 @@ export function InvoiceFromSection({
   return (
     <Card>
       <CardHeader className="pb-4">
-        {/* Logo upload — top-left of the From card */}
-        <div className="mb-3">
-          <input
-            ref={logoInputRef}
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={handleLogoFile}
-            aria-label="Upload business logo"
-          />
-          {logoUrl ? (
-            <div className="group relative inline-block">
-              <img
-                src={logoUrl}
-                alt="Business logo"
-                className="h-14 w-auto max-w-[140px] rounded-md border border-border object-contain"
-              />
-              <button
-                type="button"
-                onClick={removeLogo}
-                className="absolute -right-2 -top-2 hidden h-5 w-5 items-center justify-center rounded-full bg-destructive text-destructive-foreground group-hover:flex"
-                aria-label="Remove logo"
-              >
-                <X className="h-3 w-3" />
-              </button>
+        {/* Logo upload — top-left of the From card, gated to paid plans */}
+        {isPaid && (
+          <div className="mb-3">
+            <input
+              ref={logoInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleLogoFile}
+              aria-label="Upload business logo"
+            />
+            {logoUrl ? (
+              <div className="group relative inline-block">
+                <img
+                  src={logoUrl}
+                  alt="Business logo"
+                  className="h-14 w-auto max-w-[140px] rounded-md border border-border object-contain"
+                />
+                {/* Change overlay — rendered first so the remove button stacks above it */}
+                <button
+                  type="button"
+                  onClick={() => logoInputRef.current?.click()}
+                  className="absolute inset-0 hidden rounded-md bg-black/40 text-xs font-medium text-white group-hover:flex items-center justify-center"
+                >
+                  Change
+                </button>
+                {/* Remove button — z-10 keeps it above the Change overlay */}
+                <button
+                  type="button"
+                  onClick={removeLogo}
+                  className="absolute -right-2 -top-2 z-10 hidden h-5 w-5 items-center justify-center rounded-full bg-destructive text-destructive-foreground group-hover:flex"
+                  aria-label="Remove logo"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
+            ) : (
               <button
                 type="button"
                 onClick={() => logoInputRef.current?.click()}
-                className="absolute inset-0 hidden rounded-md bg-black/40 text-xs font-medium text-white group-hover:flex items-center justify-center"
+                className="flex h-14 w-[140px] flex-col items-center justify-center gap-1 rounded-md border border-dashed border-border bg-muted/40 text-xs text-muted-foreground transition-colors hover:border-primary/50 hover:bg-primary/5 hover:text-primary"
               >
-                Change
+                <ImagePlus className="h-4 w-4" />
+                <span>Add Your Logo</span>
               </button>
-            </div>
-          ) : (
-            <button
-              type="button"
-              onClick={() => logoInputRef.current?.click()}
-              className="flex h-14 w-[140px] flex-col items-center justify-center gap-1 rounded-md border border-dashed border-border bg-muted/40 text-xs text-muted-foreground transition-colors hover:border-primary/50 hover:bg-primary/5 hover:text-primary"
-            >
-              <ImagePlus className="h-4 w-4" />
-              <span>Add Your Logo</span>
-            </button>
-          )}
-        </div>
+            )}
+          </div>
+        )}
 
         <div className="flex items-center justify-between gap-2">
           <CardTitle className="text-base">From (Your Business)</CardTitle>
