@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useRef, useEffect } from "react"
 import Link from "next/link"
+import { useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import {
@@ -18,6 +19,7 @@ import { InvoicePreview } from "@/components/invoice/invoice-preview"
 import { InvoiceStyleControls } from "@/components/invoice/invoice-style-controls"
 import { UsageMeter } from "@/components/invoice/usage-meter"
 import { type InvoiceFormData, getDefaultInvoiceData, calculateInvoiceTotals } from "@/lib/utils/invoice"
+import { SIMPLE_INVOICE_TEMPLATE_IDS } from "@/lib/utils/simple-invoice-templates"
 import { generateGuestInvoice, checkInvoiceUsage } from "@/app/actions/invoice"
 import { downloadInvoicePdf } from "@/lib/utils/pdf"
 import { Download, Send, AlertCircle, ArrowRight, FilePlus } from "lucide-react"
@@ -57,6 +59,20 @@ export function EmbeddedInvoiceGenerator({ showHeading = false, useBackend = fal
     message?: string
   } | null>(null)
   const previewRef = useRef<HTMLDivElement>(null)
+  const searchParams = useSearchParams()
+
+  // "Use Template" links from /invoice-templates/* pass ?layout=<id> so the
+  // chosen template is applied immediately - the user lands on the preview
+  // with that design already selected, instead of a broken/no-op button.
+  useEffect(() => {
+    const layout = searchParams.get("layout")
+    if (layout && SIMPLE_INVOICE_TEMPLATE_IDS.includes(layout)) {
+      setFormData((prev) => ({ ...prev, layoutStyle: layout }))
+      setShowPreview(true)
+    }
+    // Only ever needs to run once, from the URL present on load.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   useEffect(() => {
     if (!useBackend) return
