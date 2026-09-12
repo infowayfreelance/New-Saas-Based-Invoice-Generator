@@ -62,13 +62,17 @@ export function EmbeddedInvoiceGenerator({ showHeading = false, useBackend = fal
   const searchParams = useSearchParams()
 
   // "Use Template" links from /invoice-templates/* pass ?layout=<id> so the
-  // chosen template is applied immediately - the user lands on the preview
-  // with that design already selected, instead of a broken/no-op button.
+  // chosen template is pre-selected. The user still lands on the normal,
+  // fully editable form (not a static preview) - the template is only
+  // applied to how the invoice looks once they generate/download it.
   useEffect(() => {
     const layout = searchParams.get("layout")
     if (layout && SIMPLE_INVOICE_TEMPLATE_IDS.includes(layout)) {
       setFormData((prev) => ({ ...prev, layoutStyle: layout }))
-      setShowPreview(true)
+      const label = layout
+        .replace("simple-", "Simple ")
+        .replace(/(^|\s)\w/g, (c) => c.toUpperCase())
+      toast.success(`${label} template selected - fill in your details below.`)
     }
     // Only ever needs to run once, from the URL present on load.
     // eslint-disable-next-line react-hooks/exhaustive-deps
