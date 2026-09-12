@@ -35,7 +35,7 @@ export function MarketingFooter() {
                 </Link>
               </li>
               <li>
-                <Link href="/free-invoice" className="text-muted-foreground hover:text-foreground">
+                <Link href="/" className="text-muted-foreground hover:text-foreground">
                   Free Invoice Generator
                 </Link>
               </li>

@@ -149,6 +149,7 @@ export async function generateAuthenticatedInvoice(
       primary_color: data.primaryColor || null,
       accent_color: data.accentColor || null,
       font_family: data.fontFamily || null,
+      logo_url: data.logoUrl || null,
     })
     .select()
     .single()
@@ -334,6 +335,7 @@ export async function updateInvoice(
     primary_color: data.primaryColor || null,
     accent_color: data.accentColor || null,
     font_family: data.fontFamily || null,
+    logo_url: data.logoUrl || null,
     client_id: data.clientId && data.clientId !== "none" ? data.clientId : null,
   }
   console.log("[v0] STEP 7 COMPLETE: Update payload built:", updateData)
