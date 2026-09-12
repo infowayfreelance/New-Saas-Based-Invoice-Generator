@@ -3,7 +3,9 @@ import Link from "next/link"
 import { getSiteUrl } from "@/lib/utils/site-url"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { TemplateThumbnail } from "@/components/templates/template-thumbnail"
+import { InvoicePreview } from "@/components/invoice/invoice-preview"
+import { SIMPLE_INVOICE_TEMPLATES } from "@/lib/utils/simple-invoice-templates"
+import type { InvoiceFormData } from "@/lib/utils/invoice"
 import { ArrowRight, ListChecks, Zap, Eye, Clock3, Users } from "lucide-react"
 
 const siteUrl = getSiteUrl()
@@ -24,27 +26,29 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
 }
 
-// Data-driven so more Simple Invoice Template variations can be added
-// later (e.g. "Simple Bold") without changing the page structure above.
-interface SimpleTemplateVariant {
-  name: string
-  description: string
+// Fictional sample data used only to render a realistic preview of each
+// template. The actual invoice generator (linked via "Use Template") starts
+// from the user's own default invoice data - this sample never reaches it.
+const sampleInvoiceData: Omit<InvoiceFormData, "layoutStyle"> = {
+  fromName: "Harper & Co Design Studio",
+  fromEmail: "hello@harperco.example",
+  fromAddress: "14 Ashford Lane\nLondon, UK",
+  clientName: "Bloom Retail Ltd",
+  clientEmail: "accounts@bloomretail.example",
+  clientAddress: "Unit 4, Riverside Business Park\nManchester, UK",
+  invoiceNumber: "INV-1042",
+  issueDate: "2025-01-06",
+  dueDate: "2025-01-20",
+  currency: "GBP",
+  items: [
+    { id: "1", description: "Brand identity design", quantity: 1, unitPrice: 850, taxRate: 20 },
+    { id: "2", description: "Website homepage design", quantity: 1, unitPrice: 650, taxRate: 20 },
+  ],
+  terms: "Payment due within 14 days.",
+  taxRate: 0,
+  discountAmount: 0,
+  bankDetails: "",
 }
-
-const variants: SimpleTemplateVariant[] = [
-  {
-    name: "Simple Classic",
-    description: "A straightforward single-column layout with your details, line items and total, top to bottom.",
-  },
-  {
-    name: "Simple Modern",
-    description: "The same clean structure with a bit more spacing and a bolder header for extra clarity.",
-  },
-  {
-    name: "Simple Minimal",
-    description: "A pared-back version with only the essential fields, ideal for quick, no-frills invoices.",
-  },
-]
 
 const invoiceFields = [
   "Business name and contact details",
@@ -214,19 +218,25 @@ export default function SimpleInvoiceTemplatePage() {
       <section className="px-4 pb-16 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {variants.map((variant) => (
-              <Card key={variant.name} className="flex flex-col overflow-hidden border-border/50 bg-card/50">
-                <div className="p-4 pb-0">
-                  <TemplateThumbnail name={variant.name} />
+            {SIMPLE_INVOICE_TEMPLATES.map((variant) => (
+              <Card key={variant.id} className="flex flex-col overflow-hidden border-border/50 bg-card/50">
+                <div
+                  className="h-64 overflow-hidden border-b border-border bg-muted/20 p-3"
+                  role="img"
+                  aria-label={`${variant.label} Invoice Template Preview`}
+                >
+                  <div className="pointer-events-none">
+                    <InvoicePreview data={{ ...sampleInvoiceData, layoutStyle: variant.id }} />
+                  </div>
                 </div>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-lg">{variant.name}</CardTitle>
+                  <CardTitle className="text-lg">{variant.label}</CardTitle>
                 </CardHeader>
                 <CardContent className="flex flex-1 flex-col">
                   <CardDescription className="flex-1 text-sm leading-relaxed">
                     {variant.description}
                   </CardDescription>
-                  <Link href="/#invoice-generator" className="mt-4">
+                  <Link href={`/?layout=${variant.id}#invoice-generator`} className="mt-4">
                     <Button className="w-full gap-2">
                       Use Template
                       <ArrowRight className="h-4 w-4" />
@@ -236,6 +246,10 @@ export default function SimpleInvoiceTemplatePage() {
               </Card>
             ))}
           </div>
+          <p className="mt-6 text-center text-sm text-muted-foreground">
+            All templates are free to use. Choosing a template opens the invoice generator with that design applied,
+            ready for your own details - it never deletes or resets invoice data you've already entered.
+          </p>
         </div>
       </section>
 

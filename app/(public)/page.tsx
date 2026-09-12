@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { Suspense } from "react"
 import { getSiteUrl } from "@/lib/utils/site-url"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -445,9 +446,15 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* The actual, working invoice generator - above the fold */}
+          {/* The actual, working invoice generator - above the fold. Wrapped
+              in Suspense because it reads an optional ?layout= param (used
+              by "Use Template" links from /invoice-templates) via
+              useSearchParams, which requires a Suspense boundary to keep
+              the rest of this page statically prerendered. */}
           <div className="mx-auto mt-12 max-w-6xl">
-            <EmbeddedInvoiceGenerator />
+            <Suspense fallback={<div className="h-96" aria-hidden="true" />}>
+              <EmbeddedInvoiceGenerator />
+            </Suspense>
           </div>
 
           <div className="mx-auto mt-10 flex max-w-3xl flex-col items-center justify-center gap-4 sm:flex-row">
