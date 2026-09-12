@@ -4,6 +4,7 @@ import { getSiteUrl } from "@/lib/utils/site-url"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ArrowRight, ListChecks, FileText, LayoutTemplate, Sparkles, Clock } from "lucide-react"
+import { TemplateThumbnail } from "@/components/templates/template-thumbnail"
 
 const siteUrl = getSiteUrl()
 const pageUrl = `${siteUrl}/invoice-templates`
@@ -24,12 +25,15 @@ export const metadata: Metadata = {
 }
 
 interface TemplateCard {
-  // A stable slug for each template category. Not yet used as a link -
-  // reserved for when dedicated pages like /invoice-templates/simple-invoice-template
-  // are built, so this grid doesn't need restructuring later.
+  // A stable slug for each template category. Used as a link once a
+  // dedicated /invoice-templates/<slug> page exists (see `href` below);
+  // reserved on the rest so this grid doesn't need restructuring later.
   slug: string
   name: string
   description: string
+  // Only set once a dedicated page for this template exists. Falls back
+  // to the invoice generator so there's never a broken/premature link.
+  href?: string
 }
 
 const templates: TemplateCard[] = [
@@ -42,6 +46,7 @@ const templates: TemplateCard[] = [
     slug: "simple-invoice-template",
     name: "Simple Invoice Template",
     description: "A clean, minimal layout that keeps the focus on what matters: the details and the amount due.",
+    href: "/invoice-templates/simple-invoice-template",
   },
   {
     slug: "blank-invoice-template",
@@ -213,43 +218,6 @@ const schema = {
   ],
 }
 
-function TemplateThumbnail({ name }: { name: string }) {
-  return (
-    <div
-      role="img"
-      aria-label={`Preview of the ${name}`}
-      className="overflow-hidden rounded-lg border border-border bg-card"
-    >
-      <div className="flex items-center gap-1.5 border-b border-border bg-muted/40 px-3 py-2">
-        <span className="h-2 w-2 rounded-full bg-muted-foreground/20" />
-        <span className="h-2 w-2 rounded-full bg-muted-foreground/20" />
-        <span className="h-2 w-2 rounded-full bg-muted-foreground/20" />
-      </div>
-      <div className="space-y-3 p-4">
-        <div className="flex items-center justify-between">
-          <div className="h-2.5 w-16 rounded-full bg-foreground/20" />
-          <div className="h-2.5 w-10 rounded-full bg-muted-foreground/20" />
-        </div>
-        <div className="h-2 w-24 rounded-full bg-muted-foreground/15" />
-        <div className="space-y-1.5 border-t border-border pt-3">
-          <div className="flex items-center justify-between">
-            <div className="h-2 w-28 rounded-full bg-muted-foreground/15" />
-            <div className="h-2 w-8 rounded-full bg-muted-foreground/15" />
-          </div>
-          <div className="flex items-center justify-between">
-            <div className="h-2 w-20 rounded-full bg-muted-foreground/15" />
-            <div className="h-2 w-8 rounded-full bg-muted-foreground/15" />
-          </div>
-        </div>
-        <div className="flex items-center justify-between border-t border-border pt-3">
-          <div className="h-2.5 w-10 rounded-full bg-foreground/20" />
-          <div className="h-3 w-14 rounded-full bg-primary/30" />
-        </div>
-      </div>
-    </div>
-  )
-}
-
 export default function InvoiceTemplatesPage() {
   return (
     <>
@@ -301,7 +269,7 @@ export default function InvoiceTemplatesPage() {
                   <CardDescription className="flex-1 text-sm leading-relaxed">
                     {template.description}
                   </CardDescription>
-                  <Link href="/#invoice-generator" className="mt-4">
+                  <Link href={template.href || "/#invoice-generator"} className="mt-4">
                     <Button className="w-full gap-2">
                       Use Template
                       <ArrowRight className="h-4 w-4" />
