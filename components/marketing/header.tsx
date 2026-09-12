@@ -31,6 +31,12 @@ export function MarketingHeader() {
               Features
             </Link>
             <Link
+              href="/invoice-templates"
+              className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+            >
+              Templates
+            </Link>
+            <Link
               href="/pricing"
               className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
             >
@@ -67,6 +73,13 @@ export function MarketingHeader() {
               onClick={() => setMobileMenuOpen(false)}
             >
               Features
+            </Link>
+            <Link
+              href="/invoice-templates"
+              className="block rounded-lg px-3 py-2 text-base font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Templates
             </Link>
             <Link
               href="/pricing"

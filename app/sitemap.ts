@@ -11,6 +11,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/features",
     "/pricing",
     "/free-invoice",
+    "/invoice-templates",
     "/login",
     "/register",
     "/about",

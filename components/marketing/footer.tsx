@@ -40,6 +40,11 @@ export function MarketingFooter() {
                 </Link>
               </li>
               <li>
+                <Link href="/invoice-templates" className="text-muted-foreground hover:text-foreground">
+                  Invoice Templates
+                </Link>
+              </li>
+              <li>
                 <Link href="/#invoice-examples" className="text-muted-foreground hover:text-foreground">
                   Invoice Examples
                 </Link>
