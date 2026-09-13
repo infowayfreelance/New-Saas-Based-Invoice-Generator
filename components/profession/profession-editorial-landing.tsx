@@ -87,7 +87,7 @@ export function ProfessionEditorialLanding({
                   title={heroImage.title}
                   fill
                   priority
-                  sizes="(max-width: 1024px) 90vw, 540px"
+                  unoptimized
                   className="object-cover"
                   style={{ objectPosition: heroImage.objectPosition ?? "center" }}
                 />

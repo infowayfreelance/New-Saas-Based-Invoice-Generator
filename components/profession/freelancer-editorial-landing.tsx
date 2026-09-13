@@ -266,7 +266,7 @@ export function FreelancerEditorialLanding() {
                 title="Invoice Generator for Freelancers"
                 fill
                 priority
-                sizes="(max-width: 1024px) 90vw, 540px"
+                unoptimized
                 className="object-cover object-[65%_20%]"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
