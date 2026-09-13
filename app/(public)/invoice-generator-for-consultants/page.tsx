@@ -143,7 +143,15 @@ export default function Page() {
   return (
     <>
       <ProfessionSchema data={data} />
-      <ProfessionEditorialLanding data={data} />
+      <ProfessionEditorialLanding
+        data={data}
+        heroImage={{
+          src: "/invoice-generator-for-consultants-webp.webp",
+          alt: "Consultant creating a professional invoice with MakeInvo invoice generator",
+          title: "Invoice Generator for Consultants",
+          objectPosition: "65% 20%",
+        }}
+      />
     </>
   )
 }
