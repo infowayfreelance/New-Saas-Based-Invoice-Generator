@@ -1,5 +1,6 @@
 import Link from "next/link"
 import Image from "next/image"
+import { CookieSettingsLink } from "@/components/cookie-consent/cookie-settings-link"
 
 export function MarketingFooter() {
   return (
@@ -37,6 +38,11 @@ export function MarketingFooter() {
               <li>
                 <Link href="/" className="text-muted-foreground hover:text-foreground">
                   Free Invoice Generator
+                </Link>
+              </li>
+              <li>
+                <Link href="/invoice-templates" className="text-muted-foreground hover:text-foreground">
+                  Invoice Templates
                 </Link>
               </li>
               <li>
@@ -166,7 +172,8 @@ export function MarketingFooter() {
           <p className="text-sm text-muted-foreground">
             &copy; {new Date().getFullYear()} MakeInvo. All rights reserved.
           </p>
-          <p className="text-sm text-muted-foreground">
+          <p className="flex items-center gap-4 text-sm text-muted-foreground">
+            <CookieSettingsLink className="hover:text-foreground" />
             <Link href="/login" className="hover:text-foreground">
               Sign In
             </Link>
