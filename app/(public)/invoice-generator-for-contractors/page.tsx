@@ -144,7 +144,15 @@ export default function Page() {
   return (
     <>
       <ProfessionSchema data={data} />
-      <ProfessionEditorialLanding data={data} />
+      <ProfessionEditorialLanding
+        data={data}
+        heroImage={{
+          src: "/invoice-generator-for-contractors.webp.webp",
+          alt: "Contractor creating a professional invoice with MakeInvo invoice generator",
+          title: "Invoice Generator for Contractors",
+          objectPosition: "65% 20%",
+        }}
+      />
     </>
   )
 }
