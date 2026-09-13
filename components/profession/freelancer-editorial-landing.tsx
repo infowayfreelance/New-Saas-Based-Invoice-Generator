@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import {
@@ -258,10 +259,16 @@ export function FreelancerEditorialLanding() {
           </div>
 
           <div className="relative mt-8 lg:col-span-6 lg:mt-0">
-            <div className="relative mx-auto max-w-[540px] overflow-hidden rounded-2xl bg-muted shadow-xl">
-              <div className="flex h-[420px] items-center justify-center bg-gradient-to-br from-primary/15 via-muted to-primary/5 sm:h-[480px]">
-                <FileText className="h-24 w-24 text-primary/40" aria-hidden="true" />
-              </div>
+            <div className="relative mx-auto h-[420px] max-w-[540px] overflow-hidden rounded-2xl bg-muted shadow-xl sm:h-[480px]">
+              <Image
+                src="/freelancer-invoice-generator-hero.webp.webp"
+                alt="Freelancer creating a professional invoice with MakeInvo invoice generator"
+                title="Invoice Generator for Freelancers"
+                fill
+                priority
+                sizes="(max-width: 1024px) 90vw, 540px"
+                className="object-cover object-[65%_20%]"
+              />
               <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
               <div className="absolute bottom-4 left-4 flex items-center gap-2 text-xs text-white/90 drop-shadow-sm">
                 <span>London Creative Studio • Independent Contractor</span>
