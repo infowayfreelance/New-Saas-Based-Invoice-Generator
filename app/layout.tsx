@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { Toaster } from "@/components/ui/sonner"
 import { CurrencyProvider } from "@/components/app/currency-provider"
+import { CookieConsentProvider } from "@/components/cookie-consent/cookie-consent-provider"
 import { getSiteUrl } from "@/lib/utils/site-url"
 import "./globals.css"
 
@@ -85,7 +86,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className="font-sans antialiased">
         <CurrencyProvider>
-          {children}
+          <CookieConsentProvider>{children}</CookieConsentProvider>
         </CurrencyProvider>
         <Toaster position="top-right" />
         <Analytics />
