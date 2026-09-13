@@ -146,16 +146,6 @@ export function MarketingFooter() {
                 </Link>
               </li>
               <li>
-                <Link href="/refund-policy" className="text-muted-foreground hover:text-foreground">
-                  Refund and Cancellation Policy
-                </Link>
-              </li>
-              <li>
-                <Link href="/billing-disputes" className="text-muted-foreground hover:text-foreground">
-                  Billing and Dispute Policy
-                </Link>
-              </li>
-              <li>
                 <Link href="/cookie-policy" className="text-muted-foreground hover:text-foreground">
                   Cookie Policy
                 </Link>

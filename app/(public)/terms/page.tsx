@@ -52,8 +52,6 @@ export default function TermsPage() {
       sections={sections}
       related={[
         { href: LEGAL_ROUTES.acceptableUse, label: "Acceptable Use Policy" },
-        { href: LEGAL_ROUTES.refundPolicy, label: "Refund and Cancellation Policy" },
-        { href: LEGAL_ROUTES.billingDisputes, label: "Billing and Dispute Policy" },
         { href: LEGAL_ROUTES.privacy, label: "Privacy Policy" },
       ]}
     >
@@ -131,13 +129,14 @@ export default function TermsPage() {
 
       <h2 id="cancellation">11. Cancellation</h2>
       <p>
-        See the <Link href={LEGAL_ROUTES.refundPolicy}>Refund and Cancellation Policy</Link> for exactly how to
-        cancel and what happens to your access afterward.
+        You can cancel your subscription at any time from your account's subscription settings. Contact us via the{" "}
+        <Link href={LEGAL_ROUTES.contact}>Contact page</Link> if you need help with cancellation.
       </p>
 
       <h2 id="refunds">12. Refunds</h2>
       <p>
-        See the <Link href={LEGAL_ROUTES.refundPolicy}>Refund and Cancellation Policy</Link>. Nothing in these
+        For refund requests, contact us via the{" "}
+        <Link href={LEGAL_ROUTES.contact}>Contact page</Link>. Nothing in these
         terms overrides mandatory consumer-protection rights that apply in your jurisdiction.
       </p>
 
@@ -253,9 +252,7 @@ export default function TermsPage() {
       <h2 id="disputes">28. Dispute resolution</h2>
       <p>
         If a dispute arises, we encourage you to contact us first via the{" "}
-        <Link href={LEGAL_ROUTES.contact}>Contact page</Link> so we can try to resolve it directly. Billing-specific
-        disputes are also covered by the{" "}
-        <Link href={LEGAL_ROUTES.billingDisputes}>Billing and Dispute Policy</Link>.
+        <Link href={LEGAL_ROUTES.contact}>Contact page</Link> so we can try to resolve it directly.
       </p>
 
       <h2 id="changes">29. Changes to these terms</h2>
