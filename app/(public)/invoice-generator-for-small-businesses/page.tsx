@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import { getSiteUrl } from "@/lib/utils/site-url"
-import { ProfessionLandingTemplate } from "@/components/profession/profession-landing-template"
+import { ProfessionEditorialLanding } from "@/components/profession/profession-editorial-landing"
 import { ProfessionSchema } from "@/components/profession/profession-schema"
 import type { ProfessionPageData } from "@/components/profession/types"
 import { Building2, Users, Percent, CreditCard, Repeat, BarChart3 } from "lucide-react"
@@ -146,7 +146,7 @@ export default function Page() {
   return (
     <>
       <ProfessionSchema data={data} />
-      <ProfessionLandingTemplate data={data} />
+      <ProfessionEditorialLanding data={data} />
     </>
   )
 }
