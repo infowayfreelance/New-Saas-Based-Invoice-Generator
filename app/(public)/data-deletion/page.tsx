@@ -52,8 +52,9 @@ export default function DataDeletionPage() {
       <h2 id="cancel-subscription">3. Cancelling a subscription</h2>
       <p>
         Cancelling your paid plan is a separate action from deleting your account - it stops future billing but
-        keeps your account, invoices, and clients intact on the free plan. See the{" "}
-        <Link href={LEGAL_ROUTES.refundPolicy}>Refund and Cancellation Policy</Link>.
+        keeps your account, invoices, and clients intact on the free plan. You can cancel from your account's
+        subscription settings, or contact us via the{" "}
+        <Link href={LEGAL_ROUTES.contact}>Contact page</Link> if you need help.
       </p>
 
       <h2 id="delete-account">4. Deleting an account</h2>

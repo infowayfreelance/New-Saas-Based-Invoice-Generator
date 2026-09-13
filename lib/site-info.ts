@@ -45,7 +45,6 @@ export const LEGAL_ROUTES = {
   contact: "/contact",
   privacy: "/privacy",
   terms: "/terms",
-  refundPolicy: "/refund-policy",
   cookiePolicy: "/cookie-policy",
   security: "/security",
   dataDeletion: "/data-deletion",
