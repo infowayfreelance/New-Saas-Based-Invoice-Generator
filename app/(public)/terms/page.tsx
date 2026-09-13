@@ -53,7 +53,6 @@ export default function TermsPage() {
       related={[
         { href: LEGAL_ROUTES.acceptableUse, label: "Acceptable Use Policy" },
         { href: LEGAL_ROUTES.refundPolicy, label: "Refund and Cancellation Policy" },
-        { href: LEGAL_ROUTES.billingDisputes, label: "Billing and Dispute Policy" },
         { href: LEGAL_ROUTES.privacy, label: "Privacy Policy" },
       ]}
     >
@@ -253,9 +252,7 @@ export default function TermsPage() {
       <h2 id="disputes">28. Dispute resolution</h2>
       <p>
         If a dispute arises, we encourage you to contact us first via the{" "}
-        <Link href={LEGAL_ROUTES.contact}>Contact page</Link> so we can try to resolve it directly. Billing-specific
-        disputes are also covered by the{" "}
-        <Link href={LEGAL_ROUTES.billingDisputes}>Billing and Dispute Policy</Link>.
+        <Link href={LEGAL_ROUTES.contact}>Contact page</Link> so we can try to resolve it directly.
       </p>
 
       <h2 id="changes">29. Changes to these terms</h2>

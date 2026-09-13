@@ -20,7 +20,6 @@ export default function ContactPage() {
         { href: LEGAL_ROUTES.privacy, label: "Privacy Policy" },
         { href: LEGAL_ROUTES.security, label: "Security" },
         { href: LEGAL_ROUTES.refundPolicy, label: "Refund and Cancellation Policy" },
-        { href: LEGAL_ROUTES.billingDisputes, label: "Billing and Dispute Policy" },
       ]}
     >
       <h2>General support</h2>
@@ -35,8 +34,7 @@ export default function ContactPage() {
       <h2>Billing and subscription support</h2>
       <p>
         For plan, billing, or subscription questions, select "Billing or subscription" below, or see the{" "}
-        <Link href={LEGAL_ROUTES.refundPolicy}>Refund and Cancellation Policy</Link> and{" "}
-        <Link href={LEGAL_ROUTES.billingDisputes}>Billing and Dispute Policy</Link>.
+        <Link href={LEGAL_ROUTES.refundPolicy}>Refund and Cancellation Policy</Link>.
       </p>
 
       <h2>Privacy requests</h2>

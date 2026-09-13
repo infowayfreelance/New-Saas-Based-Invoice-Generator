@@ -38,7 +38,6 @@ export default function RefundPolicyPage() {
       related={[
         { href: "/pricing", label: "Pricing" },
         { href: LEGAL_ROUTES.terms, label: "Terms and Conditions" },
-        { href: LEGAL_ROUTES.billingDisputes, label: "Billing and Dispute Policy" },
       ]}
     >
       <h2 id="how-subscriptions-work">1. How subscriptions work</h2>
@@ -97,8 +96,7 @@ export default function RefundPolicyPage() {
       <h2 id="duplicate-charges">9. Duplicate or incorrect charges</h2>
       <p>
         If you believe you were charged twice or charged an incorrect amount, contact us with your account email,
-        the charge date and amount, and we will investigate against your Stripe/PayPal billing record. See the{" "}
-        <Link href={LEGAL_ROUTES.billingDisputes}>Billing and Dispute Policy</Link> for the full process.
+        the charge date and amount, and we will investigate against your Stripe/PayPal billing record.
       </p>
 
       <h2 id="failed-payments">10. Failed payments</h2>
