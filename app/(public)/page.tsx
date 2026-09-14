@@ -448,7 +448,8 @@ export default function HomePage() {
 
           {/* The actual, working invoice generator - above the fold. Wrapped
               in Suspense because it reads an optional ?layout= param (used
-              by "Use Template" links from /invoice-templates) via
+              by "Use Template" links from /invoice-templates and profession
+              pages like /invoice-generator-for-freelancers) via
               useSearchParams, which requires a Suspense boundary to keep
               the rest of this page statically prerendered. */}
           <div className="mx-auto mt-12 max-w-6xl">

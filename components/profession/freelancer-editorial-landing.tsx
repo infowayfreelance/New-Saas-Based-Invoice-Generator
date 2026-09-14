@@ -229,7 +229,7 @@ export function FreelancerEditorialLanding() {
               worldwide.
             </p>
             <div className="flex w-full flex-wrap items-center gap-4 pt-2">
-              <Link href="/#invoice-generator">
+              <Link href="/?layout=creative#invoice-generator">
                 <Button size="lg" className="gap-2 rounded-full px-8 py-6 text-base shadow-md">
                   Create a Free Invoice
                   <ArrowRight className="h-4 w-4" />
@@ -421,7 +421,7 @@ export function FreelancerEditorialLanding() {
                   hourly rates, and proof-of-delivery are always one keystroke away.
                 </p>
               </div>
-              <Link href="/#invoice-generator" className="shrink-0">
+              <Link href="/?layout=creative#invoice-generator" className="shrink-0">
                 <Button className="gap-2 rounded-full px-6 py-5 shadow-sm">
                   Launch Invoicer
                   <Bolt className="h-4 w-4" />
@@ -529,7 +529,7 @@ export function FreelancerEditorialLanding() {
             ))}
           </div>
           <div className="mt-12 text-center">
-            <Link href="/#invoice-generator">
+            <Link href="/?layout=creative#invoice-generator">
               <Button size="lg" className="gap-2 rounded-full px-8 py-6 text-base shadow-md">
                 Create a Free Invoice
                 <ArrowRight className="h-4 w-4" />
@@ -815,7 +815,7 @@ export function FreelancerEditorialLanding() {
             </p>
           </div>
           <div className="relative z-10 flex w-full shrink-0 flex-col items-center gap-4 sm:w-auto sm:flex-row">
-            <Link href="/#invoice-generator" className="w-full sm:w-auto">
+            <Link href="/?layout=creative#invoice-generator" className="w-full sm:w-auto">
               <Button size="lg" className="w-full gap-2 rounded-full px-8 py-6 text-base shadow-lg sm:w-auto">
                 Create a Free Invoice
                 <Bolt className="h-4 w-4" />
