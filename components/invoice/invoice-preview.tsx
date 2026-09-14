@@ -225,6 +225,9 @@ function ClassicInvoiceBody({ data }: { data: InvoiceFormData }) {
   const stamp = getStatusStamp(data.status)
   const v = vis(data)
   const taxLabel = data.taxName || "Tax"
+  const lp = data.logoPosition || "left"
+  const il = data.infoLayout || "side-by-side"
+  const ts = data.tableStyle || "clean"
 
   return (
     <>
@@ -233,7 +236,7 @@ function ClassicInvoiceBody({ data }: { data: InvoiceFormData }) {
         {/* Header */}
         <div className="flex items-start justify-between gap-6">
           <div>
-            <div className="flex items-center gap-3">
+            <div className={`flex items-center gap-3 ${lp === "center" ? "justify-center" : lp === "right" ? "justify-end" : ""}`}>
               {v.logo && data.logoUrl && (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={data.logoUrl} alt="Logo" crossOrigin="anonymous"
@@ -265,7 +268,7 @@ function ClassicInvoiceBody({ data }: { data: InvoiceFormData }) {
         <Separator className="my-5" style={{ backgroundColor: "#e5e5e5" }} />
 
         {/* Bill To & Invoice Info */}
-        <div className="grid gap-6 sm:grid-cols-2">
+        <div className={il === "stacked" ? "space-y-4" : "grid gap-6 sm:grid-cols-2"}>
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: "#737373" }}>Bill To</p>
             <p className="mt-1.5 text-base font-semibold" style={{ color: "#171717" }}>
@@ -280,7 +283,7 @@ function ClassicInvoiceBody({ data }: { data: InvoiceFormData }) {
             {v.taxNumbers && data.clientTaxId && <p className="text-sm" style={{ color: "#737373" }}>Tax ID: {data.clientTaxId}</p>}
             {data.clientRef && <p className="text-sm" style={{ color: "#737373" }}>Ref: {data.clientRef}</p>}
           </div>
-          <div className="space-y-2 text-right text-sm">
+          <div className={`space-y-2 text-sm ${il === "stacked" ? "" : "text-right"}`}>
             <div>
               <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: "#737373" }}>Issue Date</p>
               <p style={{ color: "#171717" }}>{formatDate(data.issueDate)}</p>
@@ -307,12 +310,20 @@ function ClassicInvoiceBody({ data }: { data: InvoiceFormData }) {
         <Separator className="my-5" style={{ backgroundColor: "#e5e5e5" }} />
 
         {/* Items Table */}
-        <table className="w-full text-sm">
+        <table className="w-full text-sm"
+          style={ts === "bordered" ? { borderCollapse: "collapse" } : undefined}>
           <thead>
-            <tr style={{ borderBottomWidth: "2px", borderBottomStyle: "solid", borderBottomColor: accentColor }}>
-              <th className="pb-2 text-left font-semibold" style={{ color: "#171717" }}>Description</th>
-              <th className="pb-2 text-right font-semibold" style={{ color: "#171717" }}>Rate</th>
-              <th className="pb-2 text-right font-semibold" style={{ color: "#171717" }}>Amount</th>
+            <tr style={
+              ts === "soft-card"
+                ? { backgroundColor: lighten(accentColor, 0.9) }
+                : { borderBottomWidth: "2px", borderBottomStyle: "solid", borderBottomColor: accentColor }
+            }>
+              <th className="pb-2 pt-2 text-left font-semibold px-2" style={{ color: "#171717",
+                ...(ts === "bordered" ? { border: `1px solid ${accentColor}` } : {}) }}>Description</th>
+              <th className="pb-2 pt-2 text-right font-semibold px-2" style={{ color: "#171717",
+                ...(ts === "bordered" ? { border: `1px solid ${accentColor}` } : {}) }}>Rate</th>
+              <th className="pb-2 pt-2 text-right font-semibold px-2" style={{ color: "#171717",
+                ...(ts === "bordered" ? { border: `1px solid ${accentColor}` } : {}) }}>Amount</th>
             </tr>
           </thead>
           <tbody>
@@ -322,18 +333,26 @@ function ClassicInvoiceBody({ data }: { data: InvoiceFormData }) {
               const taxRate = toNumber(item.taxRate)
               const lineTotal = qty * unitPrice * (1 + taxRate / 100)
               const summary = getBillingTypeSummary(item, data.currency)
+              const rowStyle: React.CSSProperties = ts === "soft-card"
+                ? { backgroundColor: idx % 2 === 1 ? "#f9fafb" : "#ffffff" }
+                : ts === "bordered"
+                ? { borderBottomWidth: "1px", borderBottomStyle: "solid", borderBottomColor: "#d1d5db" }
+                : { borderBottomWidth: "1px", borderBottomStyle: "solid", borderBottomColor: "#f5f5f5" }
               return (
-                <tr key={item.id} style={{ borderBottomWidth: "1px", borderBottomStyle: "solid", borderBottomColor: "#f5f5f5" }}>
-                  <td className="py-2.5" style={{ color: "#171717" }}>
+                <tr key={item.id} style={rowStyle}>
+                  <td className="py-2.5 px-2" style={{ color: "#171717",
+                    ...(ts === "bordered" ? { border: "1px solid #d1d5db" } : {}) }}>
                     <span className="font-medium">{item.description || "—"}</span>
                     {summary && <span className="block text-xs mt-0.5" style={{ color: "#9ca3af" }}>{summary}</span>}
                     {item.detailedDescription && <span className="block text-xs mt-0.5 whitespace-pre-line" style={{ color: "#9ca3af" }}>{item.detailedDescription}</span>}
                   </td>
-                  <td className="py-2.5 text-right" style={{ color: "#525252" }}>
+                  <td className="py-2.5 px-2 text-right" style={{ color: "#525252",
+                    ...(ts === "bordered" ? { border: "1px solid #d1d5db" } : {}) }}>
                     {(item.billingType === "fixed" || item.billingType === "milestone") ? "—" : formatCurrency(unitPrice, data.currency)}
                     {taxRate > 0 && <span className="block text-xs" style={{ color: "#9ca3af" }}>+{taxRate}%</span>}
                   </td>
-                  <td className="py-2.5 text-right font-semibold" style={{ color: "#171717" }}>
+                  <td className="py-2.5 px-2 text-right font-semibold" style={{ color: "#171717",
+                    ...(ts === "bordered" ? { border: "1px solid #d1d5db" } : {}) }}>
                     {formatCurrency(lineTotal, data.currency)}
                   </td>
                 </tr>
@@ -446,9 +465,9 @@ function ClassicInvoiceBody({ data }: { data: InvoiceFormData }) {
   )
 }
 
-// ─── Template 2: Banner ──────────────────────────────────────────────────────
+// ─── Template 2: Modern ──────────────────────────────────────────────────────
 
-function BannerInvoiceBody({ data }: { data: InvoiceFormData }) {
+function ModernInvoiceBody({ data }: { data: InvoiceFormData }) {
   const totals = calculateInvoiceTotals(data.items, data.discountAmount)
   const accentColor = data.accentColor || "#f5c518"
   const brandColor = data.primaryColor || "#171717"
@@ -459,13 +478,15 @@ function BannerInvoiceBody({ data }: { data: InvoiceFormData }) {
   const v = vis(data)
   const taxLabel = data.taxName || "Tax"
   const footerContact = [data.fromEmail, data.fromAddress?.split("\n")[0]].filter(Boolean).join("   |   ")
+  const lp = data.logoPosition || "left"
+  const ts = data.tableStyle || "clean"
 
   return (
     <div className="flex flex-col p-10" style={{ position: "relative", minHeight: `${PDF_RENDER_HEIGHT}px` }}>
       {data.watermarkText && <Watermark text={data.watermarkText} color={darkColor} />}
       <div className="flex flex-1 flex-col" style={{ position: "relative", zIndex: 1 }}>
         {/* Logo row */}
-        <div className="flex items-center gap-3">
+        <div className={`flex items-center gap-3 ${lp === "center" ? "justify-center" : lp === "right" ? "justify-end" : ""}`}>
           {v.logo && data.logoUrl && (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={data.logoUrl} alt="Logo" crossOrigin="anonymous"
@@ -547,13 +568,20 @@ function BannerInvoiceBody({ data }: { data: InvoiceFormData }) {
 
         {/* Items table */}
         <div className="mt-5 flex flex-1 flex-col overflow-x-auto overflow-y-hidden">
-          <table className="w-full text-sm">
+          <table className="w-full text-sm"
+            style={ts === "bordered" ? { borderCollapse: "collapse" } : undefined}>
             <thead>
-              <tr style={{ backgroundColor: darkColor }}>
-                <th className="px-3 py-2 text-left font-semibold" style={{ color: "#ffffff" }}>SL.</th>
-                <th className="px-3 py-2 text-left font-semibold" style={{ color: "#ffffff" }}>Description</th>
-                <th className="px-3 py-2 text-right font-semibold" style={{ color: "#ffffff" }}>Rate</th>
-                <th className="px-3 py-2 text-right font-semibold" style={{ color: "#ffffff" }}>Total</th>
+              <tr style={ts === "bordered"
+                ? { backgroundColor: darkColor, border: `1px solid ${accentColor}` }
+                : { backgroundColor: darkColor }}>
+                <th className="px-3 py-2 text-left font-semibold" style={{ color: "#ffffff",
+                  ...(ts === "bordered" ? { border: "1px solid rgba(255,255,255,0.3)" } : {}) }}>SL.</th>
+                <th className="px-3 py-2 text-left font-semibold" style={{ color: "#ffffff",
+                  ...(ts === "bordered" ? { border: "1px solid rgba(255,255,255,0.3)" } : {}) }}>Description</th>
+                <th className="px-3 py-2 text-right font-semibold" style={{ color: "#ffffff",
+                  ...(ts === "bordered" ? { border: "1px solid rgba(255,255,255,0.3)" } : {}) }}>Rate</th>
+                <th className="px-3 py-2 text-right font-semibold" style={{ color: "#ffffff",
+                  ...(ts === "bordered" ? { border: "1px solid rgba(255,255,255,0.3)" } : {}) }}>Total</th>
               </tr>
             </thead>
             <tbody>
@@ -563,17 +591,25 @@ function BannerInvoiceBody({ data }: { data: InvoiceFormData }) {
                 const taxRate = toNumber(item.taxRate)
                 const total = qty * unitPrice * (1 + taxRate / 100)
                 const summary = getBillingTypeSummary(item, data.currency)
+                const rowBg = ts === "soft-card"
+                  ? (index % 2 === 1 ? lighten(accentColor, 0.9) : "#ffffff")
+                  : (index % 2 === 1 ? "#f5f5f5" : "#ffffff")
                 return (
-                  <tr key={item.id} style={{ backgroundColor: index % 2 === 1 ? "#f5f5f5" : "#ffffff" }}>
-                    <td className="px-3 py-2" style={{ color: "#171717" }}>{index + 1}</td>
-                    <td className="px-3 py-2" style={{ color: "#171717" }}>
+                  <tr key={item.id} style={{ backgroundColor: rowBg,
+                    ...(ts === "bordered" ? { border: "1px solid #d1d5db" } : {}) }}>
+                    <td className="px-3 py-2" style={{ color: "#171717",
+                      ...(ts === "bordered" ? { border: "1px solid #d1d5db" } : {}) }}>{index + 1}</td>
+                    <td className="px-3 py-2" style={{ color: "#171717",
+                      ...(ts === "bordered" ? { border: "1px solid #d1d5db" } : {}) }}>
                       {item.description || "—"}
                       {summary && <span className="block text-xs" style={{ color: "#9ca3af" }}>{summary}</span>}
                     </td>
-                    <td className="px-3 py-2 text-right" style={{ color: "#525252" }}>
+                    <td className="px-3 py-2 text-right" style={{ color: "#525252",
+                      ...(ts === "bordered" ? { border: "1px solid #d1d5db" } : {}) }}>
                       {(item.billingType === "fixed" || item.billingType === "milestone") ? "—" : formatCurrency(unitPrice, data.currency)}
                     </td>
-                    <td className="px-3 py-2 text-right font-medium" style={{ color: "#171717" }}>
+                    <td className="px-3 py-2 text-right font-medium" style={{ color: "#171717",
+                      ...(ts === "bordered" ? { border: "1px solid #d1d5db" } : {}) }}>
                       {formatCurrency(total, data.currency)}
                     </td>
                   </tr>
@@ -689,18 +725,21 @@ function MinimalInvoiceBody({ data }: { data: InvoiceFormData }) {
   const stamp = getStatusStamp(data.status)
   const v = vis(data)
   const taxLabel = data.taxName || "Tax"
+  const lp = data.logoPosition || "left"
+  const il = data.infoLayout || "side-by-side"
 
   return (
     <div className="p-10" style={{ position: "relative" }}>
       {data.watermarkText && <Watermark text={data.watermarkText} />}
       <div style={{ position: "relative", zIndex: 1 }}>
-        {/* Header — logo left, "INVOICE" right */}
-        <div className="flex items-start justify-between">
-          <div>
+        {/* Header */}
+        <div className={`flex items-start ${lp === "center" ? "flex-col items-center gap-4" : "justify-between"}`}>
+          <div className={lp === "center" ? "text-center" : ""}>
             {v.logo && data.logoUrl && (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={data.logoUrl} alt="Logo" crossOrigin="anonymous"
-                style={{ height: "44px", width: "auto", objectFit: "contain", marginBottom: "8px" }} />
+                style={{ height: "44px", width: "auto", objectFit: "contain", marginBottom: "8px",
+                  ...(lp === "center" ? { margin: "0 auto 8px" } : lp === "right" ? { marginLeft: "auto" } : {}) }} />
             )}
             <p className="text-xl font-semibold" style={{ color: "#171717" }}>
               {data.fromName || "Your Business"}
@@ -710,7 +749,7 @@ function MinimalInvoiceBody({ data }: { data: InvoiceFormData }) {
             <p className="text-xs whitespace-pre-line" style={{ color: "#9ca3af" }}>{data.fromAddress}</p>
             {v.taxNumbers && data.fromTaxId && <p className="text-xs" style={{ color: "#9ca3af" }}>VAT/Tax: {data.fromTaxId}</p>}
           </div>
-          <div className="text-right">
+          <div className={lp === "center" ? "text-center" : "text-right"}>
             <p className="text-5xl font-light tracking-widest" style={{ color: "#e5e7eb" }}>INVOICE</p>
             <p className="text-sm font-medium mt-1" style={{ color: "#374151" }}>#{data.invoiceNumber}</p>
             {v.invoiceStatus && stamp && (
@@ -725,7 +764,7 @@ function MinimalInvoiceBody({ data }: { data: InvoiceFormData }) {
         <div className="mt-8 mb-8" style={{ borderBottom: "1px solid #e5e7eb" }} />
 
         {/* Bill to + dates */}
-        <div className="grid grid-cols-2 gap-10">
+        <div className={il === "stacked" ? "space-y-6" : "grid grid-cols-2 gap-10"}>
           <div>
             <p className="text-xs uppercase tracking-widest mb-3" style={{ color: "#9ca3af" }}>Billed to</p>
             <p className="font-semibold" style={{ color: "#111827" }}>{data.clientName || "Client Name"}</p>
@@ -878,6 +917,9 @@ function BoldInvoiceBody({ data }: { data: InvoiceFormData }) {
   const stamp = getStatusStamp(data.status)
   const v = vis(data)
   const taxLabel = data.taxName || "Tax"
+  const lp = data.logoPosition || "left"
+  const il = data.infoLayout || "side-by-side"
+  const ts = data.tableStyle || "clean"
 
   return (
     <div style={{ position: "relative" }}>
@@ -885,13 +927,14 @@ function BoldInvoiceBody({ data }: { data: InvoiceFormData }) {
 
       {/* Full-width header */}
       <div className="px-10 py-8" style={{ backgroundColor: primaryColor, position: "relative", zIndex: 1 }}>
-        <div className="flex items-start justify-between">
-          <div>
+        <div className={`flex items-start ${lp === "center" ? "flex-col items-center gap-4" : "justify-between"}`}>
+          <div className={lp === "center" ? "text-center" : ""}>
             {v.logo && data.logoUrl && (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={data.logoUrl} alt="Logo" crossOrigin="anonymous"
                 style={{ height: "48px", width: "auto", objectFit: "contain", marginBottom: "12px",
-                  filter: headerTextColor === "#ffffff" ? "brightness(10)" : "none" }} />
+                  filter: headerTextColor === "#ffffff" ? "brightness(10)" : "none",
+                  ...(lp === "center" ? { margin: "0 auto 12px" } : {}) }} />
             )}
             <p className="text-2xl font-bold" style={{ color: headerTextColor }}>
               {data.fromName || "Your Business"}
@@ -920,7 +963,7 @@ function BoldInvoiceBody({ data }: { data: InvoiceFormData }) {
 
       <div className="px-10 py-8" style={{ position: "relative", zIndex: 1 }}>
         {/* Bill to + Dates */}
-        <div className="grid grid-cols-2 gap-8 mb-8">
+        <div className={`${il === "stacked" ? "space-y-4" : "grid grid-cols-2 gap-8"} mb-8`}>
           <div className="rounded-lg p-4" style={{ backgroundColor: "#f8fafc" }}>
             <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: accentColor }}>Billed To</p>
             <p className="font-bold text-base" style={{ color: "#0f172a" }}>{data.clientName || "Client Name"}</p>
@@ -965,19 +1008,23 @@ function BoldInvoiceBody({ data }: { data: InvoiceFormData }) {
         )}
 
         {/* Items Table */}
-        <table className="w-full text-sm">
+        <table className="w-full text-sm"
+          style={ts === "bordered" ? { borderCollapse: "collapse" } : undefined}>
           <thead>
-            <tr>
+            <tr style={ts === "bordered" ? { border: `1px solid ${accentColor}` } : undefined}>
               <th className="text-left py-2.5 px-3 font-bold text-xs uppercase tracking-wider" colSpan={1}
-                style={{ backgroundColor: lighten(primaryColor, 0.9), color: primaryColor }}>
+                style={{ backgroundColor: lighten(primaryColor, 0.9), color: primaryColor,
+                  ...(ts === "bordered" ? { border: `1px solid ${accentColor}` } : {}) }}>
                 Description
               </th>
               <th className="text-right py-2.5 px-3 font-bold text-xs uppercase tracking-wider"
-                style={{ backgroundColor: lighten(primaryColor, 0.9), color: primaryColor }}>
+                style={{ backgroundColor: lighten(primaryColor, 0.9), color: primaryColor,
+                  ...(ts === "bordered" ? { border: `1px solid ${accentColor}` } : {}) }}>
                 Rate
               </th>
               <th className="text-right py-2.5 px-3 font-bold text-xs uppercase tracking-wider"
-                style={{ backgroundColor: lighten(primaryColor, 0.9), color: primaryColor }}>
+                style={{ backgroundColor: lighten(primaryColor, 0.9), color: primaryColor,
+                  ...(ts === "bordered" ? { border: `1px solid ${accentColor}` } : {}) }}>
                 Amount
               </th>
             </tr>
@@ -989,18 +1036,26 @@ function BoldInvoiceBody({ data }: { data: InvoiceFormData }) {
               const taxRate = toNumber(item.taxRate)
               const lineTotal = qty * unitPrice * (1 + taxRate / 100)
               const summary = getBillingTypeSummary(item, data.currency)
+              const rowStyle: React.CSSProperties = ts === "soft-card"
+                ? { backgroundColor: idx % 2 === 1 ? lighten(accentColor, 0.95) : "#ffffff" }
+                : ts === "bordered"
+                ? { border: "1px solid #d1d5db" }
+                : { borderBottom: "1px solid #f1f5f9" }
               return (
-                <tr key={item.id} style={{ borderBottom: "1px solid #f1f5f9" }}>
-                  <td className="py-3 px-3" style={{ color: "#0f172a" }}>
+                <tr key={item.id} style={rowStyle}>
+                  <td className="py-3 px-3" style={{ color: "#0f172a",
+                    ...(ts === "bordered" ? { border: "1px solid #d1d5db" } : {}) }}>
                     <span className="font-medium">{item.description || "—"}</span>
                     {summary && <span className="block text-xs mt-0.5" style={{ color: "#94a3b8" }}>{summary}</span>}
                     {item.detailedDescription && <span className="block text-xs mt-0.5 whitespace-pre-line" style={{ color: "#94a3b8" }}>{item.detailedDescription}</span>}
                   </td>
-                  <td className="py-3 px-3 text-right" style={{ color: "#64748b" }}>
+                  <td className="py-3 px-3 text-right" style={{ color: "#64748b",
+                    ...(ts === "bordered" ? { border: "1px solid #d1d5db" } : {}) }}>
                     {(item.billingType === "fixed" || item.billingType === "milestone") ? "—" : formatCurrency(unitPrice, data.currency)}
                     {taxRate > 0 && <span className="block text-xs" style={{ color: "#94a3b8" }}>+{taxRate}%</span>}
                   </td>
-                  <td className="py-3 px-3 text-right font-semibold" style={{ color: "#0f172a" }}>
+                  <td className="py-3 px-3 text-right font-semibold" style={{ color: "#0f172a",
+                    ...(ts === "bordered" ? { border: "1px solid #d1d5db" } : {}) }}>
                     {formatCurrency(lineTotal, data.currency)}
                   </td>
                 </tr>
@@ -1308,15 +1363,17 @@ function CompactInvoiceBody({ data }: { data: InvoiceFormData }) {
   const stamp = getStatusStamp(data.status)
   const v = vis(data)
   const taxLabel = data.taxName || "Tax"
+  const lp = data.logoPosition || "left"
+  const ts = data.tableStyle || "clean"
 
   return (
     <div className="p-8" style={{ position: "relative" }}>
       {data.watermarkText && <Watermark text={data.watermarkText} />}
       <div style={{ position: "relative", zIndex: 1 }}>
         {/* Compact header row */}
-        <div className="flex items-start justify-between pb-4"
+        <div className={`flex items-start pb-4 ${lp === "center" ? "justify-center" : "justify-between"}`}
           style={{ borderBottom: `3px solid ${accentColor}` }}>
-          <div className="flex items-center gap-3">
+          <div className={`flex items-center gap-3 ${lp === "right" ? "order-last" : ""}`}>
             {v.logo && data.logoUrl && (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={data.logoUrl} alt="Logo" crossOrigin="anonymous"
@@ -1371,13 +1428,20 @@ function CompactInvoiceBody({ data }: { data: InvoiceFormData }) {
         </div>
 
         {/* Items Table — compact */}
-        <table className="w-full mt-3" style={{ fontSize: "12px" }}>
+        <table className="w-full mt-3" style={{ fontSize: "12px",
+          ...(ts === "bordered" ? { borderCollapse: "collapse" } : {}) }}>
           <thead>
-            <tr style={{ backgroundColor: lighten(accentColor, 0.9) }}>
-              <th className="py-1.5 px-2 text-left font-semibold" style={{ color: brandColor }}>#</th>
-              <th className="py-1.5 px-2 text-left font-semibold" style={{ color: brandColor }}>Description</th>
-              <th className="py-1.5 px-2 text-right font-semibold" style={{ color: brandColor }}>Rate</th>
-              <th className="py-1.5 px-2 text-right font-semibold" style={{ color: brandColor }}>Amt</th>
+            <tr style={ts === "bordered"
+              ? { backgroundColor: lighten(accentColor, 0.9), border: `1px solid ${accentColor}` }
+              : { backgroundColor: lighten(accentColor, 0.9) }}>
+              <th className="py-1.5 px-2 text-left font-semibold" style={{ color: brandColor,
+                ...(ts === "bordered" ? { border: `1px solid ${accentColor}` } : {}) }}>#</th>
+              <th className="py-1.5 px-2 text-left font-semibold" style={{ color: brandColor,
+                ...(ts === "bordered" ? { border: `1px solid ${accentColor}` } : {}) }}>Description</th>
+              <th className="py-1.5 px-2 text-right font-semibold" style={{ color: brandColor,
+                ...(ts === "bordered" ? { border: `1px solid ${accentColor}` } : {}) }}>Rate</th>
+              <th className="py-1.5 px-2 text-right font-semibold" style={{ color: brandColor,
+                ...(ts === "bordered" ? { border: `1px solid ${accentColor}` } : {}) }}>Amt</th>
             </tr>
           </thead>
           <tbody>
@@ -1387,19 +1451,29 @@ function CompactInvoiceBody({ data }: { data: InvoiceFormData }) {
               const taxRate = toNumber(item.taxRate)
               const lineTotal = qty * unitPrice * (1 + taxRate / 100)
               const summary = getBillingTypeSummary(item, data.currency)
+              const rowBg = ts === "soft-card"
+                ? (index % 2 === 0 ? "#ffffff" : "#f0f9ff")
+                : (index % 2 === 0 ? "#ffffff" : "#f8fafc")
               return (
                 <tr key={item.id}
-                  style={{ backgroundColor: index % 2 === 0 ? "#ffffff" : "#f8fafc", borderBottom: "1px solid #f1f5f9" }}>
-                  <td className="py-1.5 px-2" style={{ color: "#94a3b8" }}>{index + 1}</td>
-                  <td className="py-1.5 px-2" style={{ color: "#0f172a" }}>
+                  style={{ backgroundColor: rowBg,
+                    ...(ts === "bordered"
+                      ? { border: "1px solid #d1d5db" }
+                      : { borderBottom: "1px solid #f1f5f9" }) }}>
+                  <td className="py-1.5 px-2" style={{ color: "#94a3b8",
+                    ...(ts === "bordered" ? { border: "1px solid #d1d5db" } : {}) }}>{index + 1}</td>
+                  <td className="py-1.5 px-2" style={{ color: "#0f172a",
+                    ...(ts === "bordered" ? { border: "1px solid #d1d5db" } : {}) }}>
                     {item.description || "—"}
                     {summary && <span className="block text-[10px]" style={{ color: "#94a3b8" }}>{summary}</span>}
                   </td>
-                  <td className="py-1.5 px-2 text-right" style={{ color: "#64748b" }}>
+                  <td className="py-1.5 px-2 text-right" style={{ color: "#64748b",
+                    ...(ts === "bordered" ? { border: "1px solid #d1d5db" } : {}) }}>
                     {(item.billingType === "fixed" || item.billingType === "milestone") ? "—" : formatCurrency(unitPrice, data.currency)}
                     {taxRate > 0 && <span className="block text-[10px]" style={{ color: "#94a3b8" }}>+{taxRate}%</span>}
                   </td>
-                  <td className="py-1.5 px-2 text-right font-semibold" style={{ color: "#0f172a" }}>
+                  <td className="py-1.5 px-2 text-right font-semibold" style={{ color: "#0f172a",
+                    ...(ts === "bordered" ? { border: "1px solid #d1d5db" } : {}) }}>
                     {formatCurrency(lineTotal, data.currency)}
                   </td>
                 </tr>
@@ -1483,7 +1557,7 @@ function CompactInvoiceBody({ data }: { data: InvoiceFormData }) {
 
 const TEMPLATE_BODIES: Record<string, React.ComponentType<{ data: InvoiceFormData }>> = {
   classic: ClassicInvoiceBody,
-  banner: BannerInvoiceBody,
+  modern: ModernInvoiceBody,
   minimal: MinimalInvoiceBody,
   bold: BoldInvoiceBody,
   creative: CreativeInvoiceBody,
@@ -1518,7 +1592,7 @@ export function InvoicePreview({ data, className }: InvoicePreviewProps) {
   }, [])
 
   const TemplateBody = TEMPLATE_BODIES[data.layoutStyle || "classic"] || ClassicInvoiceBody
-  const noInnerPadding = data.layoutStyle === "banner" || data.layoutStyle === "bold" || data.layoutStyle === "creative"
+  const noInnerPadding = data.layoutStyle === "modern" || data.layoutStyle === "bold" || data.layoutStyle === "creative"
 
   return (
     <div ref={containerRef} className={className} style={{ height: scaledHeight, overflow: "hidden" }}>
@@ -1580,4 +1654,4 @@ export function InvoicePreview({ data, className }: InvoicePreviewProps) {
 }
 
 // Named exports for use in the download API server action
-export { ClassicInvoiceBody, BannerInvoiceBody }
+export { ClassicInvoiceBody, ModernInvoiceBody }

@@ -29,11 +29,12 @@ interface EmbeddedInvoiceGeneratorProps {
   useBackend?: boolean
 }
 
-const VALID_LAYOUTS = ["classic", "banner", "minimal", "bold", "creative", "compact"]
+const VALID_LAYOUTS = ["classic", "modern", "minimal", "bold", "creative", "compact"]
 
 export function EmbeddedInvoiceGenerator({ showHeading = false, useBackend = false }: EmbeddedInvoiceGeneratorProps) {
   const searchParams = useSearchParams()
   const initialLayout = VALID_LAYOUTS.includes(searchParams.get("layout") ?? "") ? searchParams.get("layout")! : undefined
+  const freelancerMode = searchParams.get("mode") === "freelancer"
   const [formData, setFormData] = useState<InvoiceFormData>(() => {
     const data = getDefaultInvoiceData()
     if (initialLayout) data.layoutStyle = initialLayout
@@ -124,11 +125,17 @@ export function EmbeddedInvoiceGenerator({ showHeading = false, useBackend = fal
       primaryColor={formData.primaryColor}
       accentColor={formData.accentColor}
       fontFamily={formData.fontFamily || "sans"}
+      logoPosition={formData.logoPosition || "left"}
+      infoLayout={formData.infoLayout || "side-by-side"}
+      tableStyle={formData.tableStyle || "clean"}
       visibility={formData.visibility}
       onLayoutStyleChange={(v) => handleStyleChange("layoutStyle", v)}
       onPrimaryColorChange={(v) => handleStyleChange("primaryColor", v)}
       onAccentColorChange={(v) => handleStyleChange("accentColor", v)}
       onFontFamilyChange={(v) => handleStyleChange("fontFamily", v)}
+      onLogoPositionChange={(v) => handleStyleChange("logoPosition", v)}
+      onInfoLayoutChange={(v) => handleStyleChange("infoLayout", v)}
+      onTableStyleChange={(v) => handleStyleChange("tableStyle", v)}
       onVisibilityChange={handleVisibilityChange}
     />
   )
@@ -154,7 +161,14 @@ export function EmbeddedInvoiceGenerator({ showHeading = false, useBackend = fal
     <div id="invoice-generator" className="scroll-mt-20">
       {showHeading && (
         <div className="mb-8">
-          <h1 className="text-3xl font-bold">Free Invoice Generator</h1>
+          <div className="flex items-center gap-3 flex-wrap">
+            <h1 className="text-3xl font-bold">Free Invoice Generator</h1>
+            {freelancerMode && (
+              <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+                Freelancer Mode
+              </span>
+            )}
+          </div>
           <p className="mt-2 text-muted-foreground">Create professional invoices in seconds. No signup required.</p>
         </div>
       )}

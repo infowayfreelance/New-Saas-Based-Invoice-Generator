@@ -7,7 +7,7 @@ import { Switch } from "@/components/ui/switch"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { DesignSlider } from "@/components/invoice/design-slider"
 import { FONT_OPTIONS } from "@/lib/utils/fonts"
-import { Check, Palette, Eye } from "lucide-react"
+import { Check, Palette, Eye, Layout } from "lucide-react"
 import type { InvoiceVisibility } from "@/lib/utils/invoice"
 import { getDefaultVisibility } from "@/lib/utils/invoice"
 
@@ -16,24 +16,28 @@ interface InvoiceStyleControlsProps {
   primaryColor?: string
   accentColor?: string
   fontFamily?: string
+  logoPosition?: "left" | "center" | "right"
+  infoLayout?: "side-by-side" | "stacked"
+  tableStyle?: "clean" | "bordered" | "soft-card"
   visibility?: Partial<InvoiceVisibility>
   onLayoutStyleChange: (value: string) => void
   onPrimaryColorChange: (value: string) => void
   onAccentColorChange: (value: string) => void
   onFontFamilyChange: (value: string) => void
+  onLogoPositionChange?: (value: "left" | "center" | "right") => void
+  onInfoLayoutChange?: (value: "side-by-side" | "stacked") => void
+  onTableStyleChange?: (value: "clean" | "bordered" | "soft-card") => void
   onVisibilityChange?: (key: keyof InvoiceVisibility, value: boolean) => void
 }
 
 const COLOR_PRESETS = [
-  { label: "Slate & Blue", primary: "#1e293b", accent: "#3b82f6" },
-  { label: "Slate & Gold", primary: "#1e293b", accent: "#f5c518" },
-  { label: "Midnight & Teal", primary: "#0f172a", accent: "#14b8a6" },
-  { label: "Charcoal & Coral", primary: "#27272a", accent: "#fb7185" },
-  { label: "Navy & Sky", primary: "#1e3a5f", accent: "#38bdf8" },
-  { label: "Forest & Lime", primary: "#14532d", accent: "#a3e635" },
-  { label: "Plum & Amber", primary: "#3b0764", accent: "#f59e0b" },
-  { label: "Teal & Orange", primary: "#134e4a", accent: "#f97316" },
-  { label: "Purple & Pink", primary: "#4c1d95", accent: "#e879f9" },
+  { label: "Green", primary: "#14532d", accent: "#22c55e" },
+  { label: "Blue", primary: "#1e3a5f", accent: "#3b82f6" },
+  { label: "Navy", primary: "#0f172a", accent: "#38bdf8" },
+  { label: "Purple", primary: "#3b0764", accent: "#a855f7" },
+  { label: "Orange", primary: "#431407", accent: "#f97316" },
+  { label: "Teal", primary: "#134e4a", accent: "#14b8a6" },
+  { label: "Charcoal", primary: "#27272a", accent: "#a1a1aa" },
 ]
 
 const VISIBILITY_LABELS: { key: keyof InvoiceVisibility; label: string }[] = [
@@ -55,11 +59,17 @@ export function InvoiceStyleControls({
   primaryColor,
   accentColor,
   fontFamily,
+  logoPosition,
+  infoLayout,
+  tableStyle,
   visibility,
   onLayoutStyleChange,
   onPrimaryColorChange,
   onAccentColorChange,
   onFontFamilyChange,
+  onLogoPositionChange,
+  onInfoLayoutChange,
+  onTableStyleChange,
   onVisibilityChange,
 }: InvoiceStyleControlsProps) {
   const primary = primaryColor || "#171717"
@@ -194,6 +204,108 @@ export function InvoiceStyleControls({
           </div>
         </PopoverContent>
       </Popover>
+
+      {/* Layout controls */}
+      {(onLogoPositionChange || onInfoLayoutChange || onTableStyleChange) && (
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              type="button"
+              variant="outline"
+              className="h-auto w-full justify-start gap-3 bg-transparent py-2.5 shadow-sm hover:shadow"
+            >
+              <Layout className="h-4 w-4 shrink-0 text-muted-foreground" />
+              <span className="flex-1 text-left">
+                <span className="block text-sm font-medium leading-none">Layout options</span>
+                <span className="mt-1 block text-xs font-normal text-muted-foreground">
+                  Logo position, info layout, table style
+                </span>
+              </span>
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-72 p-4 space-y-4" align="start">
+            {onLogoPositionChange && (
+              <div className="space-y-2">
+                <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  Logo position
+                </Label>
+                <div className="grid grid-cols-3 gap-2">
+                  {(["left", "center", "right"] as const).map((pos) => (
+                    <button
+                      key={pos}
+                      type="button"
+                      onClick={() => onLogoPositionChange(pos)}
+                      className={cn(
+                        "rounded-md border px-2 py-1.5 text-xs capitalize transition-colors",
+                        (logoPosition || "left") === pos
+                          ? "border-primary bg-primary/5 font-semibold"
+                          : "border-border hover:border-primary/50",
+                      )}
+                    >
+                      {pos}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+            {onInfoLayoutChange && (
+              <div className="space-y-2">
+                <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  Info layout
+                </Label>
+                <div className="grid grid-cols-2 gap-2">
+                  {([
+                    { id: "side-by-side", label: "Side by side" },
+                    { id: "stacked", label: "Stacked" },
+                  ] as const).map(({ id, label }) => (
+                    <button
+                      key={id}
+                      type="button"
+                      onClick={() => onInfoLayoutChange(id)}
+                      className={cn(
+                        "rounded-md border px-2 py-1.5 text-xs transition-colors",
+                        (infoLayout || "side-by-side") === id
+                          ? "border-primary bg-primary/5 font-semibold"
+                          : "border-border hover:border-primary/50",
+                      )}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+            {onTableStyleChange && (
+              <div className="space-y-2">
+                <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  Table style
+                </Label>
+                <div className="grid grid-cols-3 gap-2">
+                  {([
+                    { id: "clean", label: "Clean" },
+                    { id: "bordered", label: "Bordered" },
+                    { id: "soft-card", label: "Soft card" },
+                  ] as const).map(({ id, label }) => (
+                    <button
+                      key={id}
+                      type="button"
+                      onClick={() => onTableStyleChange(id)}
+                      className={cn(
+                        "rounded-md border px-2 py-1.5 text-xs transition-colors",
+                        (tableStyle || "clean") === id
+                          ? "border-primary bg-primary/5 font-semibold"
+                          : "border-border hover:border-primary/50",
+                      )}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </PopoverContent>
+        </Popover>
+      )}
 
       {/* Visibility toggles */}
       {onVisibilityChange && (

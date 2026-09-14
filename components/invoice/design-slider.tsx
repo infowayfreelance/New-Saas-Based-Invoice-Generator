@@ -10,7 +10,7 @@ interface Design {
 
 export const INVOICE_DESIGNS: Design[] = [
   { id: "classic", label: "Classic" },
-  { id: "banner", label: "Banner" },
+  { id: "modern", label: "Modern" },
   { id: "minimal", label: "Minimal" },
   { id: "bold", label: "Bold" },
   { id: "creative", label: "Creative" },
@@ -49,7 +49,7 @@ export function DesignSlider({ value, primaryColor, accentColor, onChange }: Des
             )}
             <div className="h-28 w-full overflow-hidden rounded bg-white shadow-sm">
               {design.id === "classic" && <ClassicThumbnail dark={dark} accent={accent} />}
-              {design.id === "banner" && <BannerThumbnail dark={dark} accent={accent} />}
+              {design.id === "modern" && <ModernThumbnail dark={dark} accent={accent} />}
               {design.id === "minimal" && <MinimalThumbnail dark={dark} accent={accent} />}
               {design.id === "bold" && <BoldThumbnail dark={dark} accent={accent} />}
               {design.id === "creative" && <CreativeThumbnail dark={dark} accent={accent} />}
@@ -108,7 +108,7 @@ function ClassicThumbnail({ dark, accent }: { dark: string; accent: string }) {
   )
 }
 
-function BannerThumbnail({ dark, accent }: { dark: string; accent: string }) {
+function ModernThumbnail({ dark, accent }: { dark: string; accent: string }) {
   return (
     <div className="flex h-full w-full flex-col p-2">
       <div className="h-1 w-5 rounded-sm bg-gray-300 mb-1" />
