@@ -115,3 +115,9 @@
 .pdf-safe-wrapper .text-muted-foreground {
   color: #737373 !important;
 }
+@media print {
+  body * { visibility: hidden !important; }
+  .invoice-print-root, .invoice-print-root * { visibility: visible !important; }
+  .invoice-print-root { position: absolute !important; left: 0; top: 0; transform: none !important; }
+  .invoice-print-root .pdf-page { break-after: page; border: 0 !important; }
+}

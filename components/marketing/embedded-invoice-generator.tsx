@@ -20,7 +20,7 @@ import { UsageMeter } from "@/components/invoice/usage-meter"
 import { type InvoiceFormData, type InvoiceVisibility, getDefaultInvoiceData } from "@/lib/utils/invoice"
 import { generateGuestInvoice, checkInvoiceUsage } from "@/app/actions/invoice"
 import { downloadInvoicePdf } from "@/lib/utils/pdf"
-import { Download, Send, AlertCircle, ArrowRight, FilePlus, Eye, Pencil } from "lucide-react"
+import { Download, Printer, Send, AlertCircle, ArrowRight, FilePlus, Eye, Pencil } from "lucide-react"
 import { toast } from "sonner"
 import { FloatingDownloadButton } from "@/components/floating-download-button"
 
@@ -29,7 +29,7 @@ interface EmbeddedInvoiceGeneratorProps {
   useBackend?: boolean
 }
 
-const VALID_LAYOUTS = ["classic", "banner", "minimal", "bold", "creative", "compact"]
+const VALID_LAYOUTS = ["classic", "modern", "banner", "minimal", "bold", "creative", "compact"]
 
 export function EmbeddedInvoiceGenerator({ showHeading = false, useBackend = false }: EmbeddedInvoiceGeneratorProps) {
   const searchParams = useSearchParams()
@@ -37,6 +37,10 @@ export function EmbeddedInvoiceGenerator({ showHeading = false, useBackend = fal
   const [formData, setFormData] = useState<InvoiceFormData>(() => {
     const data = getDefaultInvoiceData()
     if (initialLayout) data.layoutStyle = initialLayout
+    if (searchParams.get("mode") === "freelancer") {
+      data.layoutStyle = initialLayout || "modern"
+      data.items[0].billingType = "fixed"
+    }
     return data
   })
   const [isLoading, setIsLoading] = useState(false)
@@ -129,6 +133,12 @@ export function EmbeddedInvoiceGenerator({ showHeading = false, useBackend = fal
       onPrimaryColorChange={(v) => handleStyleChange("primaryColor", v)}
       onAccentColorChange={(v) => handleStyleChange("accentColor", v)}
       onFontFamilyChange={(v) => handleStyleChange("fontFamily", v)}
+      logoPosition={formData.logoPosition}
+      infoLayout={formData.infoLayout}
+      tableStyle={formData.tableStyle}
+      onLogoPositionChange={(v) => handleStyleChange("logoPosition", v)}
+      onInfoLayoutChange={(v) => handleStyleChange("infoLayout", v)}
+      onTableStyleChange={(v) => handleStyleChange("tableStyle", v)}
       onVisibilityChange={handleVisibilityChange}
     />
   )
@@ -142,6 +152,10 @@ export function EmbeddedInvoiceGenerator({ showHeading = false, useBackend = fal
       <Button variant="outline" onClick={handleCreateNewInvoice} className="bg-transparent">
         <FilePlus className="mr-2 h-4 w-4" />
         New Invoice
+      </Button>
+      <Button variant="outline" onClick={() => window.print()} className="bg-transparent">
+        <Printer className="mr-2 h-4 w-4" />
+        Print
       </Button>
       <Button variant="outline" onClick={() => setShowEmailDialog(true)} className="bg-transparent">
         <Send className="mr-2 h-4 w-4" />

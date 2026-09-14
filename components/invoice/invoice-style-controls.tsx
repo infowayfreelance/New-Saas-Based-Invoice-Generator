@@ -21,19 +21,23 @@ interface InvoiceStyleControlsProps {
   onPrimaryColorChange: (value: string) => void
   onAccentColorChange: (value: string) => void
   onFontFamilyChange: (value: string) => void
+  logoPosition?: "left" | "center" | "right"
+  infoLayout?: "side-by-side" | "stacked"
+  tableStyle?: "clean" | "bordered" | "soft-card"
+  onLogoPositionChange?: (value: "left" | "center" | "right") => void
+  onInfoLayoutChange?: (value: "side-by-side" | "stacked") => void
+  onTableStyleChange?: (value: "clean" | "bordered" | "soft-card") => void
   onVisibilityChange?: (key: keyof InvoiceVisibility, value: boolean) => void
 }
 
 const COLOR_PRESETS = [
-  { label: "Slate & Blue", primary: "#1e293b", accent: "#3b82f6" },
-  { label: "Slate & Gold", primary: "#1e293b", accent: "#f5c518" },
-  { label: "Midnight & Teal", primary: "#0f172a", accent: "#14b8a6" },
-  { label: "Charcoal & Coral", primary: "#27272a", accent: "#fb7185" },
-  { label: "Navy & Sky", primary: "#1e3a5f", accent: "#38bdf8" },
-  { label: "Forest & Lime", primary: "#14532d", accent: "#a3e635" },
-  { label: "Plum & Amber", primary: "#3b0764", accent: "#f59e0b" },
-  { label: "Teal & Orange", primary: "#134e4a", accent: "#f97316" },
-  { label: "Purple & Pink", primary: "#4c1d95", accent: "#e879f9" },
+  { label: "Green", color: "#15803d" },
+  { label: "Blue", color: "#2563eb" },
+  { label: "Navy", color: "#1e3a5f" },
+  { label: "Purple", color: "#7e22ce" },
+  { label: "Orange", color: "#ea580c" },
+  { label: "Teal", color: "#0f766e" },
+  { label: "Charcoal", color: "#27272a" },
 ]
 
 const VISIBILITY_LABELS: { key: keyof InvoiceVisibility; label: string }[] = [
@@ -60,6 +64,12 @@ export function InvoiceStyleControls({
   onPrimaryColorChange,
   onAccentColorChange,
   onFontFamilyChange,
+  logoPosition = "left",
+  infoLayout = "side-by-side",
+  tableStyle = "clean",
+  onLogoPositionChange,
+  onInfoLayoutChange,
+  onTableStyleChange,
   onVisibilityChange,
 }: InvoiceStyleControlsProps) {
   const primary = primaryColor || "#171717"
@@ -69,7 +79,7 @@ export function InvoiceStyleControls({
   return (
     <div className="space-y-5">
       <div className="space-y-2">
-        <Label>Template</Label>
+        <Label>Design</Label>
         <DesignSlider value={layoutStyle} primaryColor={primary} accentColor={accent} onChange={onLayoutStyleChange} />
       </div>
 
@@ -103,23 +113,22 @@ export function InvoiceStyleControls({
             </Label>
             <div className="grid grid-cols-3 gap-2">
               {COLOR_PRESETS.map((preset) => {
-                const isSelected = primary === preset.primary && accent === preset.accent
+                const isSelected = accent === preset.color
                 return (
                   <button
                     key={preset.label}
                     type="button"
                     title={preset.label}
                     onClick={() => {
-                      onPrimaryColorChange(preset.primary)
-                      onAccentColorChange(preset.accent)
+                      onPrimaryColorChange(preset.color)
+                      onAccentColorChange(preset.color)
                     }}
                     className={cn(
                       "relative flex h-10 overflow-hidden rounded-md border-2 transition-colors",
                       isSelected ? "border-primary" : "border-transparent hover:border-border",
                     )}
                   >
-                    <span className="h-full w-1/2" style={{ backgroundColor: preset.primary }} />
-                    <span className="h-full w-1/2" style={{ backgroundColor: preset.accent }} />
+                    <span className="h-full w-full" style={{ backgroundColor: preset.color }} />
                     {isSelected && (
                       <span className="absolute inset-0 flex items-center justify-center bg-black/10">
                         <Check className="h-4 w-4 text-white drop-shadow" />
@@ -194,6 +203,34 @@ export function InvoiceStyleControls({
           </div>
         </PopoverContent>
       </Popover>
+
+      {onLogoPositionChange && onInfoLayoutChange && onTableStyleChange && (
+        <div className="space-y-4 rounded-lg border p-4">
+          <Label className="text-sm font-semibold">Layout options</Label>
+          {[
+            { label: "Logo position", value: logoPosition, values: [["left", "Left"], ["center", "Center"], ["right", "Right"]], change: onLogoPositionChange },
+            { label: "Client details", value: infoLayout, values: [["side-by-side", "Side-by-side"], ["stacked", "Stacked"]], change: onInfoLayoutChange },
+            { label: "Table style", value: tableStyle, values: [["clean", "Clean"], ["bordered", "Bordered"], ["soft-card", "Card"]], change: onTableStyleChange },
+          ].map((control) => (
+            <div key={control.label} className="space-y-2">
+              <Label className="text-xs text-muted-foreground">{control.label}</Label>
+              <div className="flex flex-wrap gap-1.5" role="group" aria-label={control.label}>
+                {control.values.map(([value, label]) => (
+                  <Button
+                    key={value}
+                    type="button"
+                    size="sm"
+                    variant={control.value === value ? "default" : "outline"}
+                    onClick={() => control.change(value as never)}
+                  >
+                    {label}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Visibility toggles */}
       {onVisibilityChange && (
