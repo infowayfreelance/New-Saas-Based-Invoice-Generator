@@ -351,10 +351,5 @@ export function getDefaultInvoiceData(): InvoiceFormData {
     paymentLink: "",
     paymentCustomNote: "",
     visibility: getDefaultVisibility(),
-    layoutStyle: "classic",
-    fontFamily: "sans",
-    logoPosition: "left",
-    tableStyle: "clean",
-    infoLayout: "side-by-side",
   }
 }

@@ -314,7 +314,8 @@ export function FreelancerEditorialLanding() {
         </div>
       </section>
 
-      <section className="mx-auto w-full max-w-7xl scroll-mt-20 px-4 pb-16 sm:px-6 lg:px-8">
+      {/* Reuse the shared generator here so freelancer CTAs stay on this page. */}
+      <section className="mx-auto w-full max-w-7xl px-4 pb-16 sm:px-6 lg:px-8">
         <Suspense fallback={<div className="h-96" aria-hidden="true" />}>
           <EmbeddedInvoiceGenerator />
         </Suspense>
