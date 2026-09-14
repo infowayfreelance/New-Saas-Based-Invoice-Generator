@@ -1,41 +1,98 @@
+export type BillingType = "fixed" | "hourly" | "daily" | "quantity" | "milestone"
+
+export interface InvoiceVisibility {
+  logo: boolean
+  projectDetails: boolean
+  fromPhone: boolean
+  fromWebsite: boolean
+  clientPhone: boolean
+  taxNumbers: boolean
+  paymentDetails: boolean
+  notes: boolean
+  termsAndConditions: boolean
+  invoiceStatus: boolean
+  footer: boolean
+}
+
+export function getDefaultVisibility(): InvoiceVisibility {
+  return {
+    logo: true,
+    projectDetails: true,
+    fromPhone: true,
+    fromWebsite: true,
+    clientPhone: true,
+    taxNumbers: true,
+    paymentDetails: true,
+    notes: true,
+    termsAndConditions: true,
+    invoiceStatus: true,
+    footer: true,
+  }
+}
+
 export interface InvoiceFormData {
   // From (Your business)
   fromName: string
   fromEmail: string
   fromAddress: string
+  fromPhone?: string
+  fromWebsite?: string
+  fromBusinessReg?: string
   // To (Client)
   clientName: string
+  clientCompanyName?: string
   clientEmail: string
   clientAddress: string
+  clientPhone?: string
+  clientRef?: string
   // Invoice details
   invoiceNumber: string
   issueDate: string
   dueDate: string
+  paymentTerms?: "due-on-receipt" | "net-7" | "net-14" | "net-30" | "custom"
   currency: string
+  status?: string
+  // Project (optional section)
+  projectName?: string
+  projectRef?: string
+  projectDescription?: string
   // Items
   items: InvoiceItemFormData[]
-  // Additional
+  // Totals / calculations
   terms: string
+  notes?: string
   termsDetail?: string
   taxRate: number
+  taxName?: string
+  discountType?: "percentage" | "fixed"
+  discountValue?: number
   discountAmount: number
+  // Legacy payment / bank details
   bankDetails?: string
+  // Structured payment details
+  paymentMethod?: "bank" | "paypal" | "wise" | "stripe" | "other"
+  paymentLink?: string
+  paymentCustomNote?: string
   // Reference / compliance
   poNumber?: string
   fromTaxId?: string
   clientTaxId?: string
-  // Branding (from the user's default invoice template)
+  // Branding
   logoUrl?: string
   primaryColor?: string
   accentColor?: string
   watermarkText?: string
   signatureUrl?: string
   // Payment status
-  status?: string
   amountPaid?: number
   // Layout
   layoutStyle?: string
   fontFamily?: string
+  logoPosition?: "left" | "center" | "right"
+  tableStyle?: "clean" | "bordered" | "soft-card"
+  infoLayout?: "side-by-side" | "stacked"
+  // Visibility toggles
+  visibility?: Partial<InvoiceVisibility>
 }
 
 export interface BankAccountRecord {
@@ -64,12 +121,6 @@ export function formatBankDetails(account: BankAccountRecord | null | undefined)
   return lines.join("\n")
 }
 
-/**
- * Picks the saved bank account whose currency matches the invoice's
- * currency (case-insensitive). Falls back to the user's default account,
- * then the first saved account, so there's always a sensible choice when
- * no exact currency match exists.
- */
 export function pickBankAccountForCurrency<T extends BankAccountRecord>(
   accounts: T[] | null | undefined,
   currency?: string | null,
@@ -85,9 +136,51 @@ export function pickBankAccountForCurrency<T extends BankAccountRecord>(
 export interface InvoiceItemFormData {
   id: string
   description: string
+  detailedDescription?: string
+  billingType: BillingType
   quantity: number
   unitPrice: number
   taxRate: number
+}
+
+/** Returns column labels appropriate for the billing type of a line item. */
+export function getBillingTypeLabels(billingType: BillingType): { qty: string | null; rate: string } {
+  switch (billingType) {
+    case "hourly":
+      return { qty: "Hours", rate: "Rate/hr" }
+    case "daily":
+      return { qty: "Days", rate: "Rate/day" }
+    case "fixed":
+      return { qty: null, rate: "Amount" }
+    case "milestone":
+      return { qty: null, rate: "Amount" }
+    case "quantity":
+    default:
+      return { qty: "Qty", rate: "Unit Price" }
+  }
+}
+
+/** Human-readable summary of a billing type row (shown under description in preview). */
+export function getBillingTypeSummary(
+  item: InvoiceItemFormData,
+  currency: string,
+): string | null {
+  const qty = toNumber(item.quantity)
+  const rate = toNumber(item.unitPrice)
+  switch (item.billingType) {
+    case "hourly":
+      return `${qty} ${qty === 1 ? "hr" : "hrs"} × ${formatCurrency(rate, currency)}/hr`
+    case "daily":
+      return `${qty} ${qty === 1 ? "day" : "days"} × ${formatCurrency(rate, currency)}/day`
+    case "milestone":
+      return null
+    case "fixed":
+      return null
+    case "quantity":
+    default:
+      if (qty === 1) return null
+      return `${qty} × ${formatCurrency(rate, currency)}`
+  }
 }
 
 export function generateInvoiceNumber(): string {
@@ -100,9 +193,6 @@ export function generateInvoiceNumber(): string {
   return `INV-${year}${month}-${random}`
 }
 
-/**
- * Safely converts a value to a number, returning 0 for invalid values
- */
 export function toNumber(value: any): number {
   if (value === null || value === undefined || value === "") {
     return 0
@@ -119,6 +209,17 @@ export function calculateItemTotal(item: InvoiceItemFormData): number {
   const subtotal = quantity * unitPrice
   const tax = subtotal * (taxRate / 100)
   return subtotal + tax
+}
+
+export function computeDiscountAmount(
+  subtotal: number,
+  discountType: "percentage" | "fixed" = "fixed",
+  discountValue = 0,
+): number {
+  if (discountType === "percentage") {
+    return Math.round(subtotal * (discountValue / 100) * 100) / 100
+  }
+  return Math.round(toNumber(discountValue) * 100) / 100
 }
 
 export function calculateInvoiceTotals(items: InvoiceItemFormData[], discountAmount = 0) {
@@ -162,6 +263,22 @@ export function formatDate(date: string | Date): string {
   })
 }
 
+/** Compute dueDate from issueDate + payment terms offset. */
+export function computeDueDateFromTerms(issueDate: string, terms: string): string {
+  const offsets: Record<string, number> = {
+    "due-on-receipt": 0,
+    "net-7": 7,
+    "net-14": 14,
+    "net-30": 30,
+  }
+  const days = offsets[terms]
+  if (days === undefined) return ""
+  const date = new Date(issueDate)
+  if (isNaN(date.getTime())) return ""
+  date.setDate(date.getDate() + days)
+  return date.toISOString().split("T")[0]
+}
+
 export const CURRENCIES = [
   { code: "PKR", name: "Pakistani Rupee", symbol: "₨" },
   { code: "USD", name: "US Dollar", symbol: "$" },
@@ -187,32 +304,52 @@ export const CURRENCIES = [
 export function getDefaultInvoiceData(): InvoiceFormData {
   const today = new Date()
   const dueDate = new Date(today)
-  dueDate.setDate(dueDate.getDate() + 3)
+  dueDate.setDate(dueDate.getDate() + 30)
 
   return {
     fromName: "",
     fromEmail: "",
     fromAddress: "",
+    fromPhone: "",
+    fromWebsite: "",
+    fromBusinessReg: "",
     clientName: "",
+    clientCompanyName: "",
     clientEmail: "",
     clientAddress: "",
+    clientPhone: "",
+    clientRef: "",
     invoiceNumber: generateInvoiceNumber(),
     issueDate: today.toISOString().split("T")[0],
     dueDate: dueDate.toISOString().split("T")[0],
+    paymentTerms: "net-30",
     currency: "USD",
+    projectName: "",
+    projectRef: "",
+    projectDescription: "",
     items: [
       {
         id: crypto.randomUUID(),
         description: "",
+        detailedDescription: "",
+        billingType: "quantity",
         quantity: 1,
         unitPrice: 0,
         taxRate: 0,
       },
     ],
-    terms: "Payment is due within 3 days of invoice date.",
+    terms: "",
+    notes: "",
     termsDetail: "",
     taxRate: 0,
+    taxName: "",
+    discountType: "fixed",
+    discountValue: 0,
     discountAmount: 0,
     bankDetails: "",
+    paymentMethod: "bank",
+    paymentLink: "",
+    paymentCustomNote: "",
+    visibility: getDefaultVisibility(),
   }
 }
