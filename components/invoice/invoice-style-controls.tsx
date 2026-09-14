@@ -79,7 +79,7 @@ export function InvoiceStyleControls({
   return (
     <div className="space-y-5">
       <div className="space-y-2">
-        <Label>Template</Label>
+        <Label>Design</Label>
         <DesignSlider value={layoutStyle} primaryColor={primary} accentColor={accent} onChange={onLayoutStyleChange} />
       </div>
 
@@ -113,23 +113,22 @@ export function InvoiceStyleControls({
             </Label>
             <div className="grid grid-cols-3 gap-2">
               {COLOR_PRESETS.map((preset) => {
-                const isSelected = primary === preset.primary && accent === preset.accent
+                const isSelected = accent === preset.color
                 return (
                   <button
                     key={preset.label}
                     type="button"
                     title={preset.label}
                     onClick={() => {
-                      onPrimaryColorChange(preset.primary)
-                      onAccentColorChange(preset.accent)
+                      onPrimaryColorChange(preset.color)
+                      onAccentColorChange(preset.color)
                     }}
                     className={cn(
                       "relative flex h-10 overflow-hidden rounded-md border-2 transition-colors",
                       isSelected ? "border-primary" : "border-transparent hover:border-border",
                     )}
                   >
-                    <span className="h-full w-1/2" style={{ backgroundColor: preset.primary }} />
-                    <span className="h-full w-1/2" style={{ backgroundColor: preset.accent }} />
+                    <span className="h-full w-full" style={{ backgroundColor: preset.color }} />
                     {isSelected && (
                       <span className="absolute inset-0 flex items-center justify-center bg-black/10">
                         <Check className="h-4 w-4 text-white drop-shadow" />

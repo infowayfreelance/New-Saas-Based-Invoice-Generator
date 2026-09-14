@@ -1557,6 +1557,7 @@ function CompactInvoiceBody({ data }: { data: InvoiceFormData }) {
 
 const TEMPLATE_BODIES: Record<string, React.ComponentType<{ data: InvoiceFormData }>> = {
   classic: ClassicInvoiceBody,
+  banner: ModernInvoiceBody,
   modern: ModernInvoiceBody,
   minimal: MinimalInvoiceBody,
   bold: BoldInvoiceBody,
@@ -1592,7 +1593,7 @@ export function InvoicePreview({ data, className }: InvoicePreviewProps) {
   }, [])
 
   const TemplateBody = TEMPLATE_BODIES[data.layoutStyle || "classic"] || ClassicInvoiceBody
-  const noInnerPadding = data.layoutStyle === "modern" || data.layoutStyle === "bold" || data.layoutStyle === "creative"
+  const noInnerPadding = data.layoutStyle === "banner" || data.layoutStyle === "modern" || data.layoutStyle === "bold" || data.layoutStyle === "creative"
 
   return (
     <div ref={containerRef} className={className} style={{ height: scaledHeight, overflow: "hidden" }}>
@@ -1605,7 +1606,25 @@ export function InvoicePreview({ data, className }: InvoicePreviewProps) {
           margin: scale >= 1 ? "0 auto" : undefined,
         }}
       >
-        <div id="invoice-preview" className="flex flex-col gap-6">
+        <div
+          id="invoice-preview"
+          data-logo-position={data.logoPosition || "left"}
+          data-info-layout={data.infoLayout || "side-by-side"}
+          data-table-style={data.tableStyle || "clean"}
+          className="invoice-print-root flex flex-col gap-6"
+        >
+          <style>{`
+            #invoice-preview[data-logo-position="center"] img[alt="Logo"] { margin-left: auto !important; margin-right: auto !important; }
+            #invoice-preview[data-logo-position="right"] img[alt="Logo"] { margin-left: auto !important; margin-right: 0 !important; }
+            #invoice-preview[data-info-layout="stacked"] .sm\\:grid-cols-2 { grid-template-columns: 1fr !important; }
+            #invoice-preview[data-info-layout="stacked"] .sm\\:grid-cols-3 { grid-template-columns: 1fr !important; }
+            #invoice-preview[data-table-style="bordered"] table { border-collapse: collapse !important; border: 1px solid #d4d4d4 !important; }
+            #invoice-preview[data-table-style="bordered"] th, #invoice-preview[data-table-style="bordered"] td { border: 1px solid #d4d4d4 !important; padding-left: 10px !important; padding-right: 10px !important; }
+            #invoice-preview[data-table-style="soft-card"] table { border-collapse: separate !important; border-spacing: 0 8px !important; }
+            #invoice-preview[data-table-style="soft-card"] tbody tr { background: #f8fafc !important; }
+            #invoice-preview[data-table-style="soft-card"] tbody td:first-child { border-radius: 8px 0 0 8px; padding-left: 12px !important; }
+            #invoice-preview[data-table-style="soft-card"] tbody td:last-child { border-radius: 0 8px 8px 0; padding-right: 12px !important; }
+          `}</style>
           <Card
             className="pdf-safe-wrapper pdf-page"
             style={{

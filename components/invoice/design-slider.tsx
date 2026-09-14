@@ -9,9 +9,9 @@ interface Design {
 }
 
 export const INVOICE_DESIGNS: Design[] = [
-  { id: "classic", label: "Classic" },
   { id: "modern", label: "Modern" },
   { id: "minimal", label: "Minimal" },
+  { id: "classic", label: "Classic" },
   { id: "bold", label: "Bold" },
   { id: "creative", label: "Creative" },
   { id: "compact", label: "Compact" },
