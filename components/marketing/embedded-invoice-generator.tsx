@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useCallback, useRef, useEffect } from "react"
+import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import {
@@ -28,8 +29,16 @@ interface EmbeddedInvoiceGeneratorProps {
   useBackend?: boolean
 }
 
+const VALID_LAYOUTS = ["classic", "banner", "minimal", "bold", "creative", "compact"]
+
 export function EmbeddedInvoiceGenerator({ showHeading = false, useBackend = false }: EmbeddedInvoiceGeneratorProps) {
-  const [formData, setFormData] = useState<InvoiceFormData>(getDefaultInvoiceData())
+  const searchParams = useSearchParams()
+  const initialLayout = VALID_LAYOUTS.includes(searchParams.get("layout") ?? "") ? searchParams.get("layout")! : undefined
+  const [formData, setFormData] = useState<InvoiceFormData>(() => {
+    const data = getDefaultInvoiceData()
+    if (initialLayout) data.layoutStyle = initialLayout
+    return data
+  })
   const [isLoading, setIsLoading] = useState(false)
   const [mobileTab, setMobileTab] = useState<"edit" | "preview">("edit")
   const [showEmailDialog, setShowEmailDialog] = useState(false)
