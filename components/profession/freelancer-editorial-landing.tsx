@@ -1,9 +1,10 @@
 "use client"
 
-import { useState } from "react"
+import { Suspense, useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import { EmbeddedInvoiceGenerator } from "@/components/marketing/embedded-invoice-generator"
 import {
   ArrowRight,
   Bolt,
@@ -29,6 +30,8 @@ import {
   UserX,
   Workflow,
 } from "lucide-react"
+
+const FREELANCER_GENERATOR_URL = "/invoice-generator-for-freelancers?mode=freelancer&layout=creative#invoice-generator"
 
 const frictionCards = [
   {
@@ -229,7 +232,7 @@ export function FreelancerEditorialLanding() {
               worldwide.
             </p>
             <div className="flex w-full flex-wrap items-center gap-4 pt-2">
-              <Link href="/?layout=creative#invoice-generator">
+              <Link href={FREELANCER_GENERATOR_URL}>
                 <Button size="lg" className="gap-2 rounded-full px-8 py-6 text-base shadow-md">
                   Create a Free Invoice
                   <ArrowRight className="h-4 w-4" />
@@ -309,6 +312,12 @@ export function FreelancerEditorialLanding() {
             </div>
           </div>
         </div>
+      </section>
+
+      <section className="mx-auto w-full max-w-7xl scroll-mt-20 px-4 pb-16 sm:px-6 lg:px-8">
+        <Suspense fallback={<div className="h-96" aria-hidden="true" />}>
+          <EmbeddedInvoiceGenerator />
+        </Suspense>
       </section>
 
       {/* TRUST STRIP */}
@@ -421,7 +430,7 @@ export function FreelancerEditorialLanding() {
                   hourly rates, and proof-of-delivery are always one keystroke away.
                 </p>
               </div>
-              <Link href="/?layout=creative#invoice-generator" className="shrink-0">
+              <Link href={FREELANCER_GENERATOR_URL} className="shrink-0">
                 <Button className="gap-2 rounded-full px-6 py-5 shadow-sm">
                   Launch Invoicer
                   <Bolt className="h-4 w-4" />
@@ -529,7 +538,7 @@ export function FreelancerEditorialLanding() {
             ))}
           </div>
           <div className="mt-12 text-center">
-            <Link href="/?layout=creative#invoice-generator">
+            <Link href={FREELANCER_GENERATOR_URL}>
               <Button size="lg" className="gap-2 rounded-full px-8 py-6 text-base shadow-md">
                 Create a Free Invoice
                 <ArrowRight className="h-4 w-4" />
@@ -815,7 +824,7 @@ export function FreelancerEditorialLanding() {
             </p>
           </div>
           <div className="relative z-10 flex w-full shrink-0 flex-col items-center gap-4 sm:w-auto sm:flex-row">
-            <Link href="/?layout=creative#invoice-generator" className="w-full sm:w-auto">
+            <Link href={FREELANCER_GENERATOR_URL} className="w-full sm:w-auto">
               <Button size="lg" className="w-full gap-2 rounded-full px-8 py-6 text-base shadow-lg sm:w-auto">
                 Create a Free Invoice
                 <Bolt className="h-4 w-4" />
