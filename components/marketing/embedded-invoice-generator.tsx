@@ -2,9 +2,7 @@
 
 import { useState, useCallback, useRef, useEffect } from "react"
 import Link from "next/link"
-import { useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   Dialog,
   DialogContent,
@@ -18,36 +16,22 @@ import { InvoiceForm } from "@/components/invoice/invoice-form"
 import { InvoicePreview } from "@/components/invoice/invoice-preview"
 import { InvoiceStyleControls } from "@/components/invoice/invoice-style-controls"
 import { UsageMeter } from "@/components/invoice/usage-meter"
-import { type InvoiceFormData, getDefaultInvoiceData, calculateInvoiceTotals } from "@/lib/utils/invoice"
-import { SIMPLE_INVOICE_TEMPLATE_IDS } from "@/lib/utils/simple-invoice-templates"
+import { type InvoiceFormData, type InvoiceVisibility, getDefaultInvoiceData } from "@/lib/utils/invoice"
 import { generateGuestInvoice, checkInvoiceUsage } from "@/app/actions/invoice"
 import { downloadInvoicePdf } from "@/lib/utils/pdf"
-import { Download, Send, AlertCircle, ArrowRight, FilePlus } from "lucide-react"
+import { Download, Send, AlertCircle, ArrowRight, FilePlus, Eye, Pencil } from "lucide-react"
 import { toast } from "sonner"
 import { FloatingDownloadButton } from "@/components/floating-download-button"
 
 interface EmbeddedInvoiceGeneratorProps {
-  /** Show the "Free Invoice Generator" page heading. Off when embedded in the homepage hero. */
   showHeading?: boolean
-  /**
-   * Track usage against the database and enforce guest limits, like the
-   * standalone /free-invoice page does. Off (the default) for the homepage
-   * hero, which is a purely client-side demo: fill it in, preview it,
-   * download it - nothing is sent to or stored in the database.
-   */
   useBackend?: boolean
 }
 
-/**
- * The invoice generator UI - shared between the homepage hero (a pure,
- * client-side demo with no database involved) and the standalone
- * /free-invoice page (which tracks guest usage against the database), so
- * both stay visually in sync.
- */
 export function EmbeddedInvoiceGenerator({ showHeading = false, useBackend = false }: EmbeddedInvoiceGeneratorProps) {
   const [formData, setFormData] = useState<InvoiceFormData>(getDefaultInvoiceData())
   const [isLoading, setIsLoading] = useState(false)
-  const [showPreview, setShowPreview] = useState(false)
+  const [mobileTab, setMobileTab] = useState<"edit" | "preview">("edit")
   const [showEmailDialog, setShowEmailDialog] = useState(false)
   const [showLimitDialog, setShowLimitDialog] = useState(false)
   const [usage, setUsage] = useState<{
@@ -59,99 +43,103 @@ export function EmbeddedInvoiceGenerator({ showHeading = false, useBackend = fal
     message?: string
   } | null>(null)
   const previewRef = useRef<HTMLDivElement>(null)
-  const searchParams = useSearchParams()
-
-  // "Use Template" links from /invoice-templates/* pass ?layout=<id> so the
-  // chosen template is pre-selected. The user still lands on the normal,
-  // fully editable form (not a static preview) - the template is only
-  // applied to how the invoice looks once they generate/download it.
-  useEffect(() => {
-    const layout = searchParams.get("layout")
-    if (layout && SIMPLE_INVOICE_TEMPLATE_IDS.includes(layout)) {
-      setFormData((prev) => ({ ...prev, layoutStyle: layout }))
-      const label = layout
-        .replace("simple-", "Simple ")
-        .replace(/(^|\s)\w/g, (c) => c.toUpperCase())
-      toast.success(`${label} template selected - fill in your details below.`)
-    }
-    // Only ever needs to run once, from the URL present on load.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
 
   useEffect(() => {
     if (!useBackend) return
-
     const loadUsage = async () => {
       const result = await checkInvoiceUsage(null)
-      if (result) {
-        setUsage(result)
-      }
+      if (result) setUsage(result)
     }
     loadUsage()
   }, [useBackend])
 
-  const handleFormSubmit = async (data: InvoiceFormData) => {
+  const handleFormChange = useCallback((data: InvoiceFormData) => {
     setFormData(data)
-
-    // Homepage demo: no server call, no usage tracking, no database - just
-    // show the preview immediately from the values entered manually.
-    if (!useBackend) {
-      setShowPreview(true)
-      toast.success("Invoice generated successfully!")
-      return
-    }
-
-    setIsLoading(true)
-
-    try {
-      const result = await generateGuestInvoice(data)
-
-      if (!result.success) {
-        if (result.usage) {
-          setUsage(result.usage)
-        }
-        setShowLimitDialog(true)
-        return
-      }
-
-      if (result.usage) {
-        setUsage(result.usage)
-      }
-
-      setShowPreview(true)
-      toast.success("Invoice generated successfully!")
-    } catch {
-      toast.error("Failed to generate invoice. Please try again.")
-    } finally {
-      setIsLoading(false)
-    }
-  }
+  }, [])
 
   const handleDownloadPDF = useCallback(async () => {
+    if (useBackend) {
+      setIsLoading(true)
+      try {
+        const result = await generateGuestInvoice(formData)
+        if (!result.success) {
+          if (result.usage) setUsage(result.usage)
+          setShowLimitDialog(true)
+          return
+        }
+        if (result.usage) setUsage(result.usage)
+      } catch {
+        toast.error("Failed to generate invoice. Please try again.")
+        return
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
     const element = document.getElementById("invoice-preview")
     if (!element) {
       toast.error("Invoice preview not found. Please try again.")
       return
     }
-
     toast.info("Generating PDF...")
-
     try {
       await downloadInvoicePdf(element, `invoice-${formData.invoiceNumber}.pdf`)
       toast.success("PDF downloaded successfully!")
     } catch (error) {
-      console.error("Error generating PDF:", error)
-      toast.error("Failed to generate PDF. Please try again or contact support.", {
+      toast.error("Failed to generate PDF. Please try again.", {
         duration: 5000,
         description: error instanceof Error ? error.message : "An unexpected error occurred",
       })
     }
-  }, [formData.invoiceNumber])
+  }, [formData, useBackend])
 
   const handleCreateNewInvoice = useCallback(() => {
     setFormData(getDefaultInvoiceData())
-    setShowPreview(false)
+    setMobileTab("edit")
   }, [])
+
+  const handleStyleChange = useCallback((key: keyof InvoiceFormData, value: string) => {
+    setFormData((prev) => ({ ...prev, [key]: value }))
+  }, [])
+
+  const handleVisibilityChange = useCallback((key: keyof InvoiceVisibility, value: boolean) => {
+    setFormData((prev) => ({
+      ...prev,
+      visibility: { ...(prev.visibility ?? {}), [key]: value },
+    }))
+  }, [])
+
+  const styleControls = (
+    <InvoiceStyleControls
+      layoutStyle={formData.layoutStyle || "classic"}
+      primaryColor={formData.primaryColor}
+      accentColor={formData.accentColor}
+      fontFamily={formData.fontFamily || "sans"}
+      visibility={formData.visibility}
+      onLayoutStyleChange={(v) => handleStyleChange("layoutStyle", v)}
+      onPrimaryColorChange={(v) => handleStyleChange("primaryColor", v)}
+      onAccentColorChange={(v) => handleStyleChange("accentColor", v)}
+      onFontFamilyChange={(v) => handleStyleChange("fontFamily", v)}
+      onVisibilityChange={handleVisibilityChange}
+    />
+  )
+
+  const actionButtons = (
+    <div className="flex flex-wrap items-center gap-3">
+      <Button onClick={handleDownloadPDF} disabled={isLoading}>
+        <Download className="mr-2 h-4 w-4" />
+        {isLoading ? "Generating…" : "Download PDF"}
+      </Button>
+      <Button variant="outline" onClick={handleCreateNewInvoice} className="bg-transparent">
+        <FilePlus className="mr-2 h-4 w-4" />
+        New Invoice
+      </Button>
+      <Button variant="outline" onClick={() => setShowEmailDialog(true)} className="bg-transparent">
+        <Send className="mr-2 h-4 w-4" />
+        Send via Email
+      </Button>
+    </div>
+  )
 
   return (
     <div id="invoice-generator" className="scroll-mt-20">
@@ -174,107 +162,65 @@ export function EmbeddedInvoiceGenerator({ showHeading = false, useBackend = fal
         </div>
       )}
 
-      {!showPreview ? (
-        <InvoiceForm
-          initialData={formData}
-          onSubmit={handleFormSubmit}
-          isLoading={isLoading}
-          submitLabel="Generate Invoice"
-        />
-      ) : (
-        <div className="space-y-6">
-          <div className="flex flex-wrap items-center gap-4">
-            <Button onClick={handleDownloadPDF}>
-              <Download className="mr-2 h-4 w-4" />
-              Download PDF
-            </Button>
-            <Button variant="outline" onClick={handleCreateNewInvoice} className="bg-transparent">
-              <FilePlus className="mr-2 h-4 w-4" />
-              Create New Invoice
-            </Button>
-            <Button variant="outline" onClick={() => setShowEmailDialog(true)} className="bg-transparent">
-              <Send className="mr-2 h-4 w-4" />
-              Send via Email
-            </Button>
-            <Button variant="ghost" onClick={() => setShowPreview(false)}>
-              Edit Invoice
-            </Button>
-          </div>
+      {/* Action bar — always visible */}
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+        {actionButtons}
+      </div>
 
-          <Tabs defaultValue="preview" className="w-full">
-            <TabsList>
-              <TabsTrigger value="preview">Preview</TabsTrigger>
-              <TabsTrigger value="details">Details</TabsTrigger>
-            </TabsList>
-            <TabsContent value="preview" className="mt-6 space-y-4">
-              <Card>
-                <CardHeader className="pb-4">
-                  <CardTitle className="text-base">Invoice Style</CardTitle>
-                  <CardDescription>Choose the design, colors, and font for this invoice.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <InvoiceStyleControls
-                    layoutStyle={formData.layoutStyle || "classic"}
-                    primaryColor={formData.primaryColor}
-                    accentColor={formData.accentColor}
-                    fontFamily={formData.fontFamily || "sans"}
-                    onLayoutStyleChange={(value) => setFormData((prev) => ({ ...prev, layoutStyle: value }))}
-                    onPrimaryColorChange={(value) => setFormData((prev) => ({ ...prev, primaryColor: value }))}
-                    onAccentColorChange={(value) => setFormData((prev) => ({ ...prev, accentColor: value }))}
-                    onFontFamilyChange={(value) => setFormData((prev) => ({ ...prev, fontFamily: value }))}
-                  />
-                </CardContent>
-              </Card>
-              <div ref={previewRef} className="rounded-lg border border-border shadow-sm">
-                <InvoicePreview data={formData} />
-              </div>
-            </TabsContent>
-            <TabsContent value="details" className="mt-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Invoice Summary</CardTitle>
-                  <CardDescription>Invoice #{formData.invoiceNumber}</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">From</p>
-                      <p className="font-medium">{formData.fromName}</p>
-                      <p className="text-sm text-muted-foreground">{formData.fromEmail}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">To</p>
-                      <p className="font-medium">{formData.clientName}</p>
-                      <p className="text-sm text-muted-foreground">{formData.clientEmail}</p>
-                    </div>
-                  </div>
-                  <div className="grid gap-4 sm:grid-cols-3">
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">Issue Date</p>
-                      <p>{new Date(formData.issueDate).toLocaleDateString()}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">Due Date</p>
-                      <p>{new Date(formData.dueDate).toLocaleDateString()}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">Total</p>
-                      <p className="text-xl font-bold">
-                        {new Intl.NumberFormat("en-US", {
-                          style: "currency",
-                          currency: formData.currency,
-                        }).format(calculateInvoiceTotals(formData.items, formData.discountAmount).totalAmount)}
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
+      {/* Desktop: side-by-side editor + preview */}
+      <div className="hidden lg:grid lg:grid-cols-2 lg:gap-6 lg:items-start">
+        {/* Left: form */}
+        <div className="min-w-0">
+          <InvoiceForm
+            initialData={formData}
+            onChange={handleFormChange}
+            hideSubmit
+            isLoading={isLoading}
+          />
         </div>
-      )}
 
-      <FloatingDownloadButton onClick={handleDownloadPDF} isVisible={showPreview} />
+        {/* Right: style controls + live preview */}
+        <div className="min-w-0 space-y-4 sticky top-4">
+          {styleControls}
+          <div ref={previewRef} className="rounded-lg border border-border shadow-sm overflow-hidden">
+            <InvoicePreview data={formData} />
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile: tabbed edit/preview */}
+      <div className="lg:hidden">
+        <Tabs value={mobileTab} onValueChange={(v) => setMobileTab(v as "edit" | "preview")}>
+          <TabsList className="w-full">
+            <TabsTrigger value="edit" className="flex-1 gap-2">
+              <Pencil className="h-3.5 w-3.5" />
+              Edit
+            </TabsTrigger>
+            <TabsTrigger value="preview" className="flex-1 gap-2">
+              <Eye className="h-3.5 w-3.5" />
+              Preview
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="edit" className="mt-4">
+            <InvoiceForm
+              initialData={formData}
+              onChange={handleFormChange}
+              hideSubmit
+              isLoading={isLoading}
+            />
+          </TabsContent>
+
+          <TabsContent value="preview" className="mt-4 space-y-4">
+            {styleControls}
+            <div ref={previewRef} className="rounded-lg border border-border shadow-sm overflow-hidden">
+              <InvoicePreview data={formData} />
+            </div>
+          </TabsContent>
+        </Tabs>
+      </div>
+
+      <FloatingDownloadButton onClick={handleDownloadPDF} isVisible />
 
       <Dialog open={showEmailDialog} onOpenChange={setShowEmailDialog}>
         <DialogContent>
@@ -327,9 +273,9 @@ export function EmbeddedInvoiceGenerator({ showHeading = false, useBackend = fal
             <div className="rounded-lg bg-muted p-4">
               <h4 className="font-medium">Upgrade to continue creating invoices</h4>
               <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
-                <li>Basic plan: 5/day, 30/month - $5/mo</li>
-                <li>Standard plan: Unlimited - $12/mo</li>
-                <li>Pro plan: Unlimited + premium features - $29.99/mo</li>
+                <li>Basic plan: 5/day, 30/month — $5/mo</li>
+                <li>Standard plan: Unlimited — $12/mo</li>
+                <li>Pro plan: Unlimited + premium features — $29.99/mo</li>
               </ul>
             </div>
           </div>
