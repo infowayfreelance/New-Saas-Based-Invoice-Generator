@@ -34,6 +34,7 @@ const VALID_LAYOUTS = ["classic", "modern", "banner", "minimal", "bold", "creati
 export function EmbeddedInvoiceGenerator({ showHeading = false, useBackend = false }: EmbeddedInvoiceGeneratorProps) {
   const searchParams = useSearchParams()
   const initialLayout = VALID_LAYOUTS.includes(searchParams.get("layout") ?? "") ? searchParams.get("layout")! : undefined
+  const freelancerMode = searchParams.get("mode") === "freelancer"
   const [formData, setFormData] = useState<InvoiceFormData>(() => {
     const data = getDefaultInvoiceData()
     if (initialLayout) data.layoutStyle = initialLayout
@@ -67,7 +68,12 @@ export function EmbeddedInvoiceGenerator({ showHeading = false, useBackend = fal
   }, [useBackend])
 
   const handleFormChange = useCallback((data: InvoiceFormData) => {
-    setFormData(data)
+    setFormData((prev) => ({
+      ...data,
+      logoPosition: prev.logoPosition,
+      infoLayout: prev.infoLayout,
+      tableStyle: prev.tableStyle,
+    }))
   }, [])
 
   const handleDownloadPDF = useCallback(async () => {
@@ -122,23 +128,28 @@ export function EmbeddedInvoiceGenerator({ showHeading = false, useBackend = fal
     }))
   }, [])
 
+  const layout = formData.layoutStyle || "classic"
+  const supportsLogoPosition = ["classic", "modern", "banner", "minimal", "bold", "compact"].includes(layout)
+  const supportsInfoLayout = ["classic", "minimal", "bold"].includes(layout)
+  const supportsTableStyle = ["classic", "modern", "banner", "bold", "compact"].includes(layout)
+
   const styleControls = (
     <InvoiceStyleControls
-      layoutStyle={formData.layoutStyle || "classic"}
+      layoutStyle={layout}
       primaryColor={formData.primaryColor}
       accentColor={formData.accentColor}
       fontFamily={formData.fontFamily || "sans"}
+      logoPosition={formData.logoPosition || "left"}
+      infoLayout={formData.infoLayout || "side-by-side"}
+      tableStyle={formData.tableStyle || "clean"}
       visibility={formData.visibility}
       onLayoutStyleChange={(v) => handleStyleChange("layoutStyle", v)}
       onPrimaryColorChange={(v) => handleStyleChange("primaryColor", v)}
       onAccentColorChange={(v) => handleStyleChange("accentColor", v)}
       onFontFamilyChange={(v) => handleStyleChange("fontFamily", v)}
-      logoPosition={formData.logoPosition}
-      infoLayout={formData.infoLayout}
-      tableStyle={formData.tableStyle}
-      onLogoPositionChange={(v) => handleStyleChange("logoPosition", v)}
-      onInfoLayoutChange={(v) => handleStyleChange("infoLayout", v)}
-      onTableStyleChange={(v) => handleStyleChange("tableStyle", v)}
+      onLogoPositionChange={supportsLogoPosition ? (v) => handleStyleChange("logoPosition", v) : undefined}
+      onInfoLayoutChange={supportsInfoLayout ? (v) => handleStyleChange("infoLayout", v) : undefined}
+      onTableStyleChange={supportsTableStyle ? (v) => handleStyleChange("tableStyle", v) : undefined}
       onVisibilityChange={handleVisibilityChange}
     />
   )
@@ -168,7 +179,14 @@ export function EmbeddedInvoiceGenerator({ showHeading = false, useBackend = fal
     <div id="invoice-generator" className="scroll-mt-20">
       {showHeading && (
         <div className="mb-8">
-          <h1 className="text-3xl font-bold">Free Invoice Generator</h1>
+          <div className="flex items-center gap-3 flex-wrap">
+            <h1 className="text-3xl font-bold">Free Invoice Generator</h1>
+            {freelancerMode && (
+              <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+                Freelancer Mode
+              </span>
+            )}
+          </div>
           <p className="mt-2 text-muted-foreground">Create professional invoices in seconds. No signup required.</p>
         </div>
       )}
