@@ -27,18 +27,19 @@ import { FloatingDownloadButton } from "@/components/floating-download-button"
 interface EmbeddedInvoiceGeneratorProps {
   showHeading?: boolean
   useBackend?: boolean
+  forceFreelancerMode?: boolean
 }
 
 const VALID_LAYOUTS = ["classic", "modern", "banner", "minimal", "bold", "creative", "compact"]
 
-export function EmbeddedInvoiceGenerator({ showHeading = false, useBackend = false }: EmbeddedInvoiceGeneratorProps) {
+export function EmbeddedInvoiceGenerator({ showHeading = false, useBackend = false, forceFreelancerMode = false }: EmbeddedInvoiceGeneratorProps) {
   const searchParams = useSearchParams()
   const initialLayout = VALID_LAYOUTS.includes(searchParams.get("layout") ?? "") ? searchParams.get("layout")! : undefined
-  const freelancerMode = searchParams.get("mode") === "freelancer"
+  const freelancerMode = forceFreelancerMode || searchParams.get("mode") === "freelancer"
   const [formData, setFormData] = useState<InvoiceFormData>(() => {
     const data = getDefaultInvoiceData()
     if (initialLayout) data.layoutStyle = initialLayout
-    if (searchParams.get("mode") === "freelancer") {
+    if (forceFreelancerMode || searchParams.get("mode") === "freelancer") {
       data.layoutStyle = initialLayout || "modern"
       data.items[0].billingType = "fixed"
     }
