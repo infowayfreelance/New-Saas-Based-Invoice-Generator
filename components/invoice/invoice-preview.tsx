@@ -234,10 +234,17 @@ function ClassicInvoiceBody({ data }: { data: InvoiceFormData }) {
       {data.watermarkText && <Watermark text={data.watermarkText} />}
       <div style={{ position: "relative", zIndex: 1 }}>
         {/* Header */}
+        {lp !== "left" && v.logo && data.logoUrl && (
+          <div className={`mb-3 flex ${lp === "center" ? "justify-center" : "justify-end"}`}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={data.logoUrl} alt="Logo" crossOrigin="anonymous"
+              style={{ height: "48px", width: "auto", objectFit: "contain" }} />
+          </div>
+        )}
         <div className="flex items-start justify-between gap-6">
           <div>
-            <div className={`flex items-center gap-3 ${lp === "center" ? "justify-center" : lp === "right" ? "justify-end" : ""}`}>
-              {v.logo && data.logoUrl && (
+            <div className="flex items-center gap-3">
+              {lp === "left" && v.logo && data.logoUrl && (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={data.logoUrl} alt="Logo" crossOrigin="anonymous"
                   style={{ height: "48px", width: "auto", objectFit: "contain" }} />
