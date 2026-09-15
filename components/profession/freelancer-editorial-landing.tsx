@@ -229,7 +229,7 @@ export function FreelancerEditorialLanding() {
               worldwide.
             </p>
             <div className="flex w-full flex-wrap items-center gap-4 pt-2">
-<Link href="/?mode=freelancer&layout=creative#invoice-generator">
+<Link href="#invoice-generator">
                 <Button size="lg" className="gap-2 rounded-full px-8 py-6 text-base shadow-md">
                   Create a Free Invoice
                   <ArrowRight className="h-4 w-4" />
@@ -529,7 +529,7 @@ export function FreelancerEditorialLanding() {
             ))}
           </div>
           <div className="mt-12 text-center">
-<Link href="/?mode=freelancer&layout=creative#invoice-generator">
+<Link href="#invoice-generator">
               <Button size="lg" className="gap-2 rounded-full px-8 py-6 text-base shadow-md">
                 Create a Free Invoice
                 <ArrowRight className="h-4 w-4" />
