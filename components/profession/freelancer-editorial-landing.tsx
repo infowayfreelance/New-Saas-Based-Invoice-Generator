@@ -1,9 +1,10 @@
 "use client"
 
-import { useState } from "react"
+import { useState, Suspense } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import { EmbeddedInvoiceGenerator } from "@/components/marketing/embedded-invoice-generator"
 import {
   ArrowRight,
   Bolt,
@@ -310,6 +311,13 @@ export function FreelancerEditorialLanding() {
           </div>
         </div>
       </section>
+
+      {/* INVOICE GENERATOR — embedded below hero */}
+      <div id="invoice-generator" className="scroll-mt-20 mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
+        <Suspense fallback={<div className="h-96" aria-hidden="true" />}>
+          <EmbeddedInvoiceGenerator showHeading forceFreelancerMode />
+        </Suspense>
+      </div>
 
       {/* TRUST STRIP */}
       <section className="w-full bg-muted/40 py-4">

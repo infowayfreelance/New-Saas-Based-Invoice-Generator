@@ -1,9 +1,7 @@
 import type { Metadata } from "next"
-import { Suspense } from "react"
 import { getSiteUrl } from "@/lib/utils/site-url"
 import { ProfessionSchema } from "@/components/profession/profession-schema"
 import { FreelancerEditorialLanding } from "@/components/profession/freelancer-editorial-landing"
-import { EmbeddedInvoiceGenerator } from "@/components/marketing/embedded-invoice-generator"
 import type { ProfessionPageData } from "@/components/profession/types"
 import { FileText, Users, Clock3, Repeat, Wallet, History } from "lucide-react"
 
@@ -148,11 +146,6 @@ export default function Page() {
     <>
       <ProfessionSchema data={data} />
       <FreelancerEditorialLanding />
-      <div id="invoice-generator" className="scroll-mt-20 mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
-        <Suspense fallback={<div className="h-96" aria-hidden="true" />}>
-          <EmbeddedInvoiceGenerator showHeading forceFreelancerMode />
-        </Suspense>
-      </div>
     </>
   )
 }

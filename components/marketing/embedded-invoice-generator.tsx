@@ -28,11 +28,12 @@ interface EmbeddedInvoiceGeneratorProps {
   showHeading?: boolean
   useBackend?: boolean
   forceFreelancerMode?: boolean
+  hideStyleControls?: boolean
 }
 
 const VALID_LAYOUTS = ["classic", "modern", "banner", "minimal", "bold", "creative", "compact"]
 
-export function EmbeddedInvoiceGenerator({ showHeading = false, useBackend = false, forceFreelancerMode = false }: EmbeddedInvoiceGeneratorProps) {
+export function EmbeddedInvoiceGenerator({ showHeading = false, useBackend = false, forceFreelancerMode = false, hideStyleControls = false }: EmbeddedInvoiceGeneratorProps) {
   const searchParams = useSearchParams()
   const initialLayout = VALID_LAYOUTS.includes(searchParams.get("layout") ?? "") ? searchParams.get("layout")! : undefined
   const freelancerMode = forceFreelancerMode || searchParams.get("mode") === "freelancer"
@@ -223,7 +224,7 @@ export function EmbeddedInvoiceGenerator({ showHeading = false, useBackend = fal
 
         {/* Right: style controls + live preview */}
         <div className="min-w-0 space-y-4 sticky top-4">
-          {styleControls}
+          {!hideStyleControls && styleControls}
           <div ref={previewRef} className="rounded-lg border border-border shadow-sm overflow-hidden">
             <InvoicePreview data={formData} />
           </div>
@@ -254,7 +255,7 @@ export function EmbeddedInvoiceGenerator({ showHeading = false, useBackend = fal
           </TabsContent>
 
           <TabsContent value="preview" className="mt-4 space-y-4">
-            {styleControls}
+            {!hideStyleControls && styleControls}
             <div ref={previewRef} className="rounded-lg border border-border shadow-sm overflow-hidden">
               <InvoicePreview data={formData} />
             </div>

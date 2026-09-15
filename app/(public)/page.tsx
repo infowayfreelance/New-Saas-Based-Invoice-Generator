@@ -454,7 +454,7 @@ export default function HomePage() {
               the rest of this page statically prerendered. */}
           <div className="mx-auto mt-12 max-w-6xl">
             <Suspense fallback={<div className="h-96" aria-hidden="true" />}>
-              <EmbeddedInvoiceGenerator />
+              <EmbeddedInvoiceGenerator hideStyleControls />
             </Suspense>
           </div>
 
