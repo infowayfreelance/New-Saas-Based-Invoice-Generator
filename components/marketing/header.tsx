@@ -42,6 +42,12 @@ export function MarketingHeader() {
             >
               Pricing
             </Link>
+            <Link
+              href="/blog"
+              className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+            >
+              Blog
+            </Link>
           </div>
         </div>
         <div className="hidden items-center gap-4 md:flex">
@@ -81,6 +87,13 @@ export function MarketingHeader() {
               onClick={() => setMobileMenuOpen(false)}
             >
               Pricing
+            </Link>
+            <Link
+              href="/blog"
+              className="block rounded-lg px-3 py-2 text-base font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Blog
             </Link>
             <div className="flex flex-col gap-2 pt-4">
               <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
