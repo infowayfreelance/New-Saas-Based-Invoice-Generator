@@ -4,7 +4,7 @@ import { LegalPageLayout } from "@/components/legal/legal-page-layout"
 import { SITE_INFO, LEGAL_ROUTES } from "@/lib/site-info"
 
 export const metadata: Metadata = {
-  title: "Privacy Policy | MakeInvo",
+  title: "Privacy Policy",
   description:
     "Read how MakeInvo collects, uses, stores, protects and deletes account, invoice, client and website usage information.",
   alternates: { canonical: LEGAL_ROUTES.privacy },

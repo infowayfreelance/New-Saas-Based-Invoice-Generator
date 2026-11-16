@@ -250,7 +250,7 @@ function ClassicInvoiceBody({ data }: { data: InvoiceFormData }) {
                   style={{ height: "48px", width: "auto", objectFit: "contain" }} />
               )}
               <div>
-                <h1 className="text-3xl font-bold" style={{ color: accentColor }}>INVOICE</h1>
+                <div className="text-3xl font-bold" style={{ color: accentColor }}>INVOICE</div>
                 {v.invoiceStatus && stamp && (
                   <span className="ml-2 rounded border px-2 py-0.5 text-xs font-bold tracking-wider"
                     style={{ color: stamp.color, borderColor: stamp.color }}>
@@ -507,10 +507,10 @@ function ModernInvoiceBody({ data }: { data: InvoiceFormData }) {
         {/* Banner bar */}
         <div className="mt-4 flex items-center justify-between gap-4">
           <div style={{ height: "10px", flex: 1, backgroundColor: accentColor }} />
-          <h1 className="px-4 text-4xl font-bold tracking-wide"
+          <div className="px-4 text-4xl font-bold tracking-wide"
             style={{ color: brandColor, backgroundColor: "#ffffff", lineHeight: 1.3 }}>
             INVOICE
-          </h1>
+          </div>
           <div style={{ height: "10px", width: "48px", backgroundColor: darkColor }} />
         </div>
         <div className="flex items-center justify-end">
@@ -1235,7 +1235,7 @@ function CreativeInvoiceBody({ data }: { data: InvoiceFormData }) {
         {/* Top: Invoice title + number */}
         <div className="flex items-start justify-between mb-2">
           <div>
-            <h1 className="text-4xl font-black tracking-tight" style={{ color: "#0f172a" }}>INVOICE</h1>
+            <div className="text-4xl font-black tracking-tight" style={{ color: "#0f172a" }}>INVOICE</div>
             <p className="text-sm mt-1" style={{ color: "#94a3b8" }}>#{data.invoiceNumber}</p>
           </div>
           {v.invoiceStatus && stamp && (
@@ -1394,7 +1394,7 @@ function CompactInvoiceBody({ data }: { data: InvoiceFormData }) {
           </div>
           <div className="text-right">
             <div className="flex items-center justify-end gap-2">
-              <h1 className="text-2xl font-black tracking-wide" style={{ color: accentColor }}>INVOICE</h1>
+              <div className="text-2xl font-black tracking-wide" style={{ color: accentColor }}>INVOICE</div>
               {v.invoiceStatus && stamp && (
                 <span className="rounded px-2 py-0.5 text-xs font-bold"
                   style={{ backgroundColor: stamp.color, color: "#ffffff" }}>

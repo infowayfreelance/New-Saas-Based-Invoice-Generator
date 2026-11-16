@@ -4,7 +4,7 @@ import { LegalPageLayout } from "@/components/legal/legal-page-layout"
 import { SITE_INFO, LEGAL_ROUTES } from "@/lib/site-info"
 
 export const metadata: Metadata = {
-  title: "Delete Your MakeInvo Account and Data | MakeInvo",
+  title: { absolute: "Delete Your MakeInvo Account and Data" },
   description:
     "Learn how to delete your MakeInvo account, invoices and client information and what may be retained for legal or security reasons.",
   alternates: { canonical: LEGAL_ROUTES.dataDeletion },

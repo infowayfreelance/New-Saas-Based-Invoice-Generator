@@ -30,13 +30,15 @@ import {
 } from "lucide-react"
 
 const siteUrl = getSiteUrl()
+const homepageTitle = "Free Invoice Generator & Invoice Maker Online | MakeInvo"
+const homepageDescription =
+  "Free online invoice generator and invoice maker. Create a professional PDF invoice in minutes with no signup, watermark or credit card. Add tax and discounts."
 
 /* ── Metadata ────────────────────────────────────────────────────── */
 
 export const metadata: Metadata = {
-  title: "Free Invoice Generator Online – Create PDF Invoices | MakeInvo",
-  description:
-    "Create professional PDF invoices online for free. No signup, watermark or credit card required. Build and download your invoice with MakeInvo.",
+  title: { absolute: homepageTitle },
+  description: homepageDescription,
   keywords: [
     "free invoice generator",
     "online invoice generator",
@@ -53,9 +55,8 @@ export const metadata: Metadata = {
     canonical: siteUrl,
   },
   openGraph: {
-    title: "Free Invoice Generator Online – Create PDF Invoices | MakeInvo",
-    description:
-      "Create professional PDF invoices online for free. No signup, watermark or credit card required. Build and download your invoice with MakeInvo.",
+    title: homepageTitle,
+    description: homepageDescription,
     url: siteUrl,
     siteName: "MakeInvo",
     type: "website",
@@ -283,10 +284,6 @@ const faqs = [
 
 /* ── JSON-LD Schemas ─────────────────────────────────────────────── */
 
-const homepageTitle = "Free Invoice Generator Online – Create PDF Invoices | MakeInvo"
-const homepageDescription =
-  "Create professional PDF invoices online for free. No signup, watermark or credit card required. Build and download your invoice with MakeInvo."
-
 // Square mark for schema.org Organization.logo / primaryImageOfPage (Google
 // recommends a roughly square logo, not the wide wordmark used in the header).
 const brandImageUrl = `${siteUrl}/make-invo-site-icon.webp`
@@ -428,8 +425,9 @@ export default function HomePage() {
 
             {/* Sub Heading */}
             <p className="mt-6 text-pretty text-lg leading-relaxed text-muted-foreground">
-              Create a professional PDF invoice in minutes with MakeInvo. Add your business and client details,
-              calculate totals and download your invoice for free—no signup, watermark or credit card required.
+              Create a professional PDF invoice in minutes with MakeInvo, the free online invoice maker. Add your
+              business and client details, calculate totals and download your invoice for free—no signup, watermark or
+              credit card required.
             </p>
 
             <p className="mt-4 text-sm text-muted-foreground">

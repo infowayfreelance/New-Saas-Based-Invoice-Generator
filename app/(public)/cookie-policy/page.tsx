@@ -4,7 +4,7 @@ import { LegalPageLayout } from "@/components/legal/legal-page-layout"
 import { SITE_INFO, LEGAL_ROUTES } from "@/lib/site-info"
 
 export const metadata: Metadata = {
-  title: "Cookie Policy | MakeInvo",
+  title: "Cookie Policy",
   description:
     "Learn which cookies and similar technologies MakeInvo uses for security, authentication, preferences, analytics and payments.",
   alternates: { canonical: LEGAL_ROUTES.cookiePolicy },

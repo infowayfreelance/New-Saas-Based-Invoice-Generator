@@ -4,7 +4,7 @@ import { LegalPageLayout } from "@/components/legal/legal-page-layout"
 import { SITE_INFO, LEGAL_ROUTES } from "@/lib/site-info"
 
 export const metadata: Metadata = {
-  title: "Affiliate Disclosure | MakeInvo",
+  title: "Affiliate Disclosure",
   description: "Learn how MakeInvo's affiliate relationships, referral links and commission disclosures are handled.",
   alternates: { canonical: LEGAL_ROUTES.affiliateDisclosure },
 }

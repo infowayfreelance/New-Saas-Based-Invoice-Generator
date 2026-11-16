@@ -4,7 +4,7 @@ import { LegalPageLayout } from "@/components/legal/legal-page-layout"
 import { SITE_INFO, LEGAL_ROUTES } from "@/lib/site-info"
 
 export const metadata: Metadata = {
-  title: "Acceptable Use Policy | MakeInvo",
+  title: "Acceptable Use Policy",
   description:
     "Read the rules for using MakeInvo's invoice generation, account, email, sharing and subscription features responsibly.",
   alternates: { canonical: LEGAL_ROUTES.acceptableUse },
