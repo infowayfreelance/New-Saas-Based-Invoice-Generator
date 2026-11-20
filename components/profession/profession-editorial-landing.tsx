@@ -1,3 +1,4 @@
+import type { ReactNode } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -27,7 +28,11 @@ const benefitIcons = [Layers, FileDown, Timer, CheckCircle2, IdCard, Bolt, Calcu
 export function ProfessionEditorialLanding({
   data,
   heroImage,
+  ukConsulting = false,
+  afterInvoiceDetails,
 }: {
+  ukConsulting?: boolean
+  afterInvoiceDetails?: ReactNode
   data: ProfessionPageData
   heroImage?: { src: string; alt: string; title?: string; objectPosition?: string }
 }) {
@@ -64,12 +69,12 @@ export function ProfessionEditorialLanding({
             </div>
             <div className="grid w-full max-w-lg grid-cols-3 gap-4 pt-4">
               <div className="rounded-lg bg-card p-3 shadow-sm">
-                <span className="block text-lg font-bold text-foreground">&lt; 90s</span>
-                <span className="text-xs text-muted-foreground">Avg. build time</span>
+                <span className="block text-lg font-bold text-foreground">{ukConsulting ? "No signup" : "< 90s"}</span>
+                <span className="text-xs text-muted-foreground">{ukConsulting ? "for guest invoices" : "Avg. build time"}</span>
               </div>
               <div className="rounded-lg bg-card p-3 shadow-sm">
-                <span className="block text-lg font-bold text-primary">100%</span>
-                <span className="text-xs text-muted-foreground">Fee transparent</span>
+                <span className="block text-lg font-bold text-primary">{ukConsulting ? "PDF" : "100%"}</span>
+                <span className="text-xs text-muted-foreground">{ukConsulting ? "in one click" : "Fee transparent"}</span>
               </div>
               <div className="rounded-lg bg-card p-3 shadow-sm">
                 <span className="block text-lg font-bold text-foreground">Zero</span>
@@ -171,9 +176,9 @@ export function ProfessionEditorialLanding({
                 </p>
               </div>
               <div className="rounded-2xl border border-slate-700/60 bg-slate-800/80 p-6 shadow-xl">
-                <span className="block text-5xl font-bold leading-none text-primary">3.8 hrs</span>
+                <span className="block text-5xl font-bold leading-none text-primary">{ukConsulting ? "Every hour" : "3.8 hrs"}</span>
                 <span className="mt-2 block font-semibold text-white">
-                  Average lost to manual administrative billing per month
+                  {ukConsulting ? "spent formatting invoices is an hour you can't bill." : "Average lost to manual administrative billing per month"}
                 </span>
                 <div className="mt-4 flex items-center gap-3 border-t border-slate-700/50 pt-4">
                   <Timer className="h-7 w-7 text-primary" />
@@ -278,7 +283,7 @@ export function ProfessionEditorialLanding({
                 </div>
               </div>
               <div className="space-y-1.5 rounded bg-card p-2.5 shadow-sm">
-                <span className="block text-[10px] font-bold text-primary">4. ITEMIZED WORK SCHEDULE</span>
+                <span className="block text-[10px] font-bold text-primary">{ukConsulting ? "4. ITEMISED WORK SCHEDULE" : "4. ITEMIZED WORK SCHEDULE"}</span>
                 <div className="h-2 w-full rounded-full bg-muted" />
                 <div className="h-2 w-4/5 rounded-full bg-muted" />
                 <div className="h-2 w-3/4 rounded-full bg-muted" />
@@ -293,11 +298,13 @@ export function ProfessionEditorialLanding({
               </div>
             </div>
             <p className="mt-4 text-center text-sm text-muted-foreground">
-              MakeInvo automatically standardizes these structural blocks on export.
+              {ukConsulting ? "MakeInvo automatically standardises these structural blocks on export." : "MakeInvo automatically standardizes these structural blocks on export."}
             </p>
           </div>
         </div>
       </section>
+
+      {afterInvoiceDetails}
 
       {/* WORKFLOW STEPS */}
       <section className="w-full bg-muted/30 py-16">
@@ -513,7 +520,7 @@ export function ProfessionEditorialLanding({
           <span className="text-xs font-bold uppercase tracking-widest text-primary">Common Inquiries</span>
           <h2 className="mt-1 text-3xl font-bold text-foreground sm:text-4xl">Frequently asked questions</h2>
         </div>
-        <ProfessionFaqAccordion faqs={data.faqs} />
+        <ProfessionFaqAccordion faqs={data.faqs} keepAnswersMounted={ukConsulting} />
       </section>
 
       {/* FINAL CTA */}

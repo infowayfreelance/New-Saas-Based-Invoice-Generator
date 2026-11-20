@@ -4,7 +4,7 @@ import { useState } from "react"
 import { ChevronDown } from "lucide-react"
 import type { ProfessionFaq } from "./types"
 
-export function ProfessionFaqAccordion({ faqs }: { faqs: ProfessionFaq[] }) {
+export function ProfessionFaqAccordion({ faqs, keepAnswersMounted = false }: { faqs: ProfessionFaq[]; keepAnswersMounted?: boolean }) {
   const [openIndex, setOpenIndex] = useState<number | null>(0)
 
   return (
@@ -24,7 +24,7 @@ export function ProfessionFaqAccordion({ faqs }: { faqs: ProfessionFaq[] }) {
                 className={`h-5 w-5 shrink-0 text-primary transition-transform ${isOpen ? "rotate-180" : "text-muted-foreground"}`}
               />
             </button>
-            {isOpen && <div className="px-4 pb-4 leading-relaxed text-muted-foreground">{item.answer}</div>}
+            {(isOpen || keepAnswersMounted) && <div hidden={!isOpen} className="px-4 pb-4 leading-relaxed text-muted-foreground">{item.answer}</div>}
           </div>
         )
       })}
