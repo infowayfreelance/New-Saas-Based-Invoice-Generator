@@ -1,3 +1,4 @@
+import { freelancerFaqs } from "@/components/profession/freelancer-faqs"
 import type { Metadata } from "next"
 import { getSiteUrl } from "@/lib/utils/site-url"
 import { ProfessionSchema } from "@/components/profession/profession-schema"
@@ -9,14 +10,14 @@ const siteUrl = getSiteUrl()
 const slug = "invoice-generator-for-freelancers"
 
 export const metadata: Metadata = {
-  title: "Invoice Generator for Freelancers – Create Free Invoices",
+  title: "Freelance Invoice Generator – Free PDF Invoices",
   description:
-    "Create professional freelance invoices online for free. Add projects, hours, rates and payment terms, then download a clear PDF invoice in minutes.",
+    "Free freelance invoice generator. Bill hourly, daily, fixed or milestone work, add VAT only if you're registered and download a PDF. No signup needed.",
   alternates: { canonical: `${siteUrl}/${slug}` },
   openGraph: {
-    title: "Invoice Generator for Freelancers – Create Free Invoices",
+    title: "Freelance Invoice Generator – Free PDF Invoices | MakeInvo",
     description:
-      "Create professional freelance invoices online for free. Add projects, hours, rates and payment terms, then download a clear PDF invoice in minutes.",
+      "Free freelance invoice generator. Bill hourly, daily, fixed or milestone work, add VAT only if you're registered and download a PDF. No signup needed.",
     url: `${siteUrl}/${slug}`,
     type: "website",
   },
@@ -27,7 +28,7 @@ const data: ProfessionPageData = {
   audienceLabel: "Freelancer",
   seoTitle: metadata.title as string,
   metaDescription: metadata.description as string,
-  h1: "Invoice Generator for Freelancers",
+  h1: "Free Freelance Invoice Generator",
   heroParagraph:
     "Turn completed work into a clear, professional invoice without wasting time formatting documents. MakeInvo helps freelancers list projects, hours, rates, expenses and payment terms, then generate a client-ready PDF invoice.",
   heroSupportingLine:
@@ -117,14 +118,7 @@ const data: ProfessionPageData = {
     "Keep a copy of every invoice for your own tax and accounting records.",
   ],
 
-  faqs: [
-    { question: "Can I create a freelance invoice without registering?", answer: "Yes. The free invoice generator on the MakeInvo homepage can be used without an account for occasional invoices. Registering is only needed if you want to save clients or keep an invoice history." },
-    { question: "Can I invoice both hourly and fixed-price work?", answer: "Yes. You can add separate line items for hourly work and fixed-price deliverables on the same invoice, each with its own description and amount." },
-    { question: "Can I add project expenses to my invoice?", answer: "Yes. Add an expense as its own line item so your client can see it separately from your billed hours or project fee." },
-    { question: "What payment terms should a freelancer use?", answer: "That's up to you and your client's agreement - MakeInvo lets you set any due date and add payment terms in the notes, whether that's due on receipt or a longer window." },
-    { question: "Can I save information for repeat clients?", answer: "Yes, once you create a free account. Saved clients can be selected on future invoices instead of re-entering their details each time." },
-    { question: "Can I download my freelance invoice as a PDF?", answer: "Yes. Every invoice you create, with or without an account, can be downloaded instantly as a PDF." },
-  ],
+  faqs: freelancerFaqs.map(({ q, a }) => ({ question: q, answer: a })),
 
   finalCtaHeading: "Create your next freelance invoice",
   finalCtaText: "Add your work, rates and client information, then download a professional PDF invoice in minutes.",
@@ -145,7 +139,18 @@ export default function Page() {
   return (
     <>
       <ProfessionSchema data={data} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        name: "MakeInvo Freelance Invoice Generator",
+        url: `${siteUrl}/${slug}`,
+        applicationCategory: "BusinessApplication",
+        operatingSystem: "Web",
+        offers: { "@type": "Offer", price: "0", priceCurrency: "GBP" },
+        provider: { "@id": `${siteUrl}/#organization` },
+      }).replace(/</g, "\\u003c") }} />
       <FreelancerEditorialLanding />
     </>
   )
 }
+
