@@ -13,6 +13,17 @@ export interface BlogPost {
 
 export const BLOG_POSTS: BlogPost[] = [
 {
+  "slug": "how-to-chase-a-late-invoice-uk",
+  "title": "How to Chase a Late Invoice in the UK: A Calm Step-by-Step Guide",
+  "excerpt": "A practical UK sequence for unpaid invoices: check the invoice, send reminders, and understand statutory late-payment interest, with links to official guidance.",
+  "publishedDate": "2026-11-20",
+  "updatedDate": "2026-11-20",
+  "readingTime": "11 min read",
+  "author": "MakeInvo Team",
+  "coverImage": "/blog/how-to-chase-a-late-invoice-uk/chase-late-invoice-uk-featured.webp",
+  "coverImageAlt": "Desk with an invoice, calendar and reminder checklist, titled How to Chase a Late Invoice in the UK"
+},
+{
   "slug": "what-to-include-on-a-uk-invoice",
   "title": "What Must a UK Invoice Include? A Plain-English Checklist (Including VAT)",
   "excerpt": "A plain-English checklist of what a UK invoice must include, including VAT invoices, sole trader and limited company rules, with a link to official GOV.UK guidance.",
