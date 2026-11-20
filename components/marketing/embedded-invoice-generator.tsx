@@ -25,6 +25,8 @@ import { toast } from "sonner"
 import { FloatingDownloadButton } from "@/components/floating-download-button"
 
 interface EmbeddedInvoiceGeneratorProps {
+  headingLevel?: "h1" | "h2"
+  hidePlanPrices?: boolean
   showHeading?: boolean
   useBackend?: boolean
   forceFreelancerMode?: boolean
@@ -33,7 +35,8 @@ interface EmbeddedInvoiceGeneratorProps {
 
 const VALID_LAYOUTS = ["classic", "modern", "banner", "minimal", "bold", "creative", "compact"]
 
-export function EmbeddedInvoiceGenerator({ showHeading = false, useBackend = false, forceFreelancerMode = false, hideStyleControls = false }: EmbeddedInvoiceGeneratorProps) {
+export function EmbeddedInvoiceGenerator({ showHeading = false, headingLevel = "h1", hidePlanPrices = false, useBackend = false, forceFreelancerMode = false, hideStyleControls = false }: EmbeddedInvoiceGeneratorProps) {
+  const Heading = headingLevel
   const searchParams = useSearchParams()
   const initialLayout = VALID_LAYOUTS.includes(searchParams.get("layout") ?? "") ? searchParams.get("layout")! : undefined
   const freelancerMode = forceFreelancerMode || searchParams.get("mode") === "freelancer"
@@ -182,7 +185,7 @@ export function EmbeddedInvoiceGenerator({ showHeading = false, useBackend = fal
       {showHeading && (
         <div className="mb-8">
           <div className="flex items-center gap-3 flex-wrap">
-            <h1 className="text-3xl font-bold">Free Invoice Generator</h1>
+            <Heading className="text-3xl font-bold">Free Invoice Generator</Heading>
             {freelancerMode && (
               <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
                 Freelancer Mode
@@ -316,9 +319,15 @@ export function EmbeddedInvoiceGenerator({ showHeading = false, useBackend = fal
             <div className="rounded-lg bg-muted p-4">
               <h4 className="font-medium">Upgrade to continue creating invoices</h4>
               <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
-                <li>Basic plan: 5/day, 30/month — $5/mo</li>
-                <li>Standard plan: Unlimited — $12/mo</li>
-                <li>Pro plan: Unlimited + premium features — $29.99/mo</li>
+                {hidePlanPrices ? (
+                  <li><Link href="/pricing">see plans</Link></li>
+                ) : (
+                  <>
+                    <li>Basic plan: 5/day, 30/month — $5/mo</li>
+                    <li>Standard plan: Unlimited — $12/mo</li>
+                    <li>Pro plan: Unlimited + premium features — $29.99/mo</li>
+                  </>
+                )}
               </ul>
             </div>
           </div>
@@ -338,3 +347,4 @@ export function EmbeddedInvoiceGenerator({ showHeading = false, useBackend = fal
     </div>
   )
 }
+
