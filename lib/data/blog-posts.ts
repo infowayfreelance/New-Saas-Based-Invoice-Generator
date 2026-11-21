@@ -13,6 +13,17 @@ export interface BlogPost {
 
 export const BLOG_POSTS: BlogPost[] = [
 {
+  "slug": "invoice-vs-receipt",
+  "title": "Invoice vs Receipt: What Is the Difference? (A Plain-English UK Guide)",
+  "excerpt": "An invoice asks for payment; a receipt confirms it. A plain-English UK guide to when you need each, what to include, paid invoices and record keeping.",
+  "publishedDate": "2026-11-21",
+  "updatedDate": "2026-11-21",
+  "readingTime": "9 min read",
+  "author": "MakeInvo Team",
+  "coverImage": "/blog/invoice-vs-receipt/invoice-vs-receipt-featured.webp",
+  "coverImageAlt": "Printed invoice and paper receipt side by side on a desk"
+},
+{
   "slug": "how-to-chase-a-late-invoice-uk",
   "title": "How to Chase a Late Invoice in the UK: A Calm Step-by-Step Guide",
   "excerpt": "A practical UK sequence for unpaid invoices: check the invoice, send reminders, and understand statutory late-payment interest, with links to official guidance.",
