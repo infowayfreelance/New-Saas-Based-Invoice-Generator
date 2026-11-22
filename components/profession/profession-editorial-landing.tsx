@@ -30,15 +30,17 @@ export function ProfessionEditorialLanding({
   heroImage,
   ukConsulting = false,
   ukTradespeople = false,
+  ukPhotographers = false,
   afterInvoiceDetails,
 }: {
   ukConsulting?: boolean
   ukTradespeople?: boolean
+  ukPhotographers?: boolean
   afterInvoiceDetails?: ReactNode
   data: ProfessionPageData
   heroImage?: { src: string; alt: string; title?: string; objectPosition?: string }
 }) {
-  const ukInvoiceCopy = ukConsulting || ukTradespeople
+  const ukInvoiceCopy = ukConsulting || ukTradespeople || ukPhotographers
   const previewItems = data.invoicePreview.items.slice(0, 2)
 
   return (
@@ -156,7 +158,7 @@ export function ProfessionEditorialLanding({
           </span>
           <span className="text-border">/</span>
           <span className="inline-flex items-center gap-1.5">
-            <Download className="h-4 w-4 text-primary" /> Instant PDF download
+            <Download className="h-4 w-4 text-primary" /> {ukPhotographers ? "PDF download" : "Instant PDF download"}
           </span>
           <span className="text-border">/</span>
           <span className="inline-flex items-center gap-1.5">
@@ -174,14 +176,13 @@ export function ProfessionEditorialLanding({
                 <span className="text-xs font-bold uppercase tracking-widest text-primary">The Administrative Drag</span>
                 <h2 className="text-3xl font-bold leading-tight text-white sm:text-4xl">{data.problemsHeading}</h2>
                 <p className="leading-relaxed text-slate-300">
-                  Most billing mistakes happen when rigid word processors and generic spreadsheets get bent into
-                  fiscal ledgers. Every extra click is billable time lost.
+                  {ukPhotographers ? "Billing mistakes often happen when rigid word processors and generic spreadsheets get bent into fiscal ledgers." : "Most billing mistakes happen when rigid word processors and generic spreadsheets get bent into fiscal ledgers. Every extra click is billable time lost."}
                 </p>
               </div>
               <div className="rounded-2xl border border-slate-700/60 bg-slate-800/80 p-6 shadow-xl">
                 <span className="block text-5xl font-bold leading-none text-primary">{ukInvoiceCopy ? "Every hour" : "3.8 hrs"}</span>
                 <span className="mt-2 block font-semibold text-white">
-                  {ukInvoiceCopy ? (ukTradespeople ? "spent formatting invoices is an hour you can't spend on the next job." : "spent formatting invoices is an hour you can't bill.") : "Average lost to manual administrative billing per month"}
+                  {ukInvoiceCopy ? (ukPhotographers ? "spent formatting invoices is an hour you can't spend shooting or editing." : ukTradespeople ? "spent formatting invoices is an hour you can't spend on the next job." : "spent formatting invoices is an hour you can't bill.") : "Average lost to manual administrative billing per month"}
                 </span>
                 <div className="mt-4 flex items-center gap-3 border-t border-slate-700/50 pt-4">
                   <Timer className="h-7 w-7 text-primary" />
