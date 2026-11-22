@@ -13,6 +13,17 @@ export interface BlogPost {
 
 export const BLOG_POSTS: BlogPost[] = [
 {
+  "slug": "invoice-payment-terms-uk",
+  "title": "Invoice Payment Terms Explained: Net 30, Due on Receipt and More (UK Guide)",
+  "excerpt": "What invoice payment terms like Net 7, Net 30 and EOM mean, UK legal time limits, how to choose terms and how to word them on your invoice clearly.",
+  "publishedDate": "2026-11-22",
+  "updatedDate": "2026-11-22",
+  "readingTime": "10 min read",
+  "author": "MakeInvo Team",
+  "coverImage": "/blog/invoice-payment-terms-uk/invoice-payment-terms-uk-featured.webp",
+  "coverImageAlt": "Printed invoice with a payment terms line next to a calendar with a circled due date"
+},
+{
   "slug": "invoice-vs-receipt",
   "title": "Invoice vs Receipt: What Is the Difference? (A Plain-English UK Guide)",
   "excerpt": "An invoice asks for payment; a receipt confirms it. A plain-English UK guide to when you need each, what to include, paid invoices and record keeping.",
