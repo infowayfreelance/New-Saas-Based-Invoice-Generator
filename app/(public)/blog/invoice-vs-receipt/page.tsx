@@ -5,7 +5,7 @@ import { getSiteUrl } from "@/lib/utils/site-url"
 import { getBlogPost } from "@/lib/data/blog-posts"
 
 const siteUrl = getSiteUrl()
-const post = getBlogPost("invoice-vs-receipt")!
+const post = { ...getBlogPost("invoice-vs-receipt")!, updatedDate: "2026-11-23" }
 const pageUrl = `${siteUrl}/blog/${post.slug}`
 const coverImageUrl = `${siteUrl}${post.coverImage}`
 
@@ -33,32 +33,32 @@ export const metadata: Metadata = {
 
 const faqs = [
   {
-    "question": "Is an invoice the same as a receipt?",
-    "answer": "No. An invoice asks for payment. A receipt confirms payment has been received. GOV.UK states that an invoice is not the same as a receipt."
+    "question": "Does sending an invoice prove the customer paid?",
+    "answer": "No. It records a charge, not the arrival of money. Check the payment and keep evidence linking it to the invoice before confirming that the balance is settled."
   },
   {
-    "question": "Do I have to give a receipt in the UK?",
-    "answer": "There is generally no blanket legal requirement to issue a receipt for every sale, but it is good practice, especially for cash payments. Specific rules can apply in some situations, such as VAT, so check GOV.UK if you are unsure."
+    "question": "Can I acknowledge payment on the original invoice?",
+    "answer": "You can send a paid copy using the original reference. State the amount received, the payment date and any remaining balance so the customer can see exactly what the acknowledgement covers."
   },
   {
-    "question": "Can a receipt be used as a VAT invoice?",
-    "answer": "Sometimes. HMRC allows VAT-registered retailers to issue a simplified VAT invoice for supplies of £250 or less including VAT when a customer asks, and some till receipts include the required details. Check HMRC's VAT guidance for the exact requirements."
+    "question": "Is a bank transfer confirmation enough for my records?",
+    "answer": "It helps show that money moved, but may not describe the purchase or contain the invoice details you need. Keep the supplier's invoice or receipt alongside the payment evidence."
   },
   {
-    "question": "Can I send a paid invoice instead of a receipt?",
-    "answer": "Many small businesses send a copy of the invoice marked \"Paid\" with the payment date and amount. It links the payment to the original invoice number and gives the customer a clear record."
+    "question": "Does every till receipt count as a VAT invoice?",
+    "answer": "No. Its contents and the applicable VAT rules matter. Some receipts meet the simplified VAT invoice requirements; ask the supplier for an appropriate VAT invoice if the necessary information is missing."
   },
   {
-    "question": "What comes first, the invoice or the receipt?",
-    "answer": "Usually the invoice. You send the invoice, the customer pays, and the receipt (or paid invoice) confirms the payment. At a shop till, payment is immediate, so you normally just get a receipt."
+    "question": "What should I send after a deposit?",
+    "answer": "Acknowledge the amount received and identify the booking or invoice it relates to. Make any outstanding balance clear, and do not describe the whole sale as paid in full unless it is."
   },
   {
-    "question": "Do I need an invoice if I am not VAT registered?",
-    "answer": "GOV.UK's legal requirement to give an invoice applies when both parties are VAT registered. Many businesses that are not VAT registered still invoice customers because it is clearer for both sides and helps with record keeping."
+    "question": "Can I invoice without being VAT-registered?",
+    "answer": "Yes. You can use an invoice to explain your charges and payment terms. Do not charge VAT when you are not VAT-registered, and include the business details relevant to your circumstances."
   },
   {
-    "question": "How long should I keep receipts and invoices?",
-    "answer": "Sole traders must keep records for at least 5 years after the 31 January submission deadline for the relevant tax year. Limited companies generally keep records for 6 years from the end of the last financial year they relate to. Check GOV.UK for the details that apply to you."
+    "question": "Does MakeInvo generate receipts?",
+    "answer": "This guide does not claim that MakeInvo offers a receipt generator. It creates invoices, with payment recording available on plans that include payment tracking."
   }
 ]
 
@@ -119,82 +119,85 @@ export default function InvoiceVsReceiptPage() {
           </nav>
           <h1 className="mt-4 text-4xl font-bold tracking-tight text-balance sm:text-5xl">{post.title}</h1>
           <p className="mt-4 text-sm text-muted-foreground">
-            By {post.author} &middot; Published {formatDate(post.publishedDate)} &middot; {post.readingTime}
+            By {post.author} &middot; Published {formatDate(post.publishedDate)} &middot; {post.readingTime} &middot; Updated {formatDate(post.updatedDate)}
           </p>
           <div className="relative mt-8 aspect-[16/9] w-full overflow-hidden rounded-xl border border-border bg-muted">
             <Image src={post.coverImage} alt={post.coverImageAlt} fill priority sizes="(min-width: 768px) 768px, 100vw" className="object-cover" />
           </div>
           <div className="prose prose-neutral mt-10 max-w-none dark:prose-invert prose-headings:scroll-mt-20 prose-h2:text-2xl prose-h2:font-bold prose-h3:text-lg prose-h3:font-semibold">
-            <p>{"Invoices and receipts are easy to mix up. Both list what was sold, both show an amount, and both end up in your records. But they do different jobs, they are issued at different times, and the rules around them are not the same."}</p>
-            <p>{"This guide explains the difference in plain English for UK freelancers, sole traders and small businesses: what each document is for, when you need one, what to include, how \"paid invoices\" fit in, and how long to keep your records. It is general information, not legal, tax or accounting advice. If your situation is complicated, check GOV.UK or speak to an accountant."}</p>
-            <h2>{"Short answer: invoice vs receipt"}</h2>
-            <ul><li><strong>{"An invoice is a request for payment."}</strong>{" It tells the customer what they owe, what it is for and when to pay."}</li><li><strong>{"A receipt is proof of payment."}</strong>{" It confirms that money has been received, how much, when and for what."}</li></ul>
-            <p>{"GOV.UK puts it simply: an invoice is not the same as a receipt, which is an acknowledgement of payment."}</p>
-            <p>{"In a typical sale, the invoice comes first and the receipt comes after the customer pays. In a shop or café, where payment happens straight away, you often only see a receipt."}</p>
-            <h2>{"What is an invoice?"}</h2>
+            <p>{"A customer asks for a receipt, but you have already emailed an invoice. Should you send the same PDF again, change its heading or make another document? The answer depends on whether you are asking for money or confirming money you have received."}</p>
+            <p>{"An invoice sets out the charge. A receipt records a payment. Keeping those jobs clear helps your customer understand their balance and helps you match each sale to the money in your account. This guide is general information, not legal, tax or accounting advice."}</p>
+            <h2>{"Invoice and receipt: the difference at a glance"}</h2>
+            <p>{"The useful question is: “What does this document confirm?” An invoice confirms what you are charging. A receipt confirms what was paid. An unpaid invoice alone does not show that the customer settled the bill."}</p>
+            <table><thead><tr><th>{"Detail"}</th><th>{"Invoice"}</th><th>{"Receipt"}</th></tr></thead><tbody><tr><td>{"Main purpose"}</td><td>{"Ask the customer to pay"}</td><td>{"Acknowledge money received"}</td></tr><tr><td>{"Usual timing"}</td><td>{"At the agreed billing stage"}</td><td>{"Once payment has been received"}</td></tr><tr><td>{"Important date"}</td><td>{"Invoice date and payment deadline"}</td><td>{"Date of payment"}</td></tr><tr><td>{"Amount shown"}</td><td>{"Charges and the amount due"}</td><td>{"Amount actually received"}</td></tr><tr><td>{"Useful reference"}</td><td>{"Unique invoice number"}</td><td>{"Receipt reference and related invoice number"}</td></tr><tr><td>{"After a part-payment"}</td><td>{"Still shows the remaining debt"}</td><td>{"Confirms only the payment received"}</td></tr></tbody></table>
+            <p><a href="https://www.gov.uk/invoicing-and-taking-payment-from-customers">{"GOV.UK's invoicing overview"}</a>{" makes the same distinction between an invoice and an acknowledgement of payment. Sometimes both jobs fit on one document, but the wording and payment details must make that clear."}</p>
+            <h2>{"Start with the invoice when payment is due"}</h2>
             <div className="not-prose relative my-8 aspect-[4/3] w-full overflow-hidden rounded-xl border border-border bg-muted"><Image src="/blog/invoice-vs-receipt/invoice-request-for-payment.webp" alt="Freelancer reviewing an invoice on a laptop before sending it" fill sizes="(min-width: 768px) 768px, 100vw" className="object-cover" /></div>
-            <p>{"An invoice is a document you send to a customer asking them to pay for goods or services you have supplied, or are about to supply. It sets out:"}</p>
-            <ul><li>{"who is billing whom;"}</li><li>{"what was supplied;"}</li><li>{"how much is owed;"}</li><li>{"when payment is due and how to pay."}</li></ul>
-            <p>{"Invoices are standard in business-to-business work and in any situation where the customer pays after the work is done, such as freelance projects, trades jobs, consulting and agency retainers."}</p>
-            <p>{"In the UK, GOV.UK says you must give an invoice by law if both you and your customer are registered for VAT (a business-to-business transaction). Many businesses that are not VAT registered still issue invoices because customers expect them and they make bookkeeping much easier."}</p>
-            <p>{"For a full checklist of what to put on a UK invoice, including VAT details, read our guide to "}<Link href="https://makeinvo.com/blog/what-to-include-on-a-uk-invoice">{"what a UK invoice must include"}</Link>{"."}</p>
-            <h2>{"What is a receipt?"}</h2>
+            <p>{"An invoice gives your customer enough information to check the charge and arrange payment. You might send one when a project ends, at an agreed milestone or before work starts if your terms require payment upfront. Sending it is not evidence that the money has arrived."}</p>
+            <p>{"For example, a freelance editor finishes an agreed piece of work and sends an invoice with a due date. The client can use that invoice to approve the expense. The editor should still check for payment before marking the account as settled."}</p>
+            <p>{"A useful invoice includes:"}</p>
+            <ul><li>{"a unique invoice number;"}</li><li>{"your business name, address and contact details;"}</li><li>{"the customer's name and address;"}</li><li>{"a clear description of the goods or services;"}</li><li>{"the supply date and invoice date;"}</li><li>{"the charges, VAT where applicable and total owed;"}</li><li>{"payment instructions and the agreed due date."}</li></ul>
+            <p>{"Sole traders and limited companies have additional naming requirements. Our guide to "}<Link href="/blog/what-to-include-on-a-uk-invoice">{"what a UK invoice must include"}</Link>{" explains these, with links to the official checklist. For the practical steps, see "}<Link href="/blog/how-to-make-an-invoice-online">{"how to make an invoice online"}</Link>{"."}</p>
+            <h2>{"Send a receipt when you acknowledge payment"}</h2>
             <div className="not-prose relative my-8 aspect-[4/3] w-full overflow-hidden rounded-xl border border-border bg-muted"><Image src="/blog/invoice-vs-receipt/receipt-proof-of-payment.webp" alt="Printed receipt confirming a card payment at a shop counter" fill sizes="(min-width: 768px) 768px, 100vw" className="object-cover" /></div>
-            <p>{"A receipt confirms that a payment has been made. It is usually issued:"}</p>
-            <ul><li>{"at the point of sale, when someone pays in a shop, on a website or in person;"}</li><li>{"after an invoice is paid, if the customer asks for confirmation;"}</li><li>{"when payment is made in cash, so both sides have a record."}</li></ul>
-            <p>{"A receipt typically shows:"}</p>
-            <ul><li>{"the seller's business name and contact details;"}</li><li>{"the date of payment;"}</li><li>{"what was bought or which invoice was paid;"}</li><li>{"the amount paid;"}</li><li>{"the payment method, such as card, bank transfer or cash;"}</li><li>{"any amount still outstanding, if it was a part-payment."}</li></ul>
-            <p>{"In general there is no blanket UK legal requirement to issue a receipt for every sale, but giving one is good practice, especially for cash payments, and customers often need one for their own records or expense claims."}</p>
-            <h2>{"Invoice vs receipt: side by side"}</h2>
-            <div className="overflow-x-auto"><table><thead><tr><th scope="col"></th><th scope="col">{"Invoice"}</th><th scope="col">{"Receipt"}</th></tr></thead><tbody><tr><th scope="row">{"Purpose"}</th><td>{"Requests payment"}</td><td>{"Confirms payment"}</td></tr><tr><th scope="row">{"When issued"}</th><td>{"Before payment (after or during supply)"}</td><td>{"After payment"}</td></tr><tr><th scope="row">{"Shows amount due"}</th><td>{"Yes"}</td><td>{"Shows amount paid"}</td></tr><tr><th scope="row">{"Payment terms and due date"}</th><td>{"Yes"}</td><td>{"No"}</td></tr><tr><th scope="row">{"Payment method"}</th><td>{"Usually how to pay"}</td><td>{"How it was paid"}</td></tr><tr><th scope="row">{"Typical use"}</th><td>{"B2B work, freelancers, trades, services"}</td><td>{"Retail, online sales, confirming a paid invoice"}</td></tr><tr><th scope="row">{"Legal requirement in the UK"}</th><td>{"Required for VAT-registered B2B sales"}</td><td>{"Generally good practice rather than a blanket requirement"}</td></tr></tbody></table></div>
-            <h2>{"What about VAT invoices and receipts?"}</h2>
-            <p>{"If you are VAT registered, the rules are more specific. HMRC's VAT record-keeping guidance (VAT Notice 700/21) sets out what a full VAT invoice must contain."}</p>
-            <p>{"Retailers have some flexibility. Under HMRC's guidance, a VAT-registered retailer does not have to issue a VAT invoice unless the customer asks for one. If the customer asks and the supply is £250 or less including VAT, the retailer can issue a "}<strong>{"simplified (less detailed) VAT invoice"}</strong>{". This is why some till receipts show the seller's VAT number and the VAT rate: they can double as a simplified VAT invoice."}</p>
-            <p>{"The exact requirements depend on your circumstances, so check the current HMRC guidance before relying on a till-style receipt for VAT purposes."}</p>
-            <h2>{"What is a \"paid invoice\"?"}</h2>
+            <p>{"A receipt answers a different set of questions: who paid, who received the money, when did it arrive and which purchase did it cover? It is particularly helpful when a customer pays in cash or needs a record for their own bookkeeping."}</p>
+            <p>{"Think of a customer collecting an order and paying at the counter. There may be no period of waiting for payment, so a receipt is the document they leave with. For a service sold on credit, there may instead be an invoice followed later by a receipt."}</p>
+            <p>{"For a clear payment record, include your business details, the payment date, the amount received, a short description and the payment method. Where an invoice exists, reference its number. A separate receipt reference can help you find the document again."}</p>
+            <p>{"Do not include full card details or other payment information the customer does not need. A method such as “bank transfer” is usually clearer than copying a long bank transaction description into the document."}</p>
+            <h2>{"Can you use a paid invoice as a receipt?"}</h2>
+            <p>{"A copy of an invoice marked “Paid” can provide a useful payment acknowledgement when it also shows what was received and when. It keeps the charge and the payment linked through the original invoice number."}</p>
+            <p>{"Before sending it, check that the payment has actually reached you. A customer's message saying they have made a transfer is a reason to check your account, rather than proof that the funds have arrived."}</p>
+            <p>{"Keep the original invoice reference. On the paid copy, make the payment status clear, add the payment date and amount, and show whether anything remains outstanding. Avoid creating a second invoice for the same sale just to acknowledge payment: that can make the customer think you are billing twice."}</p>
+            <p>{"If the customer asks for a separate receipt, clarify what their accounts team needs. They may want a short payment acknowledgement referencing the invoice, rather than another copy of the full list of charges."}</p>
+            <h2>{"Deposits and part-payments need careful labels"}</h2>
+            <p>{"Receiving some money does not mean the whole invoice is paid. A deposit may cover only a booking stage, while a later transfer may leave a balance outstanding. Your records should show each payment against the right sale."}</p>
+            <p>{"For an existing invoice, record the amount received, its date and the remaining balance. If you acknowledge that payment to the customer, say “Part-payment received” or “Deposit received”, as appropriate. Reserve “Paid in full” for a balance that has actually been cleared."}</p>
+            <p>{"A simple fictional example is a designer who invoices for a project and receives a deposit first. The deposit acknowledgement refers to the project and original invoice. When the final payment arrives, the designer records that separately and confirms that no balance remains. No extra sale has taken place merely because there were two payments."}</p>
+            <p>{"If your contract uses separate invoices for separate stages, name each stage clearly. Check the customer's reference when matching a transfer, especially if they have several invoices open at once."}</p>
+            <h2>{"UK VAT: the document's details matter"}</h2>
+            <p>{"GOV.UK says you must give an invoice when both you and your customer are VAT-registered. That does not make every receipt a VAT invoice, or mean a document becomes suitable for VAT records simply because its heading says “Invoice”."}</p>
+            <p>{"A till receipt may contain the details needed for a simplified VAT invoice. Under "}<a href="https://www.gov.uk/guidance/record-keeping-for-vat-notice-70021">{"HMRC's VAT Notice 700/21"}</a>{", a retailer asked for an invoice can use the simplified form for an individual supply of £250 or less, including VAT, subject to the rules in the notice."}</p>
+            <p>{"Those details include the supplier's name, address and VAT registration number, the tax point, a description of the supply and the required VAT information. Exempt supplies must not be included on that type of invoice. If the purchase does not fit the simplified rules, ask the supplier for the appropriate VAT invoice."}</p>
+            <p>{"For your own sales, only charge VAT if you are VAT-registered. Keep the invoice and payment evidence together, and check the official guidance or your accountant if you are unsure which document your customer needs. A payment confirmation does not repair missing VAT invoice information."}</p>
+            <h2>{"Which document fits these everyday situations?"}</h2>
+            <h3>{"A client will pay after you finish"}</h3>
+            <p>{"Send the invoice at the stage agreed in your contract. Include the deadline and payment instructions. Once you receive the money, update your records and provide an acknowledgement if needed. For overdue business invoices, follow our guide to "}<Link href="/blog/how-to-chase-a-late-invoice-uk">{"chasing a late invoice in the UK"}</Link>{"."}</p>
+            <h3>{"A customer pays immediately"}</h3>
+            <p>{"A receipt confirms the payment without suggesting that another amount is due. If the customer also needs a VAT invoice, check whether your receipt contains the right information or whether you need to provide a separate document."}</p>
+            <h3>{"An employee needs to claim an expense"}</h3>
+            <p>{"The employee may need both the supplier's invoice or receipt and evidence of payment under their employer's policy. A card statement can show a transaction but may not explain what was purchased. Keep the itemised document rather than assuming the bank entry covers everything."}</p>
+            <h3>{"A customer asks for a duplicate"}</h3>
+            <p>{"Resend a copy of the relevant original document with its reference intact. Make clear that it is a copy, and check whether they want the unpaid invoice or confirmation of a payment. This avoids turning a simple records request into a fresh charge."}</p>
+            <h2>{"Bills, quotes and other documents nearby"}</h2>
+            <p>{"The words used in everyday conversation are not always precise. A customer may call your invoice a “bill”, for example. Focus on the document's purpose and contents rather than the label alone."}</p>
+            <ul><li><strong>{"Quote:"}</strong>{" your proposed price before the customer agrees to the work. It does not acknowledge payment."}</li><li><strong>{"Pro forma invoice:"}</strong>{" a preliminary document setting out a proposed transaction or requesting advance payment. It is not a VAT invoice."}</li><li><strong>{"Bill:"}</strong>{" commonly another word for an invoice or request to pay."}</li><li><strong>{"Statement:"}</strong>{" a summary of account activity, often showing several invoices, payments and balances."}</li><li><strong>{"Credit note:"}</strong>{" a document recording a reduction or correction to an earlier invoice; it does not by itself confirm a refund was paid."}</li></ul>
+            <p>{"Keep references between related documents. If you issue a credit note or make a refund, retain a clear record of both the adjustment and any money returned. Deleting the earlier paperwork can make the sequence harder to explain later."}</p>
+            <h2>{"Keep a trail from the sale to the payment"}</h2>
             <div className="not-prose relative my-8 aspect-[4/3] w-full overflow-hidden rounded-xl border border-border bg-muted"><Image src="/blog/invoice-vs-receipt/paid-invoice-records.webp" alt="Folder of invoices with one marked paid next to a laptop" fill sizes="(min-width: 768px) 768px, 100vw" className="object-cover" /></div>
-            <p>{"A paid invoice is an invoice that has been marked as settled. Some businesses send the customer a copy of the original invoice stamped or marked \"Paid\", with the payment date and amount, instead of a separate receipt."}</p>
-            <p>{"That can work well for small businesses because:"}</p>
-            <ul><li>{"the customer gets confirmation that matches the invoice they already have;"}</li><li>{"the invoice number links the payment to the original bill;"}</li><li>{"your own records show at a glance which invoices are settled."}</li></ul>
-            <p>{"If a customer pays part of an invoice, record the part-payment and show the remaining balance clearly. Do not mark the invoice as fully paid until the whole amount has arrived."}</p>
-            <h2>{"Other documents that get confused with invoices"}</h2>
-            <p><strong>{"Quote or estimate:"}</strong>{" sent before the work to show the expected price. It is not a request for payment."}</p>
-            <p><strong>{"Pro forma invoice:"}</strong>{" a preliminary invoice sent before supply, sometimes to request an upfront payment or for customs purposes. It is usually followed by a proper invoice."}</p>
-            <p><strong>{"Bill:"}</strong>{" in everyday UK speech, \"bill\" often just means an invoice, for example a utility bill. GOV.UK uses \"invoice (bill)\" on its invoicing guidance page."}</p>
-            <p><strong>{"Statement:"}</strong>{" a summary of several invoices and payments over a period, showing what is still owed overall."}</p>
-            <p><strong>{"Credit note:"}</strong>{" issued to reduce or cancel an invoice, for example after a refund or a pricing error."}</p>
-            <h2>{"When should you issue an invoice, a receipt or both?"}</h2>
-            <p><strong>{"Freelancer or consultant billing a client after the work:"}</strong>{" send an invoice. When it is paid, update its status and, if the client asks, send confirmation of payment."}</p>
-            <p><strong>{"Trades or contractor jobs:"}</strong>{" send an invoice for labour and materials when the job is done, or at agreed stages. Give a receipt if the customer pays in cash on the day."}</p>
-            <p><strong>{"Shop, market stall or online store:"}</strong>{" customers pay at the point of sale, so a receipt is the usual document. If a VAT-registered business customer asks, provide a VAT invoice."}</p>
-            <p><strong>{"Upfront deposits:"}</strong>{" you might send an invoice for the deposit, confirm receipt when it is paid, and later invoice the balance."}</p>
-            <h2>{"How long should you keep invoices and receipts?"}</h2>
-            <p>{"Invoices you issue and receipts you collect are part of your business records. GOV.UK sets minimum periods:"}</p>
-            <ul><li><strong>{"Self-employed (sole traders and partners):"}</strong>{" keep records for at least 5 years after the 31 January submission deadline of the relevant tax year."}</li><li><strong>{"Limited companies:"}</strong>{" keep records for 6 years from the end of the last company financial year they relate to, or longer in some situations, such as when a transaction covers more than one accounting period."}</li><li><strong>{"VAT-registered businesses:"}</strong>{" follow HMRC's VAT record-keeping rules in VAT Notice 700/21."}</li></ul>
-            <p>{"Keep copies of both the invoices you send and the receipts for money you spend, and store them somewhere safe and searchable."}</p>
-            <h2>{"Common mistakes to avoid"}</h2>
-            <ul><li><strong>{"Treating a quote as an invoice."}</strong>{" A quote shows an expected price; it does not ask for payment."}</li><li><strong>{"Re-using invoice numbers."}</strong>{" Each invoice should have its own unique number so payments and receipts can be matched to it."}</li><li><strong>{"Marking an invoice paid too early."}</strong>{" Wait until the money has actually arrived, and record part-payments separately."}</li><li><strong>{"Not keeping copies."}</strong>{" Keep the invoices you send and the receipts for what you spend, for the periods GOV.UK sets out."}</li><li><strong>{"Losing cash receipts."}</strong>{" If you take or pay cash, a written record is especially useful."}</li></ul>
-            <h2>{"How an invoicing tool helps keep invoices and payments straight"}</h2>
-            <p>{"Keeping invoices and payment records together saves time when customers ask questions and when you prepare your accounts. With "}<Link href="https://makeinvo.com/">{"MakeInvo"}</Link>{", you can create and download a professional PDF invoice in the free generator without signing up. A free account lets you save clients and see your invoice history."}</p>
-            <p>{"On plans that include payment tracking, you can "}<Link href="https://makeinvo.com/features">{"record payments"}</Link>{" with the amount, date and method, including partial payments, and see which invoices are paid, unpaid, partially paid or overdue. That makes it easy to confirm to a customer that their invoice has been settled. You can compare plans on the "}<Link href="https://makeinvo.com/pricing">{"pricing page"}</Link>{"."}</p>
-            <p>{"If you are just getting started, our guide on "}<Link href="https://makeinvo.com/blog/how-to-make-an-invoice-online">{"how to make an invoice online"}</Link>{" walks through each step, and the "}<Link href="https://makeinvo.com/invoice-templates">{"invoice templates"}</Link>{" page has layouts for freelancers, contractors, consultants and small businesses. If an invoice is overdue, read "}<Link href="https://makeinvo.com/blog/how-to-chase-a-late-invoice-uk">{"how to chase a late invoice in the UK"}</Link>{"."}</p>
+            <p>{"Store the invoice, payment acknowledgement and supporting bank entry so you can find them together. A consistent filename using the date and invoice reference helps. Keep a backup, and check that scanned receipts remain readable."}</p>
+            <p>{"For self-employed businesses, "}<a href="https://www.gov.uk/self-employed-records/how-long-to-keep-your-records">{"GOV.UK's record retention guidance"}</a>{" says to keep records for at least five years after the relevant tax year's 31 January submission deadline. Count from that deadline, not simply from the day you bought something."}</p>
+            <p>{"For limited companies, the general period is six years from the end of the last company financial year the records relate to. "}<a href="https://www.gov.uk/running-a-limited-company/company-and-accounting-records">{"GOV.UK's company records guidance"}</a>{" lists circumstances requiring longer retention. VAT and other rules can also affect what you must keep, so use the guidance relevant to your business."}</p>
+            <h2>{"Where MakeInvo fits"}</h2>
+            <p>{"Use the "}<Link href="/">{"MakeInvo invoice generator"}</Link>{" to create a PDF invoice without signup, a watermark or a credit card. A free account lets you save clients and invoice history, so you can refer back to earlier billing details."}</p>
+            <p>{"On plans that include payment tracking, MakeInvo lets you record payment amounts, dates and methods, including partial payments. The paid, unpaid, partially paid and overdue statuses help you see where an invoice stands. Review the available "}<Link href="/features">{"features"}</Link>{" and compare options on the "}<Link href="/pricing">{"pricing page"}</Link>{"."}</p>
+            <p>{"MakeInvo is not presented here as a receipt generator. Creating an invoice and recording its payment are distinct tasks. For a separate receipt, provide the payment acknowledgement your customer needs and keep it with your invoice records."}</p>
             <h2>{"Frequently asked questions"}</h2>
-            <h3>{"Is an invoice the same as a receipt?"}</h3>
-            <p>{"No. An invoice asks for payment. A receipt confirms payment has been received. GOV.UK states that an invoice is not the same as a receipt."}</p>
-            <h3>{"Do I have to give a receipt in the UK?"}</h3>
-            <p>{"There is generally no blanket legal requirement to issue a receipt for every sale, but it is good practice, especially for cash payments. Specific rules can apply in some situations, such as VAT, so check GOV.UK if you are unsure."}</p>
-            <h3>{"Can a receipt be used as a VAT invoice?"}</h3>
-            <p>{"Sometimes. HMRC allows VAT-registered retailers to issue a simplified VAT invoice for supplies of £250 or less including VAT when a customer asks, and some till receipts include the required details. Check HMRC's VAT guidance for the exact requirements."}</p>
-            <h3>{"Can I send a paid invoice instead of a receipt?"}</h3>
-            <p>{"Many small businesses send a copy of the invoice marked \"Paid\" with the payment date and amount. It links the payment to the original invoice number and gives the customer a clear record."}</p>
-            <h3>{"What comes first, the invoice or the receipt?"}</h3>
-            <p>{"Usually the invoice. You send the invoice, the customer pays, and the receipt (or paid invoice) confirms the payment. At a shop till, payment is immediate, so you normally just get a receipt."}</p>
-            <h3>{"Do I need an invoice if I am not VAT registered?"}</h3>
-            <p>{"GOV.UK's legal requirement to give an invoice applies when both parties are VAT registered. Many businesses that are not VAT registered still invoice customers because it is clearer for both sides and helps with record keeping."}</p>
-            <h3>{"How long should I keep receipts and invoices?"}</h3>
-            <p>{"Sole traders must keep records for at least 5 years after the 31 January submission deadline for the relevant tax year. Limited companies generally keep records for 6 years from the end of the last financial year they relate to. Check GOV.UK for the details that apply to you."}</p>
-            <h2>{"Create your next invoice clearly"}</h2>
-            <p>{"Getting the paperwork right is simple once you know which document does which job: invoices ask for payment, receipts confirm it, and good records tie them together. When you are ready to bill your next customer, create a clear PDF invoice with the free "}<Link href="https://makeinvo.com/">{"MakeInvo invoice generator"}</Link>{", with no signup, watermark or credit card needed. For more practical guides, visit the "}<Link href="https://makeinvo.com/blog">{"MakeInvo blog"}</Link>{"."}</p>
+            <h3>{"Does sending an invoice prove the customer paid?"}</h3>
+            <p>{"No. It records a charge, not the arrival of money. Check the payment and keep evidence linking it to the invoice before confirming that the balance is settled."}</p>
+            <h3>{"Can I acknowledge payment on the original invoice?"}</h3>
+            <p>{"You can send a paid copy using the original reference. State the amount received, the payment date and any remaining balance so the customer can see exactly what the acknowledgement covers."}</p>
+            <h3>{"Is a bank transfer confirmation enough for my records?"}</h3>
+            <p>{"It helps show that money moved, but may not describe the purchase or contain the invoice details you need. Keep the supplier's invoice or receipt alongside the payment evidence."}</p>
+            <h3>{"Does every till receipt count as a VAT invoice?"}</h3>
+            <p>{"No. Its contents and the applicable VAT rules matter. Some receipts meet the simplified VAT invoice requirements; ask the supplier for an appropriate VAT invoice if the necessary information is missing."}</p>
+            <h3>{"What should I send after a deposit?"}</h3>
+            <p>{"Acknowledge the amount received and identify the booking or invoice it relates to. Make any outstanding balance clear, and do not describe the whole sale as paid in full unless it is."}</p>
+            <h3>{"Can I invoice without being VAT-registered?"}</h3>
+            <p>{"Yes. You can use an invoice to explain your charges and payment terms. Do not charge VAT when you are not VAT-registered, and include the business details relevant to your circumstances."}</p>
+            <h3>{"Does MakeInvo generate receipts?"}</h3>
+            <p>{"This guide does not claim that MakeInvo offers a receipt generator. It creates invoices, with payment recording available on plans that include payment tracking."}</p>
+            <h2>{"Give each document a clear job"}</h2>
+            <p>{"Before sending paperwork, decide whether you are requesting payment or confirming it. Use a clear reference, check the balance and keep the supporting records together. Start your next bill with MakeInvo's "}<Link href="/invoice-templates">{"invoice templates"}</Link>{", or browse the "}<Link href="/blog">{"MakeInvo blog"}</Link>{" for more practical invoicing guides.\n"}</p>
           </div>
           <div className="mt-10 border-t border-border pt-8">
             <Link href="/blog" className="text-sm font-medium text-primary hover:underline">&larr; Back to the blog</Link>
