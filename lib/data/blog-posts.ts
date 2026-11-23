@@ -13,6 +13,17 @@ export interface BlogPost {
 
 export const BLOG_POSTS: BlogPost[] = [
 {
+  "slug": "how-to-invoice-as-a-freelancer-uk",
+  "title": "How to Invoice as a Freelancer in the UK: A Step-by-Step Guide",
+  "excerpt": "Agree terms, number your invoices, bill day rates, hours or projects, add expenses and VAT only if registered, and get paid on time. A UK freelancer guide.",
+  "publishedDate": "2026-11-23",
+  "updatedDate": "2026-11-23",
+  "readingTime": "11 min read",
+  "author": "MakeInvo Team",
+  "coverImage": "/blog/how-to-invoice-as-a-freelancer-uk/how-to-invoice-as-a-freelancer-uk-featured.webp",
+  "coverImageAlt": "Freelancer preparing an invoice on a laptop at a home desk"
+},
+{
   "slug": "invoice-payment-terms-uk",
   "title": "Invoice Payment Terms Explained: Net 30, Due on Receipt and More (UK Guide)",
   "excerpt": "What invoice payment terms like Net 7, Net 30 and EOM mean, UK legal time limits, how to choose terms and how to word them on your invoice clearly.",
