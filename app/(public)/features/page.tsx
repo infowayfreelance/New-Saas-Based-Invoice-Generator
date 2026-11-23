@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
-import { getSiteUrl } from "@/lib/utils/site-url"
 import Link from "next/link"
+import { FeaturesFaqAccordion } from "./features-faq"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
@@ -18,20 +18,180 @@ import {
 } from "lucide-react"
 
 export const metadata: Metadata = {
-  title: "Features",
-  description: "Discover all the powerful features MakeInvo offers to streamline your invoicing workflow.",
+  "title": "Invoice Generator Features: Templates, Payments",
+  "description": "MakeInvo features: invoice builder, PDF export, saved clients, monthly recurring invoice rules, payment tracking and branding. Start with a free invoice.",
+  "alternates": {
+    "canonical": "https://makeinvo.com/features"
+  },
+  "openGraph": {
+    "title": "Invoice Generator Features: Templates, Payments | MakeInvo",
+    "description": "MakeInvo features: invoice builder, PDF export, saved clients, monthly recurring invoice rules, payment tracking and branding. Start with a free invoice.",
+    "url": "https://makeinvo.com/features",
+    "type": "website"
+  },
+  "twitter": {
+    "card": "summary",
+    "title": "Invoice Generator Features: Templates, Payments | MakeInvo",
+    "description": "MakeInvo features: invoice builder, PDF export, saved clients, monthly recurring invoice rules, payment tracking and branding. Start with a free invoice."
+  }
 }
 
-const siteUrl = getSiteUrl()
+const faqs = [
+  {
+    "question": "Is MakeInvo free to use?",
+    "answer": "You can start without a credit card. For what is included in each plan, see the pricing page, which always shows the current details."
+  },
+  {
+    "question": "Can I create an invoice without signing up?",
+    "answer": "Yes. You can build an invoice with the free invoice generator and download it as a PDF without creating an account. Create an account to save clients, keep an invoice history and manage recurring invoice rules."
+  },
+  {
+    "question": "Can I add VAT to my invoices?",
+    "answer": "Yes, you can add tax to your invoice lines. Only add VAT if you are VAT-registered; if you are not, leave it off. GOV.UK explains what a VAT invoice must show."
+  },
+  {
+    "question": "Can I send invoices by email from MakeInvo?",
+    "answer": "Download your invoice as a PDF and email it to your client yourself. Built-in email delivery is not currently available."
+  },
+  {
+    "question": "How do recurring invoices work?",
+    "answer": "For retainer clients you can create a monthly recurring invoice rule and choose a day of the month from 1 to 28. Download and send the resulting invoice yourself."
+  },
+  {
+    "question": "Does MakeInvo send payment reminders?",
+    "answer": "Automatic reminder sending is not currently available. Use invoice due dates and payment records to follow up with your clients yourself."
+  },
+  {
+    "question": "Can I record part payments?",
+    "answer": "Yes. You can record each payment with its amount, date and method, including part payments, so an invoice shows what has been paid and what is still owed."
+  },
+  {
+    "question": "What should a UK invoice include?",
+    "answer": "In general: your name or business name and address, your customer's name and address, a unique invoice number, the invoice date, a description of what you are charging for, the amount and any VAT. GOV.UK has the full list."
+  }
+]
 
-const breadcrumbSchema = {
-  "@context": "https://schema.org",
-  "@type": "BreadcrumbList",
-  itemListElement: [
-    { "@type": "ListItem", position: 1, name: "Home", item: siteUrl },
-    { "@type": "ListItem", position: 2, name: "Features", item: `${siteUrl}/features` },
-  ],
-}
+const schemas = [
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "@id": "https://makeinvo.com/features#app",
+    "name": "MakeInvo Invoice Generator",
+    "url": "https://makeinvo.com/",
+    "description": "MakeInvo features: invoice builder, PDF export, saved clients, monthly recurring invoice rules, payment tracking and branding. Start with a free invoice.",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Web",
+    "isAccessibleForFree": true,
+    "featureList": [
+      "Invoice generator with automatic totals",
+      "Per-line tax",
+      "PDF export",
+      "Client database",
+      "Recent invoice history by client",
+      "Monthly recurring invoice rules",
+      "Payment recording including part payments",
+      "Templates, logo and brand colours"
+    ],
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "GBP"
+    },
+    "provider": {
+      "@id": "https://makeinvo.com/#organization"
+    }
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "@id": "https://makeinvo.com/features#faq",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Is MakeInvo free to use?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "You can start without a credit card. For what is included in each plan, see the pricing page, which always shows the current details."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I create an invoice without signing up?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. You can build an invoice with the free invoice generator and download it as a PDF without creating an account. Create an account to save clients, keep an invoice history and manage recurring invoice rules."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I add VAT to my invoices?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, you can add tax to your invoice lines. Only add VAT if you are VAT-registered; if you are not, leave it off. GOV.UK explains what a VAT invoice must show."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I send invoices by email from MakeInvo?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Download your invoice as a PDF and email it to your client yourself. Built-in email delivery is not currently available."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do recurring invoices work?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "For retainer clients you can create a monthly recurring invoice rule and choose a day of the month from 1 to 28. Download and send the resulting invoice yourself."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does MakeInvo send payment reminders?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Automatic reminder sending is not currently available. Use invoice due dates and payment records to follow up with your clients yourself."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I record part payments?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. You can record each payment with its amount, date and method, including part payments, so an invoice shows what has been paid and what is still owed."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What should a UK invoice include?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "In general: your name or business name and address, your customer's name and address, a unique invoice number, the invoice date, a description of what you are charging for, the amount and any VAT. GOV.UK has the full list."
+        }
+      }
+    ]
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "@id": "https://makeinvo.com/features#breadcrumb",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": "https://makeinvo.com/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Features",
+        "item": "https://makeinvo.com/features"
+      }
+    ]
+  }
+]
 
 const featureCategories = [
   {
@@ -42,7 +202,7 @@ const featureCategories = [
         icon: FileText,
         title: "Invoice Generator",
         description:
-          "Create beautiful, professional invoices in seconds with our intuitive builder. Add items, calculate totals automatically, and customize to match your brand.",
+          "Create professional invoices with an intuitive builder. Add items, let MakeInvo calculate the totals, and customise the invoice to match your brand.",
       },
       {
         icon: Download,
@@ -52,15 +212,15 @@ const featureCategories = [
       },
       {
         icon: Send,
-        title: "Email Delivery",
+        title: "Email Your PDF",
         description:
-          "Send invoices directly to clients via email with professional templates. Track when invoices are sent and viewed.",
+          "Download your invoice as a PDF and email it to your client yourself.",
       },
     ],
   },
   {
     title: "Client Management",
-    description: "Keep your clients organized",
+    description: "Keep your clients organised",
     features: [
       {
         icon: Users,
@@ -71,7 +231,7 @@ const featureCategories = [
       {
         icon: FileText,
         title: "Invoice History",
-        description: "View complete invoice history for each client. Filter by status, date range, and payment status.",
+        description: "View recent invoices for each client and check their status. Use dashboard date filters to review your activity.",
       },
     ],
   },
@@ -83,19 +243,19 @@ const featureCategories = [
         icon: RefreshCw,
         title: "Recurring Invoices",
         description:
-          "Set up automatic monthly invoices for retainer clients. Choose the day, enable auto-send, and let us handle the rest.",
+          "Set up monthly invoice rules for retainer clients. Choose a day of the month from 1 to 28, then download and send the resulting invoices yourself.",
       },
       {
         icon: Bell,
-        title: "Payment Reminders",
+        title: "Payment Follow-up",
         description:
-          "Automatic late payment reminders at 3, 5, and 7 days after due date. Keep your cash flow healthy without awkward conversations.",
+          "Check invoice due dates and payment records, then follow up with clients yourself. Automatic reminder sending is not currently available.",
       },
     ],
   },
   {
     title: "Payment Tracking",
-    description: "Track every dollar",
+    description: "Track every payment",
     features: [
       {
         icon: CreditCard,
@@ -107,45 +267,44 @@ const featureCategories = [
         icon: BarChart3,
         title: "Financial Reports",
         description:
-          "Filter and view accounts by client, month, year, and status. Export reports for accounting and tax purposes.",
+          "Review invoice counts, received payments and outstanding balances on your dashboard. Filter by date range and currency.",
       },
     ],
   },
   {
-    title: "Customization",
+    title: "Customisation",
     description: "Make it yours",
     features: [
       {
         icon: Palette,
         title: "Templates & Branding",
         description:
-          "Choose from multiple professional templates. Upload your logo, set brand colors, and add watermarks or digital signatures.",
+          "Choose from multiple professional templates. Add your logo and signature image, set brand colours, and add watermark text.",
       },
       {
         icon: Shield,
         title: "Secure & Private",
         description:
-          "Your data is encrypted and secure. We never share your information with third parties. GDPR compliant.",
+          "Read how we protect your data on our Security page and in our Privacy Policy.",
       },
     ],
   },
 ]
 
+const audiences = [["Freelancers", "freelancers"], ["Contractors", "contractors"], ["Consultants", "consultants"], ["Designers", "designers"], ["Photographers", "photographers"], ["Agencies", "agencies"], ["Small businesses", "small-businesses"], ["Tradespeople", "tradespeople"], ["Self-employed", "self-employed"]]
+
 export default function FeaturesPage() {
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
-      />
+      {schemas.map((schema) => <script key={schema["@type"]} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema).replace(/</g, "\\u003c") }} />)}
       <div className="px-4 py-20 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
         <div className="mx-auto max-w-2xl text-center">
           <h1 className="text-balance text-4xl font-bold tracking-tight sm:text-5xl">
-            Powerful features for modern invoicing
+            Invoicing Features for Freelancers and Small Businesses
           </h1>
           <p className="mt-4 text-pretty text-lg text-muted-foreground">
-            Everything you need to create, send, and track invoices. Built for freelancers and small businesses.
+            Create PDF invoices to send to clients, set up monthly invoice rules, and keep your clients and payment records in one place.
           </p>
         </div>
         <div className="mt-20 space-y-20">
@@ -165,7 +324,7 @@ export default function FeaturesPage() {
                       <CardTitle className="text-lg">{feature.title}</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-sm leading-relaxed text-muted-foreground">{feature.description}</p>
+                      <p className="text-sm leading-relaxed text-muted-foreground">{feature.title === "Secure & Private" ? <>Read how we protect your data on our <Link href="/security">Security</Link> page and in our <Link href="/privacy">Privacy Policy</Link>.</> : feature.description}</p>
                     </CardContent>
                   </Card>
                 ))}
@@ -173,10 +332,32 @@ export default function FeaturesPage() {
             </div>
           ))}
         </div>
+
+        <div className="mt-20 space-y-20">
+          <section>
+            <div className="mb-8"><h2 className="text-2xl font-bold">How MakeInvo Works</h2></div>
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {[{ title: "Build your invoice.", text: "Add your details, your client, your line items and any tax, then choose a template." }, { title: "Send it.", text: "Download the PDF and email the invoice to your client yourself." }, { title: "Get paid and track it.", text: "Record payments as they arrive, and use due dates and dashboard totals to keep on top of what is owed." }].map((step) => <Card key={step.title} className="border-border/50"><CardHeader><CardTitle className="text-lg">{step.title}</CardTitle></CardHeader><CardContent><p className="text-sm leading-relaxed text-muted-foreground">{step.text}</p></CardContent></Card>)}
+            </div>
+          </section>
+          <section>
+            <div className="mb-8"><h2 className="text-2xl font-bold">Invoicing Features That Fit the UK</h2></div>
+            <p className="text-sm leading-relaxed text-muted-foreground">A UK invoice has to show certain details, and VAT is only added if you're registered. MakeInvo's invoice builder has fields for the details clients expect, and you can add tax to each line. Check <a href="https://www.gov.uk/invoicing-and-taking-payment-from-customers/invoices-what-they-must-include">what a UK invoice must include</a> and whether you need to <a href="https://www.gov.uk/vat-registration">register for VAT</a> before you start charging it. If a client pays late, GOV.UK explains your rights on <a href="https://www.gov.uk/late-commercial-payments-interest-debt-recovery">late commercial payments and interest</a>. Use your invoice due dates and payment records to plan your follow-up.</p>
+          </section>
+          <section>
+            <div className="mb-8"><h2 className="text-2xl font-bold">Features for the Way You Work</h2><p className="mt-1 text-muted-foreground">Each type of business invoices a little differently. Explore invoicing guidance for the way you work.</p></div>
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">{audiences.map(([label, slug]) => <Card key={slug} className="border-border/50"><CardHeader><CardTitle className="text-lg"><Link href={`/invoice-generator-for-${slug}`}>{label}</Link></CardTitle></CardHeader></Card>)}</div>
+            <p className="mt-4 text-sm leading-relaxed text-muted-foreground">Prefer to start from a layout? Browse the <Link href="/invoice-templates">invoice templates</Link>.</p>
+          </section>
+          <section>
+            <div className="mb-8"><h2 className="text-2xl font-bold">Invoicing Features FAQs</h2></div>
+            <FeaturesFaqAccordion faqs={faqs} keepAnswersMounted />
+          </section>
+        </div>
         <div className="mt-20 rounded-2xl border border-border bg-muted/30 p-8 text-center md:p-12">
           <h2 className="text-balance text-2xl font-bold sm:text-3xl">Ready to get started?</h2>
           <p className="mt-4 text-pretty text-muted-foreground">
-            Create your first invoice in under 60 seconds. No credit card required.
+            Create your first invoice today. No credit card required.
           </p>
           <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Link href="/">
