@@ -6,7 +6,7 @@ import { getSiteUrl } from "@/lib/utils/site-url"
 import { getBlogPost } from "@/lib/data/blog-posts"
 
 const siteUrl = getSiteUrl()
-const post = getBlogPost("invoice-payment-terms-uk")!
+const post = { ...getBlogPost("invoice-payment-terms-uk")!, updatedDate: "2026-11-23" }
 const pageUrl = `${siteUrl}/blog/${post.slug}`
 const coverImageUrl = `${siteUrl}${post.coverImage}`
 
@@ -40,7 +40,7 @@ const schemas = [
     "description": "What invoice payment terms like Net 7, Net 30 and EOM mean, UK legal time limits, how to choose terms and how to word them on your invoice clearly.",
     "image": "https://makeinvo.com/blog/invoice-payment-terms-uk/invoice-payment-terms-uk-featured.webp",
     "datePublished": "2026-11-22",
-    "dateModified": "2026-11-22",
+    "dateModified": "2026-11-23",
     "author": {
       "@type": "Organization",
       "name": "MakeInvo",
@@ -64,58 +64,58 @@ const schemas = [
     "mainEntity": [
       {
         "@type": "Question",
-        "name": "What does Net 30 mean on an invoice?",
+        "name": "Does Net 30 mean the end of next month?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Net 30 means the full amount is due within 30 calendar days of the invoice date. Write the actual due date as well, so there is no confusion."
+          "text": "No. When counted from the invoice date, Net 30 means thirty calendar days later. End-of-month arrangements use a different starting point, so show the actual due date rather than relying on the abbreviation."
         }
       },
       {
         "@type": "Question",
-        "name": "What is the most common payment term in the UK?",
+        "name": "Are Net 7 and Net 14 working days?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Net 30 is widely used for business-to-business invoices, but many freelancers and small businesses use shorter terms such as Net 7 or Net 14. Choose terms that suit your cash flow and agree them with the customer first."
+          "text": "Normally they refer to calendar days. If you and the customer agree working days instead, state that clearly and put the resulting due date on the invoice."
         }
       },
       {
         "@type": "Question",
-        "name": "What happens if I don't put payment terms on my invoice?",
+        "name": "Does due on receipt mean the invoice is paid?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "For business-to-business sales, GOV.UK says that if no payment date is agreed, payment is late 30 days after the customer gets the invoice or you deliver the goods or service, whichever is later. It is still clearer to state your terms."
+          "text": "No. It says when payment is expected. You still need to check that the money has arrived before recording the invoice as paid."
         }
       },
       {
         "@type": "Question",
-        "name": "Can I set payment terms longer than 60 days?",
+        "name": "What if the customer never agreed a deadline?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "For business transactions, GOV.UK says agreed payment dates should usually be within 60 days. A longer period can be agreed, but it must be fair to both businesses."
+          "text": "For commercial payments, GOV.UK says payment becomes late thirty days after receipt of the invoice or the goods or service, whichever is later. Check the rules for your transaction rather than assuming the invoice date alone starts that period."
         }
       },
       {
         "@type": "Question",
-        "name": "What does \"due on receipt\" mean?",
+        "name": "Can a business agree more than sixty days?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "It means payment is due as soon as the customer receives the invoice. It suits small one-off jobs, but some customers will still need a few days to process payment."
+          "text": "GOV.UK allows a longer business payment period if it is fair to both parties. Make the agreement clear and seek advice if the proposed terms are difficult to assess."
         }
       },
       {
         "@type": "Question",
-        "name": "Can I charge interest on late payments?",
+        "name": "Can I change terms for an invoice already sent?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "For business-to-business sales, you generally have the right to claim statutory interest and compensation on late payments under UK late payment legislation, unless your contract says otherwise. Check GOV.UK for the current rules."
+          "text": "Discuss the change with the customer and keep a record of any agreement. Do not assume that sending a replacement PDF with a different deadline changes the original contract."
         }
       },
       {
         "@type": "Question",
-        "name": "Should I show the due date or just the payment term?",
+        "name": "Should I include bank details and a payment reference?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Show both. The term explains your policy, and the exact date removes any doubt about when payment is late."
+          "text": "Yes, where bank transfer is the agreed method. Give the customer clear payment instructions and ask them to quote the invoice number so you can match the money to the right bill."
         }
       }
     ]
@@ -168,79 +168,85 @@ export default function InvoicePaymentTermsPage() {
           </nav>
           <h1 className="mt-4 text-4xl font-bold tracking-tight text-balance sm:text-5xl">{post.title}</h1>
           <p className="mt-4 text-sm text-muted-foreground">
-            By {post.author} &middot; Published {formatDate(post.publishedDate)} &middot; {post.readingTime}
+            By {post.author} &middot; Published {formatDate(post.publishedDate)} &middot; {post.readingTime} &middot; Updated {formatDate(post.updatedDate)}
           </p>
           <div className="relative mt-8 aspect-[16/9] w-full overflow-hidden rounded-xl border border-border bg-muted">
             <Image src={post.coverImage} alt={post.coverImageAlt} fill priority sizes="(min-width: 768px) 768px, 100vw" className="object-cover" />
           </div>
           <div className="prose prose-neutral mt-10 max-w-none dark:prose-invert prose-headings:scroll-mt-20 prose-h2:text-2xl prose-h2:font-bold prose-h3:text-lg prose-h3:font-semibold">
-            <p>{"Payment terms are the small line on an invoice that decides when you actually get paid. Get them right and customers know exactly what to do. Leave them vague and you invite late payments, awkward emails and arguments about which day counts."}</p>
-            <p>{"This plain-English guide explains what payment terms are, what common terms such as Net 30 and \"due on receipt\" mean, the UK rules on payment periods, how to choose terms that suit your business, and how to write them clearly on your invoice. It is general information, not legal, tax or accounting advice. If your situation is complicated, check GOV.UK or speak to an accountant or solicitor."}</p>
-            <h2>{"Short answer: what are invoice payment terms?"}</h2>
-            <p>{"Invoice payment terms tell your customer "}<strong>{"when"}</strong>{" payment is due, "}<strong>{"how"}</strong>{" to pay and, if you choose, what happens if they pay late or early."}</p>
-            <ul><li><strong>{"Net 30"}</strong>{" means the full amount is due 30 days after the invoice date."}</li><li><strong>{"Due on receipt"}</strong>{" means payment is due as soon as the customer receives the invoice."}</li><li>{"If you "}<strong>{"never agreed a payment date"}</strong>{" with a business customer, GOV.UK says payment is late 30 days after the customer gets the invoice or after you deliver the goods or service, whichever is later."}</li></ul>
-            <p>{"The clearest invoices show both the term and the actual date, for example, on an invoice dated 1 December 2026: \"Payment terms: Net 14. Due by 15 December 2026.\""}</p>
-            <h2>{"Why payment terms matter"}</h2>
-            <p>{"Clear payment terms help you:"}</p>
-            <ul><li><strong>{"get paid on time"}</strong>{", because customers know the exact deadline;"}</li><li><strong>{"manage cash flow"}</strong>{", because you can plan when money will arrive;"}</li><li><strong>{"avoid disputes"}</strong>{", because there is no debate about when the clock started;"}</li><li><strong>{"enforce your rights"}</strong>{", because a clear due date makes it obvious when a payment becomes late."}</li></ul>
-            <p>{"GOV.UK confirms you can set your own payment terms, such as discounts for early payment or payment upfront. The key is to agree them with the customer before you start the work, then repeat them on the invoice."}</p>
-            <h2>{"Common invoice payment terms and what they mean"}</h2>
+            <p>{"“Net 30” may be familiar to your customer's accounts team, but another customer may have no idea when it means they should pay. A short term becomes much more useful when you put a real due date beside it."}</p>
+            <p>{"Invoice payment terms describe the payment arrangement: the deadline, how to pay and any agreed conditions. This guide explains the common labels, how to choose a suitable deadline and how to write the arrangement clearly. It is general information, not legal, tax or accounting advice."}</p>
+            <h2>{"Agree the deadline before sending the invoice"}</h2>
+            <p>{"Your invoice should reflect an agreement the customer already understands. Adding a new payment policy after the work is complete can create a disagreement just when you want the customer to approve the bill."}</p>
+            <p>{"Put the terms in your quote, proposal or booking agreement first. Check that the person placing the order can accept them. For larger customers, ask whether you need a purchase order, supplier registration or a particular billing address before work starts."}</p>
+            <p>{"That small check can prevent an invoice sitting in the wrong inbox. It also helps you plan your own spending: a payment deadline is useful only if you know when you can invoice and what the customer needs to process it."}</p>
+            <h2>{"Net 7, Net 14 and Net 30 in plain English"}</h2>
             <div className="not-prose relative my-8 aspect-[4/3] w-full overflow-hidden rounded-xl border border-border bg-muted"><Image src="/blog/invoice-payment-terms-uk/payment-terms-calendar-due-date.webp" alt="Calendar with a circled due date and a Net 30 sticky note" fill sizes="(min-width: 768px) 768px, 100vw" className="object-cover" /></div>
-            <p>{"Here is what the most common terms mean, using an example invoice dated "}<strong>{"1 December 2026"}</strong>{"."}</p>
-            <div className="overflow-x-auto"><table><thead><tr><th scope="col">{"Term"}</th><th scope="col">{"What it means"}</th><th scope="col">{"Due date for an invoice dated 1 Dec 2026"}</th></tr></thead><tbody><tr><th scope="row">{"Due on receipt"}</th><td>{"Payable as soon as the customer receives the invoice"}</td><td>{"1 December 2026 (on receipt)"}</td></tr><tr><th scope="row">{"Net 7"}</th><td>{"7 days after the invoice date"}</td><td>{"8 December 2026"}</td></tr><tr><th scope="row">{"Net 14"}</th><td>{"14 days after the invoice date"}</td><td>{"15 December 2026"}</td></tr><tr><th scope="row">{"Net 30"}</th><td>{"30 days after the invoice date"}</td><td>{"31 December 2026"}</td></tr><tr><th scope="row">{"Net 60"}</th><td>{"60 days after the invoice date"}</td><td>{"30 January 2027"}</td></tr><tr><th scope="row">{"EOM (end of month)"}</th><td>{"Last day of the month the invoice is dated"}</td><td>{"31 December 2026"}</td></tr><tr><th scope="row">{"30 days EOM"}</th><td>{"30 days after the end of the invoice month"}</td><td>{"30 January 2027"}</td></tr><tr><th scope="row">{"CIA / payment in advance"}</th><td>{"Payment before work starts or goods are sent"}</td><td>{"Before supply"}</td></tr><tr><th scope="row">{"COD (cash on delivery)"}</th><td>{"Payment when the goods or service are delivered"}</td><td>{"On delivery"}</td></tr></tbody></table></div>
-            <p>{"A few points worth knowing:"}</p>
-            <ul><li><strong>{"\"Net\" days are calendar days"}</strong>{", including weekends and bank holidays, unless you say otherwise."}</li><li><strong>{"The clock usually starts on the invoice date"}</strong>{", but some businesses count from the delivery date. Say which one you mean."}</li><li><strong>{"\"Net 30\" and \"30 days\" are often used interchangeably"}</strong>{", but the safest approach is to write the actual due date."}</li></ul>
-            <h3>{"Other terms you may see"}</h3>
-            <ul><li><strong>{"Stage payments or milestones"}</strong>{": part of the total is due at agreed points in a project, such as a deposit, a mid-point payment and a final balance."}</li><li><strong>{"Deposit or upfront payment"}</strong>{": a percentage or fixed part of the total is paid before work begins."}</li><li><strong>{"Early payment discount"}</strong>{": for example, \"2/10 Net 30\" means a 2% discount if paid within 10 days, otherwise the full amount within 30 days. Only offer this if it makes sense for your margins."}</li><li><strong>{"Retainers and recurring invoices"}</strong>{": a fixed amount billed on the same day each month for ongoing work."}</li></ul>
-            <h2>{"UK rules on payment periods"}</h2>
-            <p>{"The UK has rules for business-to-business payments. According to GOV.UK and the Office of the Small Business Commissioner:"}</p>
-            <ul><li><strong>{"If you agree a payment date"}</strong>{", it should usually be within "}<strong>{"60 days"}</strong>{" for business transactions. A longer period can be agreed, but it must be fair to both businesses."}</li><li><strong>{"Public authorities"}</strong>{" should usually pay within "}<strong>{"30 days"}</strong>{"."}</li><li><strong>{"If no payment date is agreed"}</strong>{", payment is late "}<strong>{"30 days"}</strong>{" after the customer gets the invoice or you deliver the goods or service, whichever is later."}</li></ul>
-            <p>{"These rules cover business-to-business transactions. If you sell to consumers, your terms and contract still matter, but the late commercial payment rules described below do not apply in the same way."}</p>
-            <h2>{"What happens if a customer pays late?"}</h2>
-            <p>{"For business-to-business sales, the Late Payment of Commercial Debts legislation gives you the right to claim statutory interest and fixed compensation on late payments, unless your contract says otherwise. GOV.UK sets statutory interest at "}<strong>{"8% plus the Bank of England base rate"}</strong>{". You can choose not to charge it, and many small businesses use it as a last resort to protect the relationship."}</p>
-            <p>{"Our step-by-step guide on "}<Link href="https://makeinvo.com/blog/how-to-chase-a-late-invoice-uk">{"how to chase a late invoice in the UK"}</Link>{" explains the full sequence, from a polite reminder to statutory interest, with links to the official guidance."}</p>
-            <h2>{"How to choose the right payment terms for your business"}</h2>
-            <p>{"There is no single right answer. Think about:"}</p>
-            <h3>{"Your cash flow"}</h3>
-            <p>{"Shorter terms bring money in sooner. If you have regular outgoings such as materials, subcontractors or rent, Net 7 or Net 14 may suit you better than Net 30."}</p>
-            <h3>{"Your industry and customers"}</h3>
-            <p>{"Some sectors and larger customers expect longer terms because they pay in monthly payment runs. If a client pays on fixed dates, agree terms that fit their process so your invoice is not left waiting a month for the next run."}</p>
-            <h3>{"The size and length of the job"}</h3>
-            <p>{"For larger projects, consider a deposit or stage payments so you are not funding the entire job yourself until the end."}</p>
-            <h3>{"Your relationship with the customer"}</h3>
-            <p>{"You might offer new customers shorter terms or ask for payment upfront, then extend terms for regular customers who always pay on time."}</p>
-            <h3>{"Your own capacity to chase"}</h3>
-            <p>{"The longer the terms, the longer you wait before you can follow up. Terms you can realistically monitor are better than generous terms you cannot keep track of."}</p>
-            <h2>{"How to write payment terms on an invoice"}</h2>
+            <p>{"“Net” refers to the full amount being due within the stated period. On an invoice using the invoice date as its starting point, Net 7 means seven days later, Net 14 means fourteen days later and Net 30 means thirty days later."}</p>
+            <p>{"These are normally calendar days, unless your agreement specifies working days. Do not quietly add extra time for weekends or assume the customer counts them differently. Write the actual deadline and agree any adjustment in advance."}</p>
+            <p>{"The following worked example uses an invoice dated "}<strong>{"10 January 2027"}</strong>{". It assumes the day count starts from that invoice date and that the customer receives it on the same day."}</p>
+            <div className="overflow-x-auto"><table><thead><tr><th scope="col">{"Payment term"}</th><th scope="col">{"How to read it"}</th><th scope="col">{"Example deadline"}</th></tr></thead><tbody><tr><th scope="row">{"Due on receipt"}</th><td>{"Payment is due when the invoice arrives"}</td><td>{"10 January 2027"}</td></tr><tr><th scope="row">{"Net 7"}</th><td>{"Seven calendar days after the invoice date"}</td><td>{"17 January 2027"}</td></tr><tr><th scope="row">{"Net 14"}</th><td>{"Fourteen calendar days after the invoice date"}</td><td>{"24 January 2027"}</td></tr><tr><th scope="row">{"Net 30"}</th><td>{"Thirty calendar days after the invoice date"}</td><td>{"9 February 2027"}</td></tr><tr><th scope="row">{"Net 60"}</th><td>{"Sixty calendar days after the invoice date"}</td><td>{"11 March 2027"}</td></tr><tr><th scope="row">{"EOM"}</th><td>{"Payment at the end of the invoice month"}</td><td>{"31 January 2027"}</td></tr><tr><th scope="row">{"30 days EOM"}</th><td>{"Thirty days after that month ends"}</td><td>{"2 March 2027"}</td></tr></tbody></table></div>
+            <p>{"The difference between Net 30 and 30 days EOM can be substantial. One counts from the invoice date; the other waits until month end before counting. Avoid using EOM wording without explaining how you calculate the date."}</p>
+            <h2>{"What does due on receipt mean?"}</h2>
+            <p>{"Due on receipt asks the customer to pay when they receive the invoice. It does not give them a further seven or thirty days, and it does not mean payment has already been made."}</p>
+            <p>{"It can suit a small one-off job where immediate payment was agreed. However, a business customer may need someone to approve the charge before a bank transfer can be arranged. Check that your chosen term fits the way the customer pays rather than expecting the label to change their process."}</p>
+            <p>{"If payment must arrive before work begins, say “payment in advance” instead. If you expect payment when goods arrive, say “payment on delivery”. Those describe different stages and should not be treated as interchangeable."}</p>
+            <h2>{"Other arrangements for longer jobs"}</h2>
+            <p>{"A single final invoice is not always the best fit. When you need to buy materials or reserve time, you might agree a deposit followed by a balance payment. For a longer project, separate invoices at named milestones can make the amount due easier to understand."}</p>
+            <p>{"Describe each stage precisely. “Design approval” or “delivery of the final files” is clearer than “later payment”. State the deadline for each stage and explain whether work continues while a payment is outstanding."}</p>
+            <p>{"A retainer is another arrangement: the client pays for agreed ongoing work under the schedule in your contract. Repeating invoices should still identify the period they cover so the customer does not mistake them for duplicates."}</p>
+            <p>{"You may also see an early-payment discount written as “2/10 Net 30”. That generally offers a 2% discount for payment within ten days, with the full amount due within thirty. Explain both deadlines in words, and check the effect on your margin before offering a discount."}</p>
+            <h2>{"UK payment periods: agreements and the default rule"}</h2>
+            <p><a href="https://www.gov.uk/invoicing-and-taking-payment-from-customers/payment-obligations">{"GOV.UK's payment obligations guidance"}</a>{" explains that you can set payment terms, including advance payment or an early-payment discount. Make the arrangement clear before the transaction."}</p>
+            <p>{"For commercial payments, "}<a href="https://www.gov.uk/late-commercial-payments-interest-debt-recovery">{"GOV.UK's late-payment guidance"}</a>{" says agreed deadlines should usually be within 60 days for businesses and 30 days for public authorities. Businesses can agree a longer period if it is fair to both sides."}</p>
+            <p>{"Without an agreed payment date, a commercial payment becomes late 30 days after the customer receives the invoice or the goods or service, whichever happens later. This is a default rule, not a reason to leave the due date off your invoice."}</p>
+            <p>{"These commercial rules concern business transactions. Do not assume the same interest rights apply when invoicing a private customer. For an unusual contract, disputed charge or public-sector arrangement, check the guidance and get advice suited to the situation."}</p>
+            <h2>{"Choose terms you can work with"}</h2>
+            <p>{"Start with your own costs. If you pay for supplies before starting a job, waiting until the end of a long project and then allowing another month may leave a gap in your cash flow. A deposit or stage payment could be more practical than simply shortening the final deadline."}</p>
+            <p>{"Next, ask how the customer handles invoices. A monthly payment run or an approval process may affect the date they can agree to. Find that out before committing to the work, and decide whether the arrangement is workable for you."}</p>
+            <p>{"Consider the size of the job and your experience with the client. You might ask a new customer for payment in advance while offering an established customer an agreed period of credit. Avoid promising terms you cannot afford just because another supplier uses them."}</p>
+            <p>{"Finally, choose a process you can monitor. Keep a list of upcoming due dates and check payments regularly. Short terms do little good if you do not notice an unpaid invoice until several weeks later."}</p>
+            <h2>{"Write the payment instructions as one clear block"}</h2>
             <div className="not-prose relative my-8 aspect-[4/3] w-full overflow-hidden rounded-xl border border-border bg-muted"><Image src="/blog/invoice-payment-terms-uk/invoice-payment-terms-wording.webp" alt="Payment terms and due date section at the bottom of an invoice" fill sizes="(min-width: 768px) 768px, 100vw" className="object-cover" /></div>
-            <p>{"Clear wording removes guesswork. Include:"}</p>
-            <ol><li><strong>{"The term"}</strong>{", such as \"Net 14\"."}</li><li><strong>{"The exact due date"}</strong>{", such as \"Due by 15 December 2026\"."}</li><li><strong>{"How to pay"}</strong>{", including bank details or a payment link."}</li><li><strong>{"The invoice number"}</strong>{" to use as a payment reference."}</li><li><strong>{"Any late payment policy"}</strong>{", if you have agreed one, for example a reference to statutory interest."}</li><li><strong>{"Any early payment discount"}</strong>{", if you offer one."}</li></ol>
-            <h3>{"Example payment terms wording"}</h3>
-            <ul><li><em>{"\"Payment terms: Net 14. Please pay by 15 December 2026 by bank transfer to the account below, using invoice number INV-0042 as the reference.\""}</em></li><li><em>{"\"Payment due on receipt. Thank you for your business.\""}</em></li><li><em>{"\"50% deposit due before work starts; remaining balance due within 7 days of completion.\""}</em></li><li><em>{"\"Payment terms: Net 30 from the invoice date. We reserve the right to claim interest and compensation on late payments under the Late Payment of Commercial Debts (Interest) Act 1998.\""}</em></li></ul>
-            <p>{"Adapt the wording to what you actually agreed with the customer. For the other details your invoice needs, see our checklist of "}<Link href="https://makeinvo.com/blog/what-to-include-on-a-uk-invoice">{"what a UK invoice must include"}</Link>{"."}</p>
-            <h2>{"Tips to get paid on time"}</h2>
-            <ul><li><strong>{"Agree terms before you start"}</strong>{", in your quote, proposal or contract."}</li><li><strong>{"Send the invoice promptly"}</strong>{", as soon as the work is done or the milestone is reached."}</li><li><strong>{"Make paying easy"}</strong>{", with clear bank details and the right reference."}</li><li><strong>{"Send polite reminders"}</strong>{" before and after the due date."}</li><li><strong>{"Keep records"}</strong>{" of invoices, payments and correspondence."}</li><li><strong>{"Review terms regularly"}</strong>{", especially for customers who are often late."}</li></ul>
-            <h2>{"How MakeInvo helps with payment terms and due dates"}</h2>
+            <p>{"The customer should be able to find the deadline and payment details without reading the whole document. Put the term beside a specific date, then explain how to pay and which reference to use."}</p>
+            <p>{"Include:"}</p>
+            <ul><li>{"the agreed term and exact due date;"}</li><li>{"the bank details or payment route;"}</li><li>{"the invoice number to quote as a reference;"}</li><li>{"any agreed deposit or stage-payment details;"}</li><li>{"a contact for questions about the charge."}</li></ul>
+            <p>{"For the rest of the document, follow our checklist of "}<Link href="/blog/what-to-include-on-a-uk-invoice">{"what to include on a UK invoice"}</Link>{". Payment instructions do not replace the business details, supply dates and descriptions an invoice needs."}</p>
+            <h3>{"Wording you can adapt"}</h3>
+            <p>{"For the worked example above: “Payment terms: Net 14 from the invoice date. Please pay by 24 January 2027 using the bank details below. Quote invoice INV-0107 as your payment reference.”"}</p>
+            <p>{"For advance payment: “Payment is required before work begins, as agreed in your booking confirmation. Please use this invoice number as the reference.”"}</p>
+            <p>{"For a staged project: “This invoice covers the agreed design approval stage. Payment is due on the date shown above. The remaining stage will be invoiced separately under our agreement.”"}</p>
+            <p>{"Use only wording that matches your contract. Do not add a late-payment fee or cancellation condition for the first time on the invoice and assume that printing it makes it agreed."}</p>
+            <h2>{"Make payment easier to process"}</h2>
+            <p>{"Send the invoice when the agreed billing stage is reached. Check the customer's name, purchase order and billing address before sending. Attach the correct file and make the invoice number easy to find in the email subject."}</p>
+            <p>{"Where the customer has a billing portal, find out whether an upload is required as well as an email. Keep a record of submission and respond to reasonable queries promptly. An accounts team cannot resolve a missing reference if you do not know they asked for it."}</p>
+            <p>{"A friendly reminder before the deadline can help confirm that everything is in place. After the due date, check your payment records before chasing: a transfer might use an unexpected reference or cover several invoices together."}</p>
+            <h2>{"What to do when a business invoice is overdue"}</h2>
+            <p>{"Begin by checking the agreement, delivery record and payment details. Ask the customer whether there is a query or an expected payment date. Keep your message factual and save the correspondence."}</p>
+            <p>{"Statutory interest on qualifying late business payments is 8% plus the Bank of England base rate. A different contractual interest rate can affect whether you can claim statutory interest. See "}<a href="https://www.gov.uk/late-commercial-payments-interest-debt-recovery/charging-interest-commercial-debt">{"GOV.UK's interest guidance"}</a>{" before calculating a charge; fixed recovery compensation may also apply under the commercial rules."}</p>
+            <p>{"You do not have to start with a legal demand. Our guide to "}<Link href="/blog/how-to-chase-a-late-invoice-uk">{"how to chase a late invoice in the UK"}</Link>{" explains a measured follow-up sequence and links to the official guidance. If the debt is disputed, deal with the substance of the dispute rather than sending repeated reminders alone."}</p>
+            <h2>{"Put the arrangement on your MakeInvo invoice"}</h2>
             <div className="not-prose relative my-8 aspect-[4/3] w-full overflow-hidden rounded-xl border border-border bg-muted"><Image src="/blog/invoice-payment-terms-uk/freelancer-tracking-paid-invoices.webp" alt="Freelancer reviewing an invoice list with paid, unpaid and overdue statuses" fill sizes="(min-width: 768px) 768px, 100vw" className="object-cover" /></div>
-            <p>{"With MakeInvo you can create a clear PDF invoice in the free "}<Link href="https://makeinvo.com/">{"invoice generator"}</Link>{" without signing up, and include your payment terms and due date so customers can see exactly when to pay. A free account lets you save clients and see your invoice history."}</p>
-            <p>{"On plans that include them, MakeInvo "}<Link href="https://makeinvo.com/features">{"features"}</Link>{" such as recurring invoices, automatic payment reminders after the due date and payment recording, including partial payments, help you keep track of what is paid, unpaid or overdue. You can compare plans on the "}<Link href="https://makeinvo.com/pricing">{"pricing page"}</Link>{". If you are new to invoicing, start with our guide on "}<Link href="https://makeinvo.com/blog/how-to-make-an-invoice-online">{"how to make an invoice online"}</Link>{" or browse the "}<Link href="https://makeinvo.com/invoice-templates">{"invoice templates"}</Link>{"."}</p>
+            <p>{"The free "}<Link href="/">{"MakeInvo invoice generator"}</Link>{" lets you prepare a PDF invoice without signing up, a watermark or a credit card. Add the due date and use the terms or notes area to explain the payment arrangement. Review the finished PDF before you send it."}</p>
+            <p>{"A free account gives you saved clients and invoice history. On plans that include them, recurring invoices, automatic reminders after the due date and payment recording can support your follow-up routine. Payment records can include partial payments, helping you distinguish money received from a remaining balance."}</p>
+            <p>{"Check the current "}<Link href="/features">{"features"}</Link>{" and "}<Link href="/pricing">{"pricing page"}</Link>{" for plan availability. If this is your first invoice, use our guide to "}<Link href="/blog/how-to-make-an-invoice-online">{"making an invoice online"}</Link>{", or start with the "}<Link href="/invoice-templates">{"invoice templates"}</Link>{"."}</p>
             <h2>{"Frequently asked questions"}</h2>
-            <h3>{"What does Net 30 mean on an invoice?"}</h3>
-            <p>{"Net 30 means the full amount is due within 30 calendar days of the invoice date. Write the actual due date as well, so there is no confusion."}</p>
-            <h3>{"What is the most common payment term in the UK?"}</h3>
-            <p>{"Net 30 is widely used for business-to-business invoices, but many freelancers and small businesses use shorter terms such as Net 7 or Net 14. Choose terms that suit your cash flow and agree them with the customer first."}</p>
-            <h3>{"What happens if I don't put payment terms on my invoice?"}</h3>
-            <p>{"For business-to-business sales, GOV.UK says that if no payment date is agreed, payment is late 30 days after the customer gets the invoice or you deliver the goods or service, whichever is later. It is still clearer to state your terms."}</p>
-            <h3>{"Can I set payment terms longer than 60 days?"}</h3>
-            <p>{"For business transactions, GOV.UK says agreed payment dates should usually be within 60 days. A longer period can be agreed, but it must be fair to both businesses."}</p>
-            <h3>{"What does \"due on receipt\" mean?"}</h3>
-            <p>{"It means payment is due as soon as the customer receives the invoice. It suits small one-off jobs, but some customers will still need a few days to process payment."}</p>
-            <h3>{"Can I charge interest on late payments?"}</h3>
-            <p>{"For business-to-business sales, you generally have the right to claim statutory interest and compensation on late payments under UK late payment legislation, unless your contract says otherwise. Check GOV.UK for the current rules."}</p>
-            <h3>{"Should I show the due date or just the payment term?"}</h3>
-            <p>{"Show both. The term explains your policy, and the exact date removes any doubt about when payment is late."}</p>
-            <h2>{"Set clear terms on your next invoice"}</h2>
-            <p>{"Clear payment terms are one of the simplest ways to get paid faster. Agree them upfront, write the exact due date on every invoice and follow up promptly. When you are ready to bill your next customer, create a professional PDF invoice with the free "}<Link href="https://makeinvo.com/">{"MakeInvo invoice generator"}</Link>{", with no signup, watermark or credit card needed. For more practical guides, visit the "}<Link href="https://makeinvo.com/blog">{"MakeInvo blog"}</Link>{"."}</p>
+            <h3>{"Does Net 30 mean the end of next month?"}</h3>
+            <p>{"No. When counted from the invoice date, Net 30 means thirty calendar days later. End-of-month arrangements use a different starting point, so show the actual due date rather than relying on the abbreviation."}</p>
+            <h3>{"Are Net 7 and Net 14 working days?"}</h3>
+            <p>{"Normally they refer to calendar days. If you and the customer agree working days instead, state that clearly and put the resulting due date on the invoice."}</p>
+            <h3>{"Does due on receipt mean the invoice is paid?"}</h3>
+            <p>{"No. It says when payment is expected. You still need to check that the money has arrived before recording the invoice as paid."}</p>
+            <h3>{"What if the customer never agreed a deadline?"}</h3>
+            <p>{"For commercial payments, GOV.UK says payment becomes late thirty days after receipt of the invoice or the goods or service, whichever is later. Check the rules for your transaction rather than assuming the invoice date alone starts that period."}</p>
+            <h3>{"Can a business agree more than sixty days?"}</h3>
+            <p>{"GOV.UK allows a longer business payment period if it is fair to both parties. Make the agreement clear and seek advice if the proposed terms are difficult to assess."}</p>
+            <h3>{"Can I change terms for an invoice already sent?"}</h3>
+            <p>{"Discuss the change with the customer and keep a record of any agreement. Do not assume that sending a replacement PDF with a different deadline changes the original contract."}</p>
+            <h3>{"Should I include bank details and a payment reference?"}</h3>
+            <p>{"Yes, where bank transfer is the agreed method. Give the customer clear payment instructions and ask them to quote the invoice number so you can match the money to the right bill."}</p>
+            <h2>{"Check the date before you send"}</h2>
+            <p>{"Read your invoice as the customer would: is it clear what they owe, how to pay and which day the money is due? Keep those details consistent with your agreement, then save a copy for your records. Find more practical billing guides on the "}<Link href="/blog">{"MakeInvo blog"}</Link>{"."}</p>
           </div>
           <div className="mt-10 border-t border-border pt-8">
             <Link href="/blog" className="text-sm font-medium text-primary hover:underline">&larr; Back to the blog</Link>
