@@ -13,6 +13,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/invoice-templates",
     "/invoice-templates/simple-invoice-template",
     "/blog",
+    "/blog/how-to-invoice-as-a-freelancer-uk",
     "/blog/how-to-make-an-invoice-online",
     "/login",
     "/register",
@@ -40,7 +41,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   return routes.map((route) => ({
     url: `${siteUrl}${route}`,
-    lastModified: now,
+    lastModified: route === "/blog/how-to-invoice-as-a-freelancer-uk" ? new Date("2026-11-23") : now,
     changeFrequency: route === "" ? "weekly" : "monthly",
     priority: route === "" ? 1 : 0.7,
   }))
