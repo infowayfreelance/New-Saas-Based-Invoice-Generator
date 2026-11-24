@@ -12,17 +12,18 @@ const siteUrl = getSiteUrl()
 const pageUrl = `${siteUrl}/invoice-templates/simple-invoice-template`
 
 export const metadata: Metadata = {
-  title: "Simple Invoice Template | Create & Customize Online",
+  title: "Simple Invoice Template UK: Free PDF Invoice",
   description:
-    "Use a simple invoice template to create clear, professional invoices online. Add your business, client and payment details, then customize and download your invoice.",
+    "Free simple invoice template for UK freelancers and sole traders. Pick a clean layout, add your details (and VAT if registered), then download a PDF.",
   alternates: { canonical: pageUrl },
   openGraph: {
-    title: "Simple Invoice Template | Create & Customize Online | MakeInvo",
+    title: "Simple Invoice Template UK: Free PDF Invoice | MakeInvo",
     description:
-      "Use a simple invoice template to create clear, professional invoices online. Add your business, client and payment details, then customize and download your invoice.",
+      "Free simple invoice template for UK freelancers and sole traders. Pick a clean layout, add your details (and VAT if registered), then download a PDF.",
     url: pageUrl,
     type: "website",
   },
+  twitter: { card: "summary_large_image", title: "Simple Invoice Template UK: Free PDF Invoice | MakeInvo", description: "Free simple invoice template for UK freelancers and sole traders. Pick a clean layout, add your details (and VAT if registered), then download a PDF." },
   robots: { index: true, follow: true },
 }
 
@@ -62,6 +63,7 @@ const invoiceFields = [
   "Subtotal",
   "Tax, where applicable",
   "Total amount due",
+  "Supply date (the date the work or goods were provided), if it's different from the invoice date",
   "Payment terms",
 ]
 
@@ -123,34 +125,47 @@ const benefits = [
 
 const faqs = [
   {
-    question: "What is a simple invoice template?",
-    answer:
-      "A simple invoice template is a clean, no-frills invoice layout that includes only the essential billing fields - business and client details, line items, and the total due.",
+    "question": "What is a simple invoice template?",
+    "answer": "A simple invoice template is a clean, no-frills invoice layout that includes only the essential billing fields - business and client details, line items, and the total due."
   },
   {
-    question: "Can I customize a simple invoice template?",
-    answer:
-      "Yes. You can add your own business details, client information, line items, tax and payment terms before creating your invoice with MakeInvo.",
+    "question": "Can I customise a simple invoice template?",
+    "answer": "Yes. You can add your own business details, client information, line items, tax and payment terms before creating your invoice with MakeInvo."
   },
   {
-    question: "Is a simple invoice suitable for freelancers?",
-    answer:
-      "Yes. A simple invoice works well for freelancers, contractors and self-employed workers who want a quick, professional invoice without extra detail.",
+    "question": "Is a simple invoice suitable for freelancers?",
+    "answer": "Yes. A simple invoice works well for freelancers, contractors and self-employed workers who want a quick, professional invoice without extra detail."
   },
   {
-    question: "What details should I include on the invoice?",
-    answer:
-      "At minimum: your business and client details, an invoice number, dates, a description of the work, quantities or hours, rates, subtotal, tax where applicable, and the total due. Requirements can vary by country and business type.",
+    "question": "What details should I include on the invoice?",
+    "answer": "At minimum: your business and client details, an invoice number, dates, a description of the work, quantities or hours, rates, subtotal, tax where applicable, and the total due. Requirements can vary by country and business type."
   },
   {
-    question: "Can I download my completed invoice as PDF?",
-    answer: "Yes. Once you've filled in your details, you can create the invoice and download it as a PDF directly from MakeInvo.",
+    "question": "Can I download my completed invoice as PDF?",
+    "answer": "Yes. Once you've filled in your details, you can create the invoice and download it as a PDF directly from MakeInvo."
   },
+  {
+    "question": "Do I need to add VAT to a simple invoice?",
+    "answer": "Only if you're VAT-registered. If you aren't, leave the tax at zero and don't show a VAT amount. If you are, you must charge VAT on taxable sales and show your VAT number and the VAT separately on the invoice; GOV.UK explains what a VAT invoice needs."
+  },
+  {
+    "question": "Can I use a simple invoice template as a sole trader?",
+    "answer": "Yes. GOV.UK says a sole trader's invoice must also show your name and any business name you use, and, if you trade under a business name, an address where legal documents can be delivered to you. Add these in the business details section."
+  },
+  {
+    "question": "What invoice number should I use?",
+    "answer": "Each invoice needs a unique identification number. Many businesses simply number invoices in order, for example INV-001, INV-002, so that no number is used twice and gaps are easy to spot."
+  },
+  {
+    "question": "What payment terms should I put on a simple invoice?",
+    "answer": "You can set your own terms, such as 14 or 30 days. If you haven't agreed a payment date, GOV.UK says the customer must pay within 30 days of receiving your invoice or the goods or service. Showing the due date and how to pay helps you get paid on time."
+  }
 ]
 
 const schema = {
   "@context": "https://schema.org",
   "@graph": [
+    {"@context": "https://schema.org", "@type": "WebApplication", "@id": "https://makeinvo.com/invoice-templates/simple-invoice-template#app", "name": "MakeInvo Simple Invoice Template", "url": "https://makeinvo.com/invoice-templates/simple-invoice-template", "description": "Free simple invoice template for UK freelancers and sole traders. Pick a clean layout, add your details (and VAT if registered), then download a PDF.", "applicationCategory": "BusinessApplication", "operatingSystem": "Web", "isAccessibleForFree": true, "featureList": ["Business, client and line-item details", "Tax per line where applicable", "Automatic subtotal, tax and total", "Payment terms", "PDF download"], "offers": {"@type": "Offer", "price": "0", "priceCurrency": "GBP"}, "provider": {"@id": "https://makeinvo.com/#organization"}},
     {
       "@type": "BreadcrumbList",
       itemListElement: [
@@ -161,6 +176,7 @@ const schema = {
     },
     {
       "@type": "FAQPage",
+      "@id": `${pageUrl}#faq`,
       mainEntity: faqs.map((faq) => ({
         "@type": "Question",
         name: faq.question,
@@ -201,7 +217,7 @@ export default function SimpleInvoiceTemplatePage() {
           </h1>
           <p className="mt-5 text-pretty text-lg leading-relaxed text-muted-foreground">
             Create a clear, professional invoice with a simple invoice template. Add your business, client
-            and payment details, then customize and download your invoice with MakeInvo.
+            and payment details, then customise and download your invoice as a PDF with MakeInvo.
           </p>
           <div className="mt-8">
             <Link href="/#invoice-generator">
@@ -247,8 +263,8 @@ export default function SimpleInvoiceTemplatePage() {
             ))}
           </div>
           <p className="mt-6 text-center text-sm text-muted-foreground">
-            All templates are free to use. Choosing a template opens the invoice generator with that design applied,
-            ready for your own details - it never deletes or resets invoice data you've already entered.
+            Use the free invoice generator to add your business, client and payment details, then download a PDF.
+            Keep a copy of your invoice details before leaving the generator.
           </p>
         </div>
       </section>
@@ -287,6 +303,9 @@ export default function SimpleInvoiceTemplatePage() {
         </div>
       </section>
 
+<section className="px-4 py-16 sm:px-6 lg:px-8"><div className="mx-auto max-w-4xl"><h2 className="text-balance text-2xl font-bold tracking-tight sm:text-3xl">{"Simple Invoices in the UK: Sole Traders and Limited Companies"}</h2><p className="mt-4 text-pretty leading-relaxed text-muted-foreground">{"GOV.UK lists what an invoice "}<a href="https://www.gov.uk/invoicing-and-taking-payment-from-customers/invoices-what-they-must-include">{"must include"}</a>{": a unique invoice number, your business name, address and contact details, your customer's name and address, a clear description of what you're charging for, the supply date, the invoice date, the amounts charged, VAT if applicable, and the total owed. A simple template covers all of these. Two extra rules depend on how you trade:"}</p><ul className="mt-6 space-y-2 text-sm leading-relaxed text-muted-foreground"><li><strong>{"Sole traders"}</strong>{" must also show their own name and any business name they use and, if trading under a business name, an address where legal documents can be delivered."}</li><li><strong>{"Limited companies"}</strong>{" must show the full company name as it appears on the certificate of incorporation. If you list directors' names on your invoices, you must list all of them."}</li></ul></div></section>
+<section className="px-4 py-16 sm:px-6 lg:px-8"><div className="mx-auto max-w-4xl"><h2 className="text-balance text-2xl font-bold tracking-tight sm:text-3xl">{"A Simple Invoice With or Without VAT"}</h2><ul className="mt-6 space-y-2 text-sm leading-relaxed text-muted-foreground"><li><strong>{"Not VAT-registered?"}</strong>{" Don't add VAT. Leave the tax rate at zero so no VAT amount appears. Some businesses add a short note such as \"Not VAT registered\" to avoid questions, but it isn't required."}</li><li><strong>{"VAT-registered?"}</strong>{" You must "}<a href="https://www.gov.uk/charge-reclaim-record-vat">{"charge VAT"}</a>{" on taxable sales, and your invoices must show your VAT number and the VAT separately. MakeInvo lets you add a tax rate to each line, so standard-rated and other items can sit on the same invoice. Check the current rates on GOV.UK before you invoice."}</li><li><strong>{"Not sure whether you need to register?"}</strong>{" GOV.UK explains "}<a href="https://www.gov.uk/register-for-vat">{"when you must register for VAT"}</a>{"."}</li></ul></div></section>
+<section className="px-4 py-16 sm:px-6 lg:px-8"><div className="mx-auto max-w-4xl"><h2 className="text-balance text-2xl font-bold tracking-tight sm:text-3xl">{"Payment Terms on a Simple Invoice"}</h2><p className="mt-4 text-pretty leading-relaxed text-muted-foreground">{"You can "}<a href="https://www.gov.uk/invoicing-and-taking-payment-from-customers/payment-obligations">{"set your own payment terms"}</a>{", such as 14 or 30 days, or payment upfront. If you haven't agreed a date, the customer must pay within 30 days of getting your invoice or the goods or service. Put the due date and how to pay (for example your bank details) on the invoice so the client doesn't have to ask. If a business customer pays late, you have the right to "}<a href="https://www.gov.uk/late-commercial-payments-interest-debt-recovery">{"charge interest on late commercial payments"}</a>{", though you can choose not to."}</p></div></section>
       {/* How to use */}
       <section className="border-y border-border bg-muted/30 px-4 py-16 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-4xl">
@@ -346,6 +365,7 @@ export default function SimpleInvoiceTemplatePage() {
         </div>
       </section>
 
+<section className="px-4 py-16 sm:px-6 lg:px-8"><div className="mx-auto max-w-4xl"><h2 className="text-balance text-2xl font-bold tracking-tight sm:text-3xl">{"Simple Invoice Templates by Type of Work"}</h2><p className="mt-4 text-pretty leading-relaxed text-muted-foreground">{"The simple layout suits most service work. If your invoices need trade-specific lines, such as hours and day rates, materials, or retainers, start from a generator built for your work:"}</p><p className="mt-4 text-pretty leading-relaxed text-muted-foreground"><Link href="/invoice-generator-for-freelancers">{"Freelancers"}</Link>{" · "}<Link href="/invoice-generator-for-self-employed">{"Self-employed"}</Link>{" · "}<Link href="/invoice-generator-for-contractors">{"Contractors"}</Link>{" · "}<Link href="/invoice-generator-for-consultants">{"Consultants"}</Link>{" · "}<Link href="/invoice-generator-for-tradespeople">{"Tradespeople"}</Link>{" · "}<Link href="/invoice-generator-for-small-businesses">{"Small businesses"}</Link>{". Prefer a different look? Browse all "}<Link href="/invoice-templates">{"invoice templates"}</Link>{", or read our step-by-step guide on "}<Link href="/blog/how-to-make-an-invoice-online">{"how to make an invoice online"}</Link>{"."}</p></div></section>
       {/* Why choose a simple layout */}
       <section className="border-y border-border bg-muted/30 px-4 py-16 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
@@ -389,7 +409,7 @@ export default function SimpleInvoiceTemplatePage() {
                   </span>
                 </summary>
                 <div className="border-t border-border px-6 py-4 text-sm leading-relaxed text-muted-foreground">
-                  {faq.answer}
+                  {faq.question === "Do I need to add VAT to a simple invoice?" ? <>Only if you're VAT-registered. If you aren't, leave the tax at zero and don't show a VAT amount. If you are, you must charge VAT on taxable sales and show your VAT number and the VAT separately on the invoice; GOV.UK explains <a href="https://www.gov.uk/charge-reclaim-record-vat">what a VAT invoice needs</a>.</> : faq.question === "What payment terms should I put on a simple invoice?" ? <>You can set your own terms, such as 14 or 30 days. If you haven't agreed a payment date, <a href="https://www.gov.uk/invoicing-and-taking-payment-from-customers/payment-obligations">GOV.UK</a> says the customer must pay within 30 days of receiving your invoice or the goods or service. Showing the due date and how to pay helps you get paid on time.</> : faq.answer}
                 </div>
               </details>
             ))}
@@ -405,7 +425,7 @@ export default function SimpleInvoiceTemplatePage() {
               Create your simple invoice
             </h2>
             <p className="mx-auto mt-3 max-w-2xl text-pretty text-muted-foreground">
-              Add your details and download a clear, professional PDF invoice in minutes.
+              Add your details and download a clear, professional PDF invoice.
             </p>
             <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <Link href="/#invoice-generator" className="w-full sm:w-auto">
