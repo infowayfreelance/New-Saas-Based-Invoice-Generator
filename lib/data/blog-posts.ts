@@ -13,6 +13,17 @@ export interface BlogPost {
 
 export const BLOG_POSTS: BlogPost[] = [
 {
+  "slug": "what-is-a-proforma-invoice",
+  "title": "What Is a Proforma Invoice? A Plain-English UK Guide (With VAT Points)",
+  "excerpt": "A proforma invoice sets out a sale before it happens. When to use one, what to include, how it differs from an invoice or quote, plus VAT basics.",
+  "publishedDate": "2026-11-25",
+  "updatedDate": "2026-11-25",
+  "readingTime": "10 min read",
+  "author": "MakeInvo Team",
+  "coverImage": "/blog/what-is-a-proforma-invoice/what-is-a-proforma-invoice-featured.webp",
+  "coverImageAlt": "Small business owner reviewing a proforma invoice before a sale"
+},
+{
   "slug": "how-to-invoice-as-a-freelancer-uk",
   "title": "How to Invoice as a Freelancer in the UK: A Step-by-Step Guide",
   "excerpt": "Agree terms, number your invoices, bill day rates, hours or projects, add expenses and VAT only if registered, and get paid on time. A UK freelancer guide.",
