@@ -1,8 +1,23 @@
 "use client"
 
-import { useState } from "react"
+import { type ReactNode, useState } from "react"
 import { ChevronDown } from "lucide-react"
 import type { ProfessionFaq } from "./types"
+
+function faqAnswer(item: ProfessionFaq): ReactNode {
+  if (!item.answerLinks?.length) return item.answer
+  const parts: ReactNode[] = []
+  let offset = 0
+  for (const link of item.answerLinks) {
+    const index = item.answer.indexOf(link.label, offset)
+    if (index < 0) continue
+    parts.push(item.answer.slice(offset, index))
+    parts.push(<a key={link.href} href={link.href} target="_blank" rel="noopener" className="text-primary underline">{link.label}</a>)
+    offset = index + link.label.length
+  }
+  parts.push(item.answer.slice(offset))
+  return <>{parts}</>
+}
 
 export function ProfessionFaqAccordion({ faqs, keepAnswersMounted = false }: { faqs: ProfessionFaq[]; keepAnswersMounted?: boolean }) {
   const [openIndex, setOpenIndex] = useState<number | null>(0)
@@ -24,7 +39,7 @@ export function ProfessionFaqAccordion({ faqs, keepAnswersMounted = false }: { f
                 className={`h-5 w-5 shrink-0 text-primary transition-transform ${isOpen ? "rotate-180" : "text-muted-foreground"}`}
               />
             </button>
-            {(isOpen || keepAnswersMounted) && <div hidden={!isOpen} className="px-4 pb-4 leading-relaxed text-muted-foreground">{item.answer}</div>}
+            {(isOpen || keepAnswersMounted) && <div hidden={!isOpen} className="px-4 pb-4 leading-relaxed text-muted-foreground">{faqAnswer(item)}</div>}
           </div>
         )
       })}
