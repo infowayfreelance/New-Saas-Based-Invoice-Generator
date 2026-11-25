@@ -31,11 +31,23 @@ export function ProfessionEditorialLanding({
   ukConsulting = false,
   ukTradespeople = false,
   ukPhotographers = false,
+  ukAgencies = false,
+  afterWorkflow,
+  afterBestPractices,
+  invoiceIntro,
+  relatedCopy,
+  faqNote,
   afterInvoiceDetails,
 }: {
   ukConsulting?: boolean
   ukTradespeople?: boolean
   ukPhotographers?: boolean
+  ukAgencies?: boolean
+  afterWorkflow?: ReactNode
+  afterBestPractices?: ReactNode
+  invoiceIntro?: ReactNode
+  relatedCopy?: ReactNode
+  faqNote?: ReactNode
   afterInvoiceDetails?: ReactNode
   data: ProfessionPageData
   heroImage?: { src: string; alt: string; title?: string; objectPosition?: string }
@@ -74,16 +86,16 @@ export function ProfessionEditorialLanding({
             </div>
             <div className="grid w-full max-w-lg grid-cols-3 gap-4 pt-4">
               <div className="rounded-lg bg-card p-3 shadow-sm">
-                <span className="block text-lg font-bold text-foreground">{ukInvoiceCopy ? "No signup" : "< 90s"}</span>
-                <span className="text-xs text-muted-foreground">{ukInvoiceCopy ? "for guest invoices" : "Avg. build time"}</span>
+                <span className="block text-lg font-bold text-foreground">{ukAgencies ? "Retainers" : ukInvoiceCopy ? "No signup" : "< 90s"}</span>
+                <span className="text-xs text-muted-foreground">{ukAgencies ? "and projects" : ukInvoiceCopy ? "for guest invoices" : "Avg. build time"}</span>
               </div>
               <div className="rounded-lg bg-card p-3 shadow-sm">
-                <span className="block text-lg font-bold text-primary">{ukInvoiceCopy ? "PDF" : "100%"}</span>
-                <span className="text-xs text-muted-foreground">{ukInvoiceCopy ? "in one click" : "Fee transparent"}</span>
+                <span className="block text-lg font-bold text-primary">{ukAgencies ? "Expenses" : ukInvoiceCopy ? "PDF" : "100%"}</span>
+                <span className="text-xs text-muted-foreground">{ukAgencies ? "and PO references" : ukInvoiceCopy ? "in one click" : "Fee transparent"}</span>
               </div>
               <div className="rounded-lg bg-card p-3 shadow-sm">
-                <span className="block text-lg font-bold text-foreground">Zero</span>
-                <span className="text-xs text-muted-foreground">Watermarks</span>
+                <span className="block text-lg font-bold text-foreground">{ukAgencies ? "PDF" : "Zero"}</span>
+                <span className="text-xs text-muted-foreground">{ukAgencies ? "download" : "Watermarks"}</span>
               </div>
             </div>
           </div>
@@ -158,7 +170,7 @@ export function ProfessionEditorialLanding({
           </span>
           <span className="text-border">/</span>
           <span className="inline-flex items-center gap-1.5">
-            <Download className="h-4 w-4 text-primary" /> {ukPhotographers ? "PDF download" : "Instant PDF download"}
+            <Download className="h-4 w-4 text-primary" /> {ukPhotographers || ukAgencies ? "PDF download" : "Instant PDF download"}
           </span>
           <span className="text-border">/</span>
           <span className="inline-flex items-center gap-1.5">
@@ -176,18 +188,18 @@ export function ProfessionEditorialLanding({
                 <span className="text-xs font-bold uppercase tracking-widest text-primary">The Administrative Drag</span>
                 <h2 className="text-3xl font-bold leading-tight text-white sm:text-4xl">{data.problemsHeading}</h2>
                 <p className="leading-relaxed text-slate-300">
-                  {ukPhotographers ? "Billing mistakes often happen when rigid word processors and generic spreadsheets get bent into fiscal ledgers." : "Most billing mistakes happen when rigid word processors and generic spreadsheets get bent into fiscal ledgers. Every extra click is billable time lost."}
+                  {ukAgencies ? "Billing gets harder when retainers, projects, extras and expenses all sit in separate spreadsheets. Keeping each charge on its own line makes every invoice easier to check." : ukPhotographers ? "Billing mistakes often happen when rigid word processors and generic spreadsheets get bent into fiscal ledgers." : "Most billing mistakes happen when rigid word processors and generic spreadsheets get bent into fiscal ledgers. Every extra click is billable time lost."}
                 </p>
               </div>
               <div className="rounded-2xl border border-slate-700/60 bg-slate-800/80 p-6 shadow-xl">
-                <span className="block text-5xl font-bold leading-none text-primary">{ukInvoiceCopy ? "Every hour" : "3.8 hrs"}</span>
+                <span className="block text-5xl font-bold leading-none text-primary">{ukAgencies ? "Clear lines" : ukInvoiceCopy ? "Every hour" : "3.8 hrs"}</span>
                 <span className="mt-2 block font-semibold text-white">
-                  {ukInvoiceCopy ? (ukPhotographers ? "spent formatting invoices is an hour you can't spend shooting or editing." : ukTradespeople ? "spent formatting invoices is an hour you can't spend on the next job." : "spent formatting invoices is an hour you can't bill.") : "Average lost to manual administrative billing per month"}
+                  {ukAgencies ? "Retainers, projects, extras and expenses" : ukInvoiceCopy ? (ukPhotographers ? "spent formatting invoices is an hour you can't spend shooting or editing." : ukTradespeople ? "spent formatting invoices is an hour you can't spend on the next job." : "spent formatting invoices is an hour you can't bill.") : "Average lost to manual administrative billing per month"}
                 </span>
                 <div className="mt-4 flex items-center gap-3 border-t border-slate-700/50 pt-4">
                   <Timer className="h-7 w-7 text-primary" />
                   <span className="text-sm font-medium text-slate-300">
-                    Reclaim your time with zero-friction generation.
+                    {ukAgencies ? "Keep client billing in one place." : "Reclaim your time with zero-friction generation."}
                   </span>
                 </div>
               </div>
@@ -254,6 +266,7 @@ export function ProfessionEditorialLanding({
         <div className="mx-auto mb-12 max-w-2xl text-center">
           <span className="text-xs font-bold uppercase tracking-widest text-primary">Standard Specification</span>
           <h2 className="mt-1 text-3xl font-bold text-foreground sm:text-4xl">{data.infoHeading}</h2>
+          {invoiceIntro}
           {data.infoNote && <p className="mt-2 text-muted-foreground">{data.infoNote}</p>}
         </div>
         <div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-12">
@@ -302,7 +315,7 @@ export function ProfessionEditorialLanding({
               </div>
             </div>
             <p className="mt-4 text-center text-sm text-muted-foreground">
-              {ukInvoiceCopy ? "MakeInvo automatically standardises these structural blocks on export." : "MakeInvo automatically standardizes these structural blocks on export."}
+              {ukAgencies ? "MakeInvo lays out these blocks for you when you download the PDF." : ukInvoiceCopy ? "MakeInvo automatically standardises these structural blocks on export." : "MakeInvo automatically standardizes these structural blocks on export."}
             </p>
           </div>
         </div>
@@ -346,6 +359,8 @@ export function ProfessionEditorialLanding({
           </div>
         </div>
       </section>
+
+      {afterWorkflow}
 
       {/* FEATURES */}
       <section className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
@@ -483,6 +498,8 @@ export function ProfessionEditorialLanding({
         </div>
       </section>
 
+      {afterBestPractices}
+
       {/* RELATED SOLUTIONS */}
       <section className="w-full bg-muted/30 py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -504,6 +521,7 @@ export function ProfessionEditorialLanding({
               </Link>
             ))}
           </div>
+          {relatedCopy}
           <div className="mt-8 flex flex-wrap items-center justify-center gap-4 border-t border-border pt-6 text-sm text-muted-foreground">
             <span className="font-semibold text-foreground">Helpful Resources:</span>
             {data.relatedLinks.map((link, i) => (
@@ -520,11 +538,12 @@ export function ProfessionEditorialLanding({
 
       {/* FAQ */}
       <section className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+        {faqNote}
         <div className="mx-auto mb-12 max-w-2xl text-center">
           <span className="text-xs font-bold uppercase tracking-widest text-primary">Common Inquiries</span>
           <h2 className="mt-1 text-3xl font-bold text-foreground sm:text-4xl">Frequently asked questions</h2>
         </div>
-        <ProfessionFaqAccordion faqs={data.faqs} keepAnswersMounted={ukInvoiceCopy} />
+        <ProfessionFaqAccordion faqs={data.faqs} keepAnswersMounted={ukInvoiceCopy || ukAgencies} />
       </section>
 
       {/* FINAL CTA */}
@@ -532,7 +551,7 @@ export function ProfessionEditorialLanding({
         <div className="relative flex flex-col items-center justify-between gap-8 overflow-hidden rounded-3xl border border-slate-800 bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 p-8 text-center shadow-2xl md:flex-row md:p-12 md:text-left">
           <div className="absolute -bottom-12 -right-12 h-80 w-80 rounded-full bg-primary/15 blur-3xl" />
           <div className="relative z-10 max-w-xl">
-            <span className="text-xs font-bold uppercase tracking-widest text-primary">Get Paid On Time</span>
+            <span className="text-xs font-bold uppercase tracking-widest text-primary">{ukAgencies ? "Clear Agency Billing" : "Get Paid On Time"}</span>
             <h2 className="mt-1 text-3xl font-bold text-white sm:text-4xl">{data.finalCtaHeading}</h2>
             <p className="mt-2 leading-relaxed text-slate-300">{data.finalCtaText}</p>
           </div>

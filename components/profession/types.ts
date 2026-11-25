@@ -35,6 +35,7 @@ export interface RelatedLink {
 export interface ProfessionFaq {
   question: string
   answer: string
+  answerLinks?: RelatedLink[]
 }
 
 export interface ProfessionPageData {
