@@ -13,6 +13,17 @@ export interface BlogPost {
 
 export const BLOG_POSTS: BlogPost[] = [
 {
+  "slug": "how-to-create-an-invoice-template",
+  "title": "How to Create an Invoice Template (UK): Fields to Include and a Reusable Setup",
+  "excerpt": "Learn how to create an invoice template with reusable fields, clear numbering and VAT versions. Compare Word, Docs, Excel and an online invoice maker.",
+  "publishedDate": "2026-11-26",
+  "updatedDate": "2026-11-26",
+  "readingTime": "10 min read",
+  "author": "MakeInvo Team",
+  "coverImage": "/blog/how-to-create-an-invoice-template/how-to-create-an-invoice-template-featured.webp",
+  "coverImageAlt": "Freelancer creating an invoice template on a laptop"
+},
+{
   "slug": "what-is-a-proforma-invoice",
   "title": "What Is a Proforma Invoice? A Plain-English UK Guide (With VAT Points)",
   "excerpt": "A proforma invoice sets out a sale before it happens. When to use one, what to include, how it differs from an invoice or quote, plus VAT basics.",
