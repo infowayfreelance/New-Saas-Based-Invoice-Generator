@@ -19,7 +19,7 @@ export function MarketingFooter() {
             </Link>
             <p className="max-w-xs text-sm text-muted-foreground">
               The free online invoice generator for freelancers, agencies, contractors, and small businesses.
-              Create, send, and track professional invoices in minutes.
+              Create, send, and track professional invoices.
             </p>
           </div>
           <div>
