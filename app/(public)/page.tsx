@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import { Suspense } from "react"
+import { Suspense, type ReactNode } from "react"
 import { getSiteUrl } from "@/lib/utils/site-url"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -30,9 +30,9 @@ import {
 } from "lucide-react"
 
 const siteUrl = getSiteUrl()
-const homepageTitle = "Free Invoice Generator & Invoice Maker Online | MakeInvo"
+const homepageTitle = "Free Invoice Generator: Create an Invoice Online | MakeInvo"
 const homepageDescription =
-  "Free online invoice generator and invoice maker. Create a professional PDF invoice in minutes with no signup, watermark or credit card. Add tax and discounts."
+  "Create an invoice online for free: add your business and client details, line items, tax and discounts, then download a PDF. No signup, watermark or card."
 
 /* ── Metadata ────────────────────────────────────────────────────── */
 
@@ -68,7 +68,7 @@ export const metadata: Metadata = {
         alt: "MakeInvo - Free Online Invoice Generator",
       },
     ],
-    locale: "en_US",
+    locale: "en_GB",
   },
   twitter: {
     card: "summary_large_image",
@@ -85,7 +85,7 @@ const trustBadges = [
   { icon: Lock, label: "Protected with HTTPS/TLS" },
   { icon: Shield, label: "Privacy-Focused Data Handling" },
   { icon: BadgeCheck, label: "No Credit Card Required" },
-  { icon: Download, label: "Instant PDF Download" },
+  { icon: Download, label: "Free PDF download" },
 ]
 
 const audiences = [
@@ -102,7 +102,7 @@ const features = [
     icon: FileText,
     title: "Free Invoice Generator",
     description:
-      "Create a professional PDF invoice online in under a minute. Add your logo, business details, line items, tax rates, and discounts with a clean invoice template.",
+      "Create a professional PDF invoice online. Add your logo, business details, line items, tax rates, and discounts with a clean invoice template.",
   },
   {
     icon: Users,
@@ -112,21 +112,21 @@ const features = [
   },
   {
     icon: Send,
-    title: "Email & WhatsApp Delivery",
+    title: "PDF & WhatsApp Sharing",
     description:
-      "Send invoices straight to a client's inbox, or share a link via WhatsApp so they can view and download the invoice PDF instantly.",
+      "Download and email the PDF yourself. Registered users can share an invoice link via WhatsApp so clients can view and download it without an account.",
   },
   {
     icon: CreditCard,
     title: "Payment Tracking",
     description:
-      "Track paid, unpaid, partially paid, and overdue invoices in real time, and record payments as they come in so your books stay accurate.",
+      "Track paid, unpaid, partially paid, and overdue invoices, and record payments as they come in so your books stay accurate.",
   },
   {
     icon: RefreshCw,
     title: "Recurring Invoices",
     description:
-      "Automate billing for retainers, subscriptions, and repeat clients so a recurring invoice goes out on schedule without manual work.",
+      "Set up monthly recurring invoice rules on the Pro plan, then download and send each invoice yourself.",
   },
   {
     icon: BarChart3,
@@ -150,7 +150,7 @@ const howItWorks = [
   {
     step: "3",
     title: "Generate & download your invoice",
-    description: "Click Generate Invoice to create a clean, professional PDF instantly, ready to download or share.",
+    description: "Click Generate Invoice to create a clean, professional PDF, ready to download or share.",
   },
   {
     step: "4",
@@ -178,7 +178,7 @@ const whoUses = [
   {
     icon: Hammer,
     title: "Contractors & Tradespeople",
-    description: "Itemize labor and materials, apply tax where required, and track job payments.",
+    description: "Itemise labour and materials, apply tax where required, and track job payments.",
   },
   {
     icon: Building2,
@@ -195,11 +195,11 @@ const whoUses = [
 const invoiceTypes = [
   {
     title: "Freelancer Invoice",
-    description: "A simple, itemized invoice for project-based or hourly freelance work.",
+    description: "A simple, itemised invoice for project-based or hourly freelance work.",
   },
   {
     title: "Contractor Invoice",
-    description: "Separates labor and materials into clear line items, with tax applied where required.",
+    description: "Separates labour and materials into clear line items, with tax applied where required.",
   },
   {
     title: "Tax, VAT or GST Invoice",
@@ -229,58 +229,135 @@ const comparisonRows = [
   { feature: "Mobile-friendly access", makeinvo: true, spreadsheet: false, manual: false },
 ]
 
-const faqs = [
+const faqs: { question: string; answer: string; links?: { label: string; href: string }[] }[] = [
   {
-    question: "What is MakeInvo?",
-    answer:
-      "MakeInvo is a free online invoice generator that lets freelancers, contractors, agencies, and small businesses create, download, and send professional PDF invoices in minutes - no design skills or accounting background required.",
+    "question": "What is MakeInvo?",
+    "answer": "MakeInvo is a free online invoice generator that lets freelancers, contractors, agencies, and small businesses create, download, and send professional PDF invoices - no design skills or accounting background required."
   },
   {
-    question: "Is MakeInvo free to use?",
-    answer:
-      "Yes. You can create and download an invoice PDF with the free invoice generator without entering a credit card. Paid plans add features like unlimited invoices, email delivery, recurring billing, and analytics.",
+    "question": "Is MakeInvo free to use?",
+    "answer": "Yes. You can create and download an invoice PDF with the free invoice generator without entering a credit card. Eligible paid plans add saved clients, recurring invoice rules, payment tracking and analytics. Built-in email delivery is not currently available. See pricing for what each plan includes.",
+    "links": [
+      {
+        "label": "pricing",
+        "href": "/pricing"
+      }
+    ]
   },
   {
-    question: "Do I need to create an account?",
-    answer:
-      "No. The free invoice generator on this page works without signup for occasional use. Creating a free account lets you save clients, access invoice history, and unlock higher usage limits.",
+    "question": "Do I need to create an account?",
+    "answer": "No. The free invoice generator on this page works without signup for occasional use. Sign in to save invoices and access invoice history. Saving clients and payment tracking require an eligible paid plan."
   },
   {
-    question: "How do I create an invoice online?",
-    answer:
-      "Fill in your business details, add your client's information, list your services or products with quantities and prices, then click Generate Invoice. MakeInvo builds a professional PDF invoice instantly.",
+    "question": "How do I create an invoice online?",
+    "answer": "Fill in your business details, add your client's information, list your services or products with quantities and prices, then click Generate Invoice. MakeInvo builds a professional PDF invoice for you to download."
   },
   {
-    question: "Can I download my invoice as a PDF?",
-    answer:
-      "Yes. Every invoice you create can be downloaded instantly as a clean, print-ready PDF invoice, suitable for emailing, printing, or archiving for your records.",
+    "question": "Can I download my invoice as a PDF?",
+    "answer": "Yes. Every invoice you create can be downloaded as a clean, print-ready PDF invoice, suitable for emailing, printing, or archiving for your records."
   },
   {
-    question: "Can I add tax, VAT or GST?",
-    answer:
-      "Yes. MakeInvo calculates tax per line item and displays it separately from the subtotal, so you can produce a tax, VAT, or GST invoice depending on your country's requirements.",
+    "question": "Can I add tax, VAT or GST?",
+    "answer": "Yes. MakeInvo calculates tax per line item and displays it separately from the subtotal, so you can produce a tax, VAT, or GST invoice depending on your country's requirements."
   },
   {
-    question: "Can I add my business logo?",
-    answer:
-      "Yes, paid plans support custom branding, including your logo, on the invoice template, so every invoice you send looks consistent with your business identity.",
+    "question": "Can I add my business logo?",
+    "answer": "Yes. Click Add Logo in the generator above and your logo appears on the invoice and the PDF."
   },
   {
-    question: "Can I use different currencies?",
-    answer:
-      "Yes. You can select from a wide range of currencies when creating an invoice, making it straightforward to bill international clients in their local currency.",
+    "question": "Can I use different currencies?",
+    "answer": "Yes. You can select from a wide range of currencies when creating an invoice, making it straightforward to bill international clients in their local currency."
   },
   {
-    question: "Are my invoices stored?",
-    answer:
-      "Invoices created without an account are generated for that session and are not saved to a profile. Once you create a free account, your invoices, clients, and payment history are securely stored so you can access them anytime.",
+    "question": "Are my invoices stored?",
+    "answer": "Invoices created without an account are generated for that session and are not saved to a profile. Sign in to save invoices and access invoice history. Saving clients and payment records require an eligible paid plan."
   },
   {
-    question: "Can I send an invoice directly to a client?",
-    answer:
-      "Yes. Registered users can email an invoice directly to a client, or share a secure, no-login invoice link via WhatsApp so the client can view and download the PDF themselves.",
+    "question": "Can I send an invoice directly to a client?",
+    "answer": "Download the PDF and email it to your client yourself; built-in email delivery is not currently available. Registered users can share an invoice link via WhatsApp so the client can view and download the PDF without an account."
   },
+  {
+    "question": "What must an invoice include?",
+    "answer": "In the UK, GOV.UK says an invoice must include a unique identification number, your business name, address and contact details, the customer's name and address, a clear description of what you're charging for, the supply date, the invoice date, the amounts charged, VAT if applicable and the total owed. See what an invoice must include on GOV.UK. Exact invoice requirements can vary by country, business type and tax status. MakeInvo provides invoice-creation software, not legal, tax or accounting advice.",
+    "links": [
+      {
+        "label": "what an invoice must include on GOV.UK",
+        "href": "https://www.gov.uk/invoicing-and-taking-payment-from-customers/invoices-what-they-must-include"
+      }
+    ]
+  },
+  {
+    "question": "Do I need to charge VAT on my invoices?",
+    "answer": "Only if you are VAT registered. In the UK you must register when your taxable turnover for the last 12 months goes over £90,000, or you expect it to in the next 30 days (GOV.UK: VAT registration). If you're not registered, leave the tax rate at 0%. If you and your customer are both VAT registered, you must issue a VAT invoice.",
+    "links": [
+      {
+        "label": "GOV.UK: VAT registration",
+        "href": "https://www.gov.uk/vat-registration"
+      }
+    ]
+  },
+  {
+    "question": "How should I number my invoices?",
+    "answer": "Give every invoice a unique number and keep the numbers in sequence, for example INV-0001, INV-0002, so you and your client can match payments to invoices. MakeInvo suggests an editable reference, but guest suggestions are not a checked sequence. Check it against your records before issuing the invoice."
+  },
+  {
+    "question": "What payment terms should I use?",
+    "answer": "Choose terms you and your client have agreed: due on receipt, Net 7, Net 14, Net 30 or a custom date. In the UK, if no payment date is agreed for a business sale, the law treats payment as late 30 days after the customer gets the invoice or you deliver the goods or service, whichever is later (GOV.UK: late commercial payments).",
+    "links": [
+      {
+        "label": "GOV.UK: late commercial payments",
+        "href": "https://www.gov.uk/late-commercial-payments-interest-debt-recovery"
+      }
+    ]
+  },
+  {
+    "question": "Can I invoice hourly, daily or milestone work?",
+    "answer": "Yes. Each line item can use its own billing type: quantity × unit price, hours × hourly rate, days × day rate, a fixed price or a named milestone payment. For role-specific guidance, see our invoice generators for freelancers, contractors and agencies.",
+    "links": [
+      {
+        "label": "freelancers",
+        "href": "/invoice-generator-for-freelancers"
+      },
+      {
+        "label": "contractors",
+        "href": "/invoice-generator-for-contractors"
+      },
+      {
+        "label": "agencies",
+        "href": "/invoice-generator-for-agencies"
+      }
+    ]
+  }
 ]
+
+
+const invoiceDisclaimer = "Exact invoice requirements can vary by country, business type and tax status. MakeInvo provides invoice-creation software, not legal, tax or accounting advice."
+
+function FaqAnswer({ faq }: { faq: (typeof faqs)[number] }) {
+  if (!faq.links?.length) return <>{faq.answer}</>
+  const parts: ReactNode[] = []
+  let offset = 0
+  for (const link of faq.links) {
+    const index = faq.answer.indexOf(link.label, offset)
+    if (index < 0) continue
+    parts.push(faq.answer.slice(offset, index))
+    parts.push(link.href.startsWith("/")
+      ? <Link key={link.href} href={link.href} className="text-primary underline">{link.label}</Link>
+      : <a key={link.href} href={link.href} target="_blank" rel="noopener" className="text-primary underline">{link.label}</a>)
+    offset = index + link.label.length
+  }
+  parts.push(faq.answer.slice(offset))
+  return <>{parts}</>
+}
+
+function InvoiceGuidance({ title, children }: { title: string; children: ReactNode }) {
+  return <section className="px-4 py-20 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-4xl">
+      <h2 className="text-balance text-3xl font-bold tracking-tight sm:text-4xl">{title}</h2>
+      <div className="mt-4 space-y-4 text-lg text-muted-foreground">{children}</div>
+    </div>
+  </section>
+}
 
 /* ── JSON-LD Schemas ─────────────────────────────────────────────── */
 
@@ -347,16 +424,16 @@ const homepageSchema = {
         "Automatic subtotal and total calculations",
         "Per-item tax rate calculation",
         "Discounts",
-        "Automatic invoice numbering",
+        "Editable invoice number suggestions; check your own sequence",
         "Issue date and due date",
         "Payment terms and notes",
         "PDF invoice download",
         "Multiple currencies",
-        "Client management and invoice history",
-        "Recurring invoices",
-        "Payment tracking and reminders",
+        "Saved invoice history with an account; client management on eligible paid plans",
+        "Monthly recurring invoice rules on the Pro plan",
+        "Payment recording on eligible paid plans",
         "Logo upload and branding",
-        "Send invoices via email and WhatsApp",
+        "Download PDFs to email yourself; share saved invoice links via WhatsApp",
       ],
       // No genuine ratings, review counts, download counts, or awards are
       // available - aggregateRating/review intentionally omitted.
@@ -375,6 +452,10 @@ const homepageSchema = {
       primaryImageOfPage: brandImageUrl,
       // No reliable last-modified timestamp is tracked for this page yet,
       // so dateModified is intentionally omitted rather than guessed.
+    },
+    {
+      "@type": "BreadcrumbList",
+      itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: siteUrl }],
     },
     // FAQPage schema mirrors the visible FAQ section rendered further down
     // this page (see the "FAQ Section" below) - same questions, same answers.
@@ -415,7 +496,7 @@ export default function HomePage() {
           <div className="mx-auto max-w-3xl text-center">
             <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-sm font-medium text-primary">
               <Zap className="h-4 w-4" />
-              <span>Create a professional invoice in minutes</span>
+              <span>Create a professional invoice online</span>
             </div>
 
             {/* H1 */}
@@ -425,13 +506,13 @@ export default function HomePage() {
 
             {/* Sub Heading */}
             <p className="mt-6 text-pretty text-lg leading-relaxed text-muted-foreground">
-              Create a professional PDF invoice in minutes with MakeInvo, the free online invoice maker. Add your
+              Create a professional PDF invoice with MakeInvo, the free online invoice maker. Add your
               business and client details, calculate totals and download your invoice for free—no signup, watermark or
               credit card required.
             </p>
 
             <p className="mt-4 text-sm text-muted-foreground">
-              No credit card required • No watermark • Instant PDF download
+              No credit card required • No watermark • Free PDF download
             </p>
 
             <div className="mt-8 flex justify-center">
@@ -513,12 +594,11 @@ export default function HomePage() {
           <div className="mt-6 space-y-4 text-pretty leading-relaxed text-muted-foreground">
             <p>
               The invoice generator above works without registration - fill it in, calculate your totals, and
-              download a professional PDF invoice in minutes, no account required.
+              download a professional PDF invoice, no account required.
             </p>
             <p>
-              Create a free account to manage your clients and invoices from one dashboard. Paid plans add recurring
-              invoices, payment tracking, and analytics for freelancers, agencies, and small businesses that bill
-              regularly.
+              Sign in to save invoices and review their history from one dashboard. Eligible paid plans add saved
+              clients and payment records, while the Pro plan includes monthly recurring invoice rules and analytics.
             </p>
           </div>
         </div>
@@ -664,6 +744,26 @@ export default function HomePage() {
         </div>
       </section>
 
+      <InvoiceGuidance title="What to Include on an Invoice">
+        <p>A clear invoice gets paid with fewer questions. In the UK, <a href="https://www.gov.uk/invoicing-and-taking-payment-from-customers/invoices-what-they-must-include" target="_blank" rel="noopener" className="text-primary underline">GOV.UK lists what an invoice must include</a>:</p>
+        <ul className="space-y-3">
+          <li>a unique invoice number</li>
+          <li>your business name, address and contact details</li>
+          <li>your customer&apos;s name and address</li>
+          <li>a clear description of what you&apos;re charging for</li>
+          <li>the date the goods or service were supplied, and the invoice date</li>
+          <li>the amount charged, VAT if applicable, and the total owed</li>
+        </ul>
+        <p>Sole traders using a business name also show their own name and an address where legal documents can be delivered; limited companies show their full registered company name. Use the generator&apos;s business, client, item and notes fields to include the information your invoice needs, including a supply date where it differs from the invoice date. {invoiceDisclaimer}</p>
+      </InvoiceGuidance>
+      <InvoiceGuidance title="VAT, Invoice Numbers and Payment Terms">
+        <ul className="space-y-3">
+          <li><strong>VAT:</strong> only charge VAT if you&apos;re VAT registered. In the UK, registration is required when taxable turnover goes over £90,000 in 12 months (<a href="https://www.gov.uk/vat-registration" target="_blank" rel="noopener" className="text-primary underline">GOV.UK</a>). If you&apos;re not registered, set the tax rate to 0%. VAT-registered businesses also need extra details on a VAT invoice, such as their VAT number (<a href="https://www.gov.uk/guidance/record-keeping-for-vat-notice-70021" target="_blank" rel="noopener" className="text-primary underline">HMRC VAT Notice 700/21</a>).</li>
+          <li><strong>Invoice numbers:</strong> use a unique number for each invoice and keep them in sequence. MakeInvo suggests an editable reference, but guest suggestions are not a checked sequence. Check it against your records.</li>
+          <li><strong>Payment terms:</strong> pick the terms you agreed with your client (due on receipt, Net 7, Net 14, Net 30 or a custom date). In the UK, if no date is agreed for a business sale, payment counts as late 30 days after the customer receives the invoice or the goods or service, whichever is later (<a href="https://www.gov.uk/late-commercial-payments-interest-debt-recovery" target="_blank" rel="noopener" className="text-primary underline">GOV.UK</a>).</li>
+        </ul>
+      </InvoiceGuidance>
+
       {/* ── Comparison Table ─────────────────────────────────────── */}
       <section className="px-4 py-20 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-5xl">
@@ -746,6 +846,15 @@ export default function HomePage() {
         </div>
       </section>
 
+      <InvoiceGuidance title="What's Free and What Needs an Account">
+        <ul className="space-y-3">
+          <li><strong>Free, no account:</strong> the invoice generator on this page, logo upload, tax and discount calculations, multiple currencies, billing by quantity, hour, day, fixed price or milestone, and PDF download without a watermark.</li>
+          <li><strong>Account:</strong> sign in to save invoices and see your invoice history in one dashboard.</li>
+          <li><strong>Eligible paid plans:</strong> saved clients and payment records; the Pro plan also provides monthly recurring invoice rules and analytics. See <Link href="/pricing" className="text-primary underline">pricing</Link> and the full <Link href="/features" className="text-primary underline">features</Link> list.</li>
+        </ul>
+        <p>Download the PDF and email it to your client yourself. Built-in email delivery and automatic reminder sending are not currently available.</p>
+      </InvoiceGuidance>
+
       {/* ── FAQ Section ──────────────────────────────────────────── */}
       <section className="px-4 py-20 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-4xl">
@@ -757,6 +866,7 @@ export default function HomePage() {
             <p className="mt-4 text-pretty text-lg text-muted-foreground">
               Everything you need to know about creating invoices online with MakeInvo.
             </p>
+            <p className="mt-4 text-sm text-muted-foreground">{invoiceDisclaimer}</p>
           </div>
           <div className="mt-12 grid gap-4 sm:grid-cols-2">
             {faqs.map((faq) => (
@@ -773,7 +883,7 @@ export default function HomePage() {
                   </span>
                 </summary>
                 <div className="border-t border-border px-6 py-4 text-sm leading-relaxed text-muted-foreground">
-                  {faq.answer}
+                  <FaqAnswer faq={faq} />
                 </div>
               </details>
             ))}
@@ -792,7 +902,7 @@ export default function HomePage() {
             </h2>
 
             <p className="mx-auto mt-4 max-w-2xl text-pretty text-lg text-muted-foreground">
-              Build, download and share a professional PDF invoice in minutes. Start without creating an account or
+              Build, download and share a professional PDF invoice. Start without creating an account or
               entering a credit card.
             </p>
 
@@ -814,7 +924,7 @@ export default function HomePage() {
               {[
                 { icon: CheckCircle2, text: "No credit card required" },
                 { icon: Shield, text: "Protected with HTTPS/TLS" },
-                { icon: Download, text: "Instant PDF download" },
+                { icon: Download, text: "Free PDF download" },
               ].map((item) => (
                 <div key={item.text} className="flex items-center gap-1.5">
                   <item.icon className="h-4 w-4 text-primary" />
