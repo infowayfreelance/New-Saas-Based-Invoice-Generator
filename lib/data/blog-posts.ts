@@ -13,6 +13,17 @@ export interface BlogPost {
 
 export const BLOG_POSTS: BlogPost[] = [
 {
+  "slug": "how-to-add-vat-to-an-invoice",
+  "title": "How to Add VAT to a UK Invoice (If You're VAT-Registered)",
+  "excerpt": "Add VAT only if you are VAT-registered. Show your VAT number and tax separately, check current GOV.UK rates, and add tax to each line in MakeInvo.",
+  "publishedDate": "2026-11-27",
+  "updatedDate": "2026-11-27",
+  "readingTime": "10 min read",
+  "author": "MakeInvo",
+  "coverImage": "/blog/how-to-add-vat-to-an-invoice/how-to-add-vat-to-an-invoice-featured.webp",
+  "coverImageAlt": "Preparing a UK invoice that may need VAT"
+},
+{
   "slug": "how-to-create-an-invoice-template",
   "title": "How to Create an Invoice Template (UK): Fields to Include and a Reusable Setup",
   "excerpt": "Learn how to create an invoice template with reusable fields, clear numbering and VAT versions. Compare Word, Docs, Excel and an online invoice maker.",

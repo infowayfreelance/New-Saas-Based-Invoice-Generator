@@ -13,6 +13,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/invoice-templates",
     "/invoice-templates/simple-invoice-template",
     "/blog",
+    "/blog/how-to-add-vat-to-an-invoice",
     "/blog/how-to-create-an-invoice-template",
     "/blog/what-is-a-proforma-invoice",
     "/blog/how-to-invoice-as-a-freelancer-uk",
@@ -43,7 +44,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   return routes.map((route) => ({
     url: `${siteUrl}${route}`,
-    lastModified: route === "/blog/how-to-create-an-invoice-template" ? new Date("2026-11-26") : route === "/blog/what-is-a-proforma-invoice" ? new Date("2026-11-25") : route === "/blog/how-to-invoice-as-a-freelancer-uk" ? new Date("2026-11-23") : now,
+    lastModified: route === "/blog/how-to-add-vat-to-an-invoice" ? new Date("2026-11-27") : route === "/blog/how-to-create-an-invoice-template" ? new Date("2026-11-26") : route === "/blog/what-is-a-proforma-invoice" ? new Date("2026-11-25") : route === "/blog/how-to-invoice-as-a-freelancer-uk" ? new Date("2026-11-23") : now,
     changeFrequency: route === "" ? "weekly" : "monthly",
     priority: route === "" ? 1 : 0.7,
   }))
