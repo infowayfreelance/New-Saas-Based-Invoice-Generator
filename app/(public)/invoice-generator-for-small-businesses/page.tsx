@@ -136,7 +136,7 @@ const data: ProfessionPageData = {
   },
   {
     "question": "Can I create recurring invoices?",
-    "answer": "Yes, on paid plans - useful for customers you bill on a regular schedule."
+    "answer": "Yes. Recurring invoices require the Pro plan, which supports monthly recurring invoice rules for customers you bill regularly."
   },
   {
     "question": "Can I add my business logo?",
@@ -295,7 +295,7 @@ const schema = {
           "name": "Can I create recurring invoices?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Yes, on paid plans - useful for customers you bill on a regular schedule."
+            "text": "Yes. Recurring invoices require the Pro plan, which supports monthly recurring invoice rules for customers you bill regularly."
           }
         },
         {
